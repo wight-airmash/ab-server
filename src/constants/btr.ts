@@ -1,0 +1,1 @@
+export const BTR_WIN_ALERT_DURATION_SEC = 7;

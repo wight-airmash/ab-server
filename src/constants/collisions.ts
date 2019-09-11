@@ -1,0 +1,40 @@
+export const MAP_SIZE = {
+  WIDTH: 32768,
+  HEIGHT: 16384,
+
+  HALF_WIDTH: 32768 / 2,
+  HALF_HEIGHT: 16384 / 2,
+};
+
+export const MAP_COORDS = {
+  MIN_X: -MAP_SIZE.WIDTH / 2,
+  MIN_Y: -MAP_SIZE.HEIGHT / 2,
+  MAX_X: MAP_SIZE.WIDTH / 2,
+  MAX_Y: MAP_SIZE.HEIGHT / 2,
+};
+
+export const COLLISIONS_MAP_COORDS = {
+  MIN_X: 0,
+  MIN_Y: 0,
+  MAX_X: MAP_SIZE.WIDTH,
+  MAX_Y: MAP_SIZE.HEIGHT,
+};
+
+export const COLLISIONS_OBJECT_TYPES = {
+  MOUNTAIN: 0,
+  PLAYER: 1,
+  SHIELD: 2,
+  UPGRADE: 3,
+  INFERNO: 4,
+  PROJECTILE: 5,
+  FLAG: 6,
+  VIEWPORT: 7,
+  REPEL: 8,
+  FLAGZONE: 9,
+  FIREWALL: 10,
+};
+
+export const COLLISIONS_OBJECT_SHAPES = {
+  CIRCLE: 0,
+  RECTANGLE: 1,
+};

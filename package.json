@@ -1,0 +1,243 @@
+{
+  "name": "@airbattle/server",
+  "version": "4.4.0",
+  "description": "ab-server.",
+  "main": "./dist/app.js",
+  "author": "wight",
+  "license": "MIT",
+  "engines": {
+    "node": "12.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wight-airmash/ab-server.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wight-airmash/ab-server/issues"
+  },
+  "scripts": {
+    "start": "node dist/app.js",
+    "build:dev": "tsc",
+    "build": "tsc --build tsconfig.prod.json",
+    "watch": "tsc -w",
+    "dev": "watch",
+    "debug": "node --inspect dist/app.js",
+    "lint": "eslint . --ext .js,.mjs,.ts",
+    "lint-autofix": "eslint --ext .js,.mjs,.ts --fix",
+    "lint-staged": "lint-staged"
+  },
+  "lint-staged": {
+    "src/**/*.(js|ts|mjs)": [
+      "eslint --fix",
+      "git add"
+    ],
+    "*.(json)": [
+      "prettier --config ./package.json --write",
+      "git add"
+    ]
+  },
+  "pre-commit": "lint-staged",
+  "dependencies": {
+    "@airbattle/protocol": "github:wight-airmash/ab-protocol#master",
+    "collisions": "github:wight-airmash/ab-collisions",
+    "crypto-random-string": "^3.0.1",
+    "dotenv": "^8.1.0",
+    "eventemitter3": "^4.0.0",
+    "maxmind": "^3.1.2",
+    "module-alias": "^2.2.1",
+    "pino": "^5.13.2",
+    "uWebSockets.js": "github:uNetworking/uWebSockets.js#v15.11.0"
+  },
+  "devDependencies": {
+    "@types/dotenv": "^6.1.1",
+    "@types/node": "^12.7.5",
+    "@types/pino": "^5.8.10",
+    "@typescript-eslint/eslint-plugin": "^2.2.0",
+    "@typescript-eslint/parser": "^2.2.0",
+    "eslint": "^6.3.0",
+    "eslint-config-airbnb": "^18.0.1",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-config-prettier": "^6.3.0",
+    "eslint-import-resolver-alias": "^1.1.2",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-prettier": "^3.1.0",
+    "lint-staged": "^9.2.5",
+    "pino-pretty": "^3.2.1",
+    "pre-commit": "^1.2.2",
+    "prettier": "^1.18.2",
+    "typescript": "^3.6.3"
+  },
+  "_moduleAliases": {
+    "@": "dist"
+  },
+  "eslintConfig": {
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+      "@typescript-eslint"
+    ],
+    "extends": [
+      "airbnb-base",
+      "plugin:@typescript-eslint/eslint-recommended",
+      "plugin:@typescript-eslint/recommended",
+      "prettier/@typescript-eslint",
+      "plugin:prettier/recommended"
+    ],
+    "parserOptions": {
+      "ecmaVersion": 2018,
+      "sourceType": "module",
+      "project": "./tsconfig.json"
+    },
+    "env": {
+      "node": true,
+      "es6": true
+    },
+    "settings": {
+      "import/extensions": [
+        ".js",
+        ".ts",
+        ".mjs",
+        "json"
+      ],
+      "import/resolver": {
+        "node": {
+          "extensions": [
+            ".js",
+            ".ts",
+            ".mjs",
+            "json"
+          ]
+        },
+        "eslint-import-resolver-alias": {
+          "map": [
+            [
+              "@/*",
+              "./src"
+            ]
+          ],
+          "extensions": [
+            ".js",
+            ".ts",
+            ".mjs"
+          ]
+        }
+      }
+    },
+    "rules": {
+      "@typescript-eslint/adjacent-overload-signatures": [
+        "error"
+      ],
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-this-alias": "off",
+      "@typescript-eslint/explicit-function-return-type": [
+        "warn",
+        {
+          "allowExpressions": true
+        }
+      ],
+      "@typescript-eslint/explicit-member-accessibility": [
+        "error",
+        {
+          "overrides": {
+            "constructors": "no-public",
+            "methods": "no-public"
+          }
+        }
+      ],
+      "no-bitwise": "off",
+      "no-useless-constructor": "off",
+      "import/no-cycle": "off",
+      "import/prefer-default-export": "off",
+      "no-param-reassign": [
+        "error",
+        {
+          "props": true,
+          "ignorePropertyModificationsFor": [
+            "ws",
+            "player",
+            "viewport",
+            "connection"
+          ]
+        }
+      ],
+      "padding-line-between-statements": [
+        "error",
+        {
+          "blankLine": "always",
+          "prev": "*",
+          "next": "return"
+        },
+        {
+          "blankLine": "always",
+          "prev": "*",
+          "next": "case"
+        },
+        {
+          "blankLine": "any",
+          "prev": "case",
+          "next": "case"
+        },
+        {
+          "blankLine": "always",
+          "prev": "if",
+          "next": "*"
+        },
+        {
+          "blankLine": "always",
+          "prev": "*",
+          "next": "if"
+        },
+        {
+          "blankLine": "always",
+          "prev": "function",
+          "next": "*"
+        },
+        {
+          "blankLine": "always",
+          "prev": "*",
+          "next": "function"
+        },
+        {
+          "blankLine": "always",
+          "prev": "multiline-block-like",
+          "next": "*"
+        },
+        {
+          "blankLine": "always",
+          "prev": "*",
+          "next": "multiline-block-like"
+        },
+        {
+          "blankLine": "always",
+          "prev": [
+            "const",
+            "let",
+            "var"
+          ],
+          "next": "*"
+        },
+        {
+          "blankLine": "any",
+          "prev": [
+            "const",
+            "let",
+            "var"
+          ],
+          "next": [
+            "const",
+            "let",
+            "var"
+          ]
+        }
+      ]
+    }
+  },
+  "eslintIgnore": [
+    "dist/*"
+  ],
+  "prettier": {
+    "trailingComma": "es5",
+    "tabWidth": 2,
+    "singleQuote": true,
+    "printWidth": 100
+  }
+}

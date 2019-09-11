@@ -1,0 +1,7 @@
+export const TIMEOUT_ACK = 'TIMEOUT_ACK';
+
+export const TIMEOUT_BACKUP = 'TIMEOUT_BACKUP';
+
+export const TIMEOUT_LOGIN = 'TIMEOUT_LOGIN';
+
+export const TIMEOUT_PONG = 'TIMEOUT_PONG';
