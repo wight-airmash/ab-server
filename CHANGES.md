@@ -3,6 +3,7 @@
 Bug fixes:
 
 - Invalid CTF reward (#27).
+- Country flag flushing (#28).
 
 ## 4.4.0 (September 11, 2019)
 
