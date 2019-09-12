@@ -84,22 +84,20 @@ export default class LoginMessageHandler extends System {
       return;
     }
 
-    const country = this.app.geocoder.get(connection.meta.ip);
+    if (has(FLAGS_ISO_TO_CODE, msg.flag.toUpperCase())) {
+      flag = msg.flag.toUpperCase();
+    } else {
+      const country = this.app.geocoder.get(connection.meta.ip);
 
-    if (connection.meta.isBot === true) {
-      if (has(FLAGS_ISO_TO_CODE, msg.flag.toUpperCase())) {
-        flag = msg.flag.toUpperCase();
+      if (
+        has(country, 'country') &&
+        has(country.country, 'iso_code') &&
+        has(FLAGS_ISO_TO_CODE, country.country.iso_code.toUpperCase())
+      ) {
+        flag = country.country.iso_code.toUpperCase();
       } else {
         flag = PLAYERS_DEFAULT_FLAG;
       }
-    } else if (
-      has(country, 'country') &&
-      has(country.country, 'iso_code') &&
-      has(FLAGS_ISO_TO_CODE, country.country.iso_code.toUpperCase())
-    ) {
-      flag = country.country.iso_code.toUpperCase();
-    } else {
-      flag = PLAYERS_DEFAULT_FLAG;
     }
 
     this.channel(CHANNEL_CONNECT_PLAYER).delay(PLAYERS_CREATE, {
