@@ -318,7 +318,7 @@ export default class GameFlags extends System {
       this.emit(CTF_TEAM_CAPTURED_FLAG, player.team.current);
 
       const bounty =
-        CTF_CAPTURE_BOUNTY.BASE + CTF_CAPTURE_BOUNTY.INCREMENT * this.storage.playerList.size;
+        CTF_CAPTURE_BOUNTY.BASE + CTF_CAPTURE_BOUNTY.INCREMENT * (this.storage.playerList.size - 1);
 
       player.score.current += bounty > CTF_CAPTURE_BOUNTY.MAX ? CTF_CAPTURE_BOUNTY.MAX : bounty;
 
