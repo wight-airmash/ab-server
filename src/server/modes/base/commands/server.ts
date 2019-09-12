@@ -240,6 +240,10 @@ export default class ServerCommandHandler extends System {
 
             this.storage.ipMuteList.set(muteConnection.meta.ip, expired);
 
+            const spammer = this.storage.playerList.get(connection.meta.playerId);
+
+            spammer.times.unmuteTime = expired;
+
             this.emit(BROADCAST_CHAT_SERVER_WHISPER, connection.meta.playerId, 'Player muted.');
           }
         } else if (command.startsWith(nameCommand)) {
@@ -257,6 +261,10 @@ export default class ServerCommandHandler extends System {
             const muteConnection = this.storage.connectionList.get(muteConnectionId);
 
             this.storage.ipMuteList.set(muteConnection.meta.ip, expired);
+
+            const spammer = this.storage.playerList.get(connection.meta.playerId);
+
+            spammer.times.unmuteTime = expired;
 
             this.emit(BROADCAST_CHAT_SERVER_WHISPER, connection.meta.playerId, 'Player muted.');
           }
@@ -278,11 +286,11 @@ export default class ServerCommandHandler extends System {
           if (!this.helpers.isPlayerConnected(playerId)) {
             this.emit(BROADCAST_CHAT_SERVER_WHISPER, connection.meta.playerId, 'Player not found.');
           } else {
-            const muteConnection = this.storage.connectionList.get(
+            const unmuteConnection = this.storage.connectionList.get(
               this.storage.playerMainConnectionList.get(playerId)
             );
 
-            this.storage.ipMuteList.delete(muteConnection.meta.ip);
+            this.storage.ipMuteList.delete(unmuteConnection.meta.ip);
 
             this.emit(BROADCAST_CHAT_SERVER_WHISPER, connection.meta.playerId, 'Player unmuted.');
           }
@@ -292,10 +300,10 @@ export default class ServerCommandHandler extends System {
           if (!has(this.storage.connectionIdByNameList, playerName)) {
             this.emit(BROADCAST_CHAT_SERVER_WHISPER, connection.meta.playerId, 'Player not found.');
           } else {
-            const muteConnectionId = this.storage.connectionIdByNameList[playerName];
-            const muteConnection = this.storage.connectionList.get(muteConnectionId);
+            const unmuteConnectionId = this.storage.connectionIdByNameList[playerName];
+            const unmuteConnection = this.storage.connectionList.get(unmuteConnectionId);
 
-            this.storage.ipMuteList.delete(muteConnection.meta.ip);
+            this.storage.ipMuteList.delete(unmuteConnection.meta.ip);
 
             this.emit(BROADCAST_CHAT_SERVER_WHISPER, connection.meta.playerId, 'Player unmuted.');
           }
