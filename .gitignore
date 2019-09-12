@@ -96,3 +96,9 @@ typings/
 
 # Ignore built ts files
 dist/**/*
+
+# Certificates
+certs/*.pem
+
+# Server cache
+cache/**/*
