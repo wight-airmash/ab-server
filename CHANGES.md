@@ -1,3 +1,9 @@
+## Future version (unversioned)
+
+Bug fixes:
+
+- Invalid CTF reward (#27).
+
 ## 4.4.0 (September 11, 2019)
 
 Public release.

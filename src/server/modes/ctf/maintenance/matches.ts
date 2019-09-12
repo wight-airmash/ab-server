@@ -143,7 +143,7 @@ export default class GameMatches extends System {
       this.storage.gameEntity.match.winnerTeam = teamId;
       this.storage.gameEntity.match.isActive = false;
       this.storage.gameEntity.match.bounty =
-        CTF_WIN_BOUNTY.BASE + CTF_WIN_BOUNTY.INCREMENT * this.storage.playerList.size;
+        CTF_WIN_BOUNTY.BASE + CTF_WIN_BOUNTY.INCREMENT * (this.storage.playerList.size - 1);
 
       if (this.storage.gameEntity.match.bounty > CTF_WIN_BOUNTY.MAX) {
         this.storage.gameEntity.match.bounty = CTF_WIN_BOUNTY.MAX;
