@@ -33,7 +33,6 @@ WORKDIR /build
 RUN apk update && apk upgrade && \
   apk add --no-cache git openssh
 
-COPY ./packages/@airbattle/collisions-bvh ./packages/@airbattle/collisions-bvh
 COPY --from=uws-build /build/uws ./packages/uws
 COPY package*.json ./
 
