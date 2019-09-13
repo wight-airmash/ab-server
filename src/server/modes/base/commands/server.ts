@@ -240,7 +240,7 @@ export default class ServerCommandHandler extends System {
 
             this.storage.ipMuteList.set(muteConnection.meta.ip, expired);
 
-            const spammer = this.storage.playerList.get(connection.meta.playerId);
+            const spammer = this.storage.playerList.get(muteConnection.meta.playerId);
 
             spammer.times.unmuteTime = expired;
 
@@ -262,7 +262,7 @@ export default class ServerCommandHandler extends System {
 
             this.storage.ipMuteList.set(muteConnection.meta.ip, expired);
 
-            const spammer = this.storage.playerList.get(connection.meta.playerId);
+            const spammer = this.storage.playerList.get(muteConnection.meta.playerId);
 
             spammer.times.unmuteTime = expired;
 

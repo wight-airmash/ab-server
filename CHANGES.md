@@ -4,6 +4,7 @@ Bug fixes:
 
 - Invalid CTF reward (#27).
 - Country flag flushing (#28).
+- Mute command affects superuser (#32).
 
 ## 4.4.0 (September 11, 2019)
 
