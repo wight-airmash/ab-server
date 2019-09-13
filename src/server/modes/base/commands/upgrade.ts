@@ -13,10 +13,19 @@ export default class UpgradeCommandHandler extends System {
   }
 
   onCommandReceived(connectionId: MainConnectionId, commandArguments: string): void {
+    if (!this.storage.connectionList.has(connectionId)) {
+      return;
+    }
+
     const upgradeType = ~~commandArguments;
 
     if (upgradeType > 0 && upgradeType < 5) {
       const connection = this.storage.connectionList.get(connectionId);
+
+      if (!this.helpers.isPlayerConnected(connection.meta.playerId)) {
+        return;
+      }
+
       const player = this.storage.playerList.get(connection.meta.playerId);
 
       if (player.alivestatus.current !== PLAYERS_ALIVE_STATUSES.ALIVE) {
