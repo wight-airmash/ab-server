@@ -1,5 +1,6 @@
 import { MIN_SAFE_TICKER_INTERVAL_NS, NS_PER_MS, NS_PER_SEC, SERVER_FPS } from '@/constants';
 import GameServer from '@/core/server';
+import { LoopParams } from '@/types/loop-params';
 
 /**
  * The game ticker for running game loop.
@@ -86,7 +87,7 @@ export default class GameTicker {
    *
    * @param loop game loop function
    */
-  tick(loop: Function): void {
+  tick(loop: (x: LoopParams) => void): void {
     if (this.startTime === null) {
       this.startTime = process.hrtime();
     }
@@ -120,12 +121,12 @@ export default class GameTicker {
       if (diffTime < this.intervalNs * (this.counter + 1)) {
         const startTimeMs = Date.now();
 
-        loop(
-          this.counter,
-          this.skippedFrames + diffTime / (this.intervalNs * this.counter),
-          diffTime,
-          this.skippedFrames
-        );
+        loop({
+          frame: this.counter,
+          frameFactor: this.skippedFrames + diffTime / (this.intervalNs * this.counter),
+          timeFromStart: diffTime,
+          skippedFrames: this.skippedFrames,
+        });
 
         this.lastTickMs = Date.now() - startTimeMs;
         this.app.metrics.ticksTimeMs += this.lastTickMs;
@@ -162,7 +163,7 @@ export default class GameTicker {
    *
    * @param loop function to run every tick
    */
-  start(loop: Function): void {
+  start(loop: (x: LoopParams) => void): void {
     this.tick(loop);
   }
 

@@ -23,7 +23,7 @@
     "dev": "watch",
     "debug": "node --inspect dist/app.js",
     "lint": "eslint . --ext .js,.mjs,.ts",
-    "lint-autofix": "eslint --ext .js,.mjs,.ts --fix",
+    "lint-autofix": "eslint . --ext .js,.mjs,.ts --fix",
     "lint-staged": "lint-staged"
   },
   "lint-staged": {
