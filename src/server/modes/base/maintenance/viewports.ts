@@ -52,19 +52,7 @@ export default class GameViewports extends System {
   }
 
   onUpdatePlayerHorizons(): void {
-    if (this.channel(CHANNEL_UPDATE_HORIZON).events.length === 0) {
-      return;
-    }
-
-    const events = [...this.channel(CHANNEL_UPDATE_HORIZON).events];
-
-    this.channel(CHANNEL_UPDATE_HORIZON).events = [];
-
-    for (let index = 0; index < events.length; index += 1) {
-      const [event, args] = events[index];
-
-      this.emit(event, ...args);
-    }
+    this.channel(CHANNEL_UPDATE_HORIZON).emitDelayed();
   }
 
   initServerScaleFactorLimit(): void {
@@ -120,8 +108,8 @@ export default class GameViewports extends System {
       y *= factor;
     }
 
-    x = Math.floor(x);
-    y = Math.floor(y);
+    x = Math.round(x);
+    y = Math.round(y);
 
     player.horizon.validX = x;
     player.horizon.validY = y;
