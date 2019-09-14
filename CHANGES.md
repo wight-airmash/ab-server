@@ -1,11 +1,14 @@
 ## Future version (unversioned)
 
+## 4.4.2 (September 14, 2019)
+
 Bug fixes:
 
 - Invalid CTF reward (#27).
 - Country flag flushing (#28).
 - Mute command affects superuser (#32).
 - Viewport detaching (#30).
+- Prowler microteleport (#35).
 
 ## 4.4.0 (September 11, 2019)
 
