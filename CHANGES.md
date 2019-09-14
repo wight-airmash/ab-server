@@ -1,5 +1,9 @@
 ## Future version (unversioned)
 
+Improvements:
+
+- The server bot is no longer displayed in the list of players.
+
 ## 4.4.2 (September 14, 2019)
 
 Bug fixes:

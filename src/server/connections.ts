@@ -88,6 +88,8 @@ export default class Connections extends System {
 
     if (connection.meta.isMain) {
       this.storage.mainConnectionIdList.delete(connectionId);
+      this.storage.humanConnectionIdList.delete(connectionId);
+      this.storage.botConnectionIdList.delete(connectionId);
       this.storage.playerMainConnectionList.delete(connection.meta.playerId);
 
       if (

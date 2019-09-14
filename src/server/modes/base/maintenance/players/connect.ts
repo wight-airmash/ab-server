@@ -266,6 +266,9 @@ export default class GamePlayersConnect extends System {
 
     if (mainConnection.meta.isBot === true) {
       this.storage.botIdList.add(player.id.current);
+      this.storage.botConnectionIdList.add(connectionId);
+    } else {
+      this.storage.humanConnectionIdList.add(connectionId);
     }
 
     if (this.storage.connectionIdByTeam.has(player.team.current)) {

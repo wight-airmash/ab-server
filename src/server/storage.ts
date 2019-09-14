@@ -88,6 +88,10 @@ export class GameStorage {
    */
   public mainConnectionIdList: Set<MainConnectionId> = new Set();
 
+  public humanConnectionIdList: Set<MainConnectionId> = new Set();
+
+  public botConnectionIdList: Set<MainConnectionId> = new Set();
+
   public connectionIdByTeam: Map<TeamId, Set<MainConnectionId>> = new Map();
 
   public connectionIdByNameList: {
