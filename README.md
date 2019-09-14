@@ -50,7 +50,7 @@ Please see .env.example.
    `docker build -t airbattle-server .`
 2. Run. Don't forget to pass envirounment variables and mount the volumes you need. Example:
 
-   `docker run -v /host/logs:/app/logs -p 3501:3501 -e SERVER_TYPE=FFA SU_PASSWORD=mypass airbattle-server`
+   `docker run -v /host/logs:/app/logs -p 3501:3501 -e SERVER_TYPE=FFA -e SU_PASSWORD=mypass airbattle-server`
 
    If you want to use TLS also mount `/app/certs` to the host directory with `privkey.pem` and `fullchain.pem`, and set ENDPOINTS_TLS=true.
 
