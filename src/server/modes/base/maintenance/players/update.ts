@@ -643,6 +643,7 @@ export default class GamePlayersUpdate extends System {
             player.planestate.stealthed = false;
             player.times.lastStealth = now;
             player.delayed.BROADCAST_EVENT_STEALTH = true;
+            this.delay(BROADCAST_PLAYER_UPDATE, player.id.current);
           }
 
           const FIRE_TEMPLATE = SHIP_SPECS[fireMode][fireType];
