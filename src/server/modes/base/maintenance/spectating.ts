@@ -189,12 +189,15 @@ export default class GameSpectating extends System {
     const connection = this.storage.connectionList.get(connectionId);
 
     if (spectator.spectate.isActive === false) {
+      this.log.debug(`Player id${spectatorId} wants to spec the previous player, but not in spec.`);
       this.onSwitchToSpectate(spectatorId);
     }
 
+    this.log.debug(spectator.spectate.isActive);
+
     connection.meta.pending.spectate = false;
 
-    if (this.playerIds.length === 0) {
+    if (this.playerIds.length === 0 || spectator.spectate.isActive === false) {
       return;
     }
 
@@ -234,12 +237,15 @@ export default class GameSpectating extends System {
     const connection = this.storage.connectionList.get(connectionId);
 
     if (spectator.spectate.isActive === false) {
+      this.log.debug(`Player id${spectatorId} wants to spec the next player, but not in spec.`);
       this.onSwitchToSpectate(spectatorId);
     }
 
+    this.log.debug(spectator.spectate.isActive);
+
     connection.meta.pending.spectate = false;
 
-    if (this.playerIds.length === 0) {
+    if (this.playerIds.length === 0 || spectator.spectate.isActive === false) {
       return;
     }
 
