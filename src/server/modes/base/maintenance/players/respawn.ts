@@ -259,9 +259,13 @@ export default class GamePlayersRespawn extends System {
         }
 
         player.spectate.current = 0;
+
+        this.log.debug(`Player id${player.id.current} removed from spectators.`);
       }
 
       player.delayed.RESPAWN = false;
+
+      this.log.debug(`Player id${player.id.current} respawned.`);
     } else {
       this.emit(ERRORS_RESPAWN_INACTIVITY_HEALTH_REQUIRED, connection.meta.id);
     }

@@ -1,6 +1,6 @@
 {
   "name": "@airbattle/server",
-  "version": "4.4.1",
+  "version": "4.4.2",
   "description": "ab-server.",
   "main": "./dist/app.js",
   "author": "wight",
