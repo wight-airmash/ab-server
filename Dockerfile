@@ -33,7 +33,6 @@ WORKDIR /build
 RUN apk update && apk upgrade && \
   apk add --no-cache git openssh
 
-COPY ./packages/@airbattle/collisions-bvh ./packages/@airbattle/collisions-bvh
 COPY --from=uws-build /build/uws ./packages/uws
 COPY package*.json ./
 
@@ -101,6 +100,9 @@ ENV SU_PASSWORD=${SU_PASSWORD}
 
 ARG MAX_PLAYERS_PER_IP=3
 ENV MAX_PLAYERS_PER_IP=${MAX_PLAYERS_PER_IP}
+
+ARG BOTS_IP=127.0.0.1
+ENV BOTS_IP=${BOTS_IP}
 
 WORKDIR /app
 
