@@ -49,7 +49,7 @@ import CTFGameManifest from '@/server/modes/ctf/manifest';
 import FFAGameManifest from '@/server/modes/ffa/manifest';
 import { GameStorage } from '@/server/storage';
 import { System } from '@/server/system';
-import { LoopParams } from './loop-params';
+import { LoopParams } from '@/types/loop-params';
 
 /**
  * Game server bootstrap.

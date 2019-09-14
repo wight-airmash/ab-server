@@ -1,6 +1,6 @@
 import { MIN_SAFE_TICKER_INTERVAL_NS, NS_PER_MS, NS_PER_SEC, SERVER_FPS } from '@/constants';
 import GameServer from '@/core/server';
-import { LoopParams } from './loop-params';
+import { LoopParams } from '@/types/loop-params';
 
 /**
  * The game ticker for running game loop.
