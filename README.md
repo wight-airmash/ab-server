@@ -2,6 +2,10 @@
 
 Game server.
 
+Features:
+
+- [in-game commands](./docs/commands.md).
+
 ## Installation
 
 Requirements:
@@ -65,6 +69,8 @@ node ./dist/app.js
 ```
 
 or use some kind of process managers.
+
+If you run the server behind the proxy it is important to pass the real IP to the server (`X-Real-IP` or `X-Forwarded-For` header).
 
 ## Contribution
 
