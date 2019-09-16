@@ -2,6 +2,54 @@
 
 Commands are executed via the chat interface.
 
+### /flag [ISO code]
+
+Update player country flag.
+
+### /upgrade [type]
+
+Apply an upgrade. Types from 1 to 4.
+
+### /upgrades drop [amount=1]
+
+Drop upgrades.
+
+### /upgrades reset [speed|defense|energy|missile]
+
+Reset applied upgrades. Empty type = reset all at once.
+
+### /respawn [type]
+
+Respawn from spectator mode. Types from 1 to 5.
+
+### /spectate -3
+
+Switch into spectator mode.
+
+### /spectate -1
+
+Spectate the next players.
+
+### /spectate -2
+
+Spectate the previous players.
+
+### /spectate [id]
+
+Spectate player by ID.
+
+### /drop
+
+Drop CTF flag.
+
+### /switch
+
+Switch CTF team.
+
+### /match
+
+CTF match info.
+
 ### /server
 
 Get server version and the result of the last performance check.
