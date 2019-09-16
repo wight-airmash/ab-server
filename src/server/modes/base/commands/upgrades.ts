@@ -1,13 +1,12 @@
 import { MOB_TYPES } from '@airbattle/protocol';
 import { UPGRADES_ACTION_TYPE } from '@/constants';
 import {
+  BROADCAST_PLAYER_UPDATE,
   COMMAND_DROP_UPGRADE,
   ERRORS_NOT_ENOUGH_UPGRADES,
+  POWERUPS_SPAWN,
   RESPONSE_COMMAND_REPLY,
   RESPONSE_PLAYER_UPGRADE,
-  POWERUPS_SPAWN,
-  BROADCAST_PLAYER_UPDATE,
-  RESPONSE_SCORE_UPDATE,
 } from '@/events';
 import { System } from '@/server/system';
 import { MainConnectionId } from '@/types';
@@ -92,21 +91,6 @@ export default class UpgradesCommandHandler extends System {
       if (player.delayed.BROADCAST_PLAYER_UPDATE) {
         this.emit(BROADCAST_PLAYER_UPDATE, connection.meta.playerId);
       }
-    } else if (player.su.current === true && command.startsWith('give')) {
-      let amount = 1;
-
-      if (command.length > 5) {
-        amount = ~~command.substring(5);
-      }
-
-      if (amount <= 0) {
-        return;
-      }
-
-      player.upgrades.amount += amount;
-
-      this.emit(RESPONSE_SCORE_UPDATE, player.id.current);
-      this.log.debug(`Player id${connection.meta.playerId} give ${amount} upgrades to himself.`);
     }
   }
 }
