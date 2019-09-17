@@ -6,6 +6,22 @@ Commands are executed via the chat interface.
 
 Update player country flag.
 
+### /votemute [player name]
+
+Vote to mute player.
+
+### /t [message]
+
+Send a message to the team chat.
+
+### /s [message]
+
+Say a message in the bubble.
+
+### /w [player name] [message]
+
+Send a private message to the player.
+
 ### /upgrade [type]
 
 Apply an upgrade. Types from 1 to 4.
