@@ -1,8 +1,11 @@
 ## Future version (unversioned)
 
+## 4.5.0 (September 18, 2019)
+
 Improvements:
 
 - The server bot is no longer displayed in the list of players.
+- Projectiles damage increases or decreases depending on the collision speed.
 
 ## 4.4.2 (September 14, 2019)
 
