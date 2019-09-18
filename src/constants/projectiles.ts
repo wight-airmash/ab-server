@@ -12,6 +12,8 @@ export const PROJECTILES_COLLISIONS = {
   [PROJECTILES_SHAPES.SMALL]: [[0, 2, 2], [0, 6, 2], [0, 10, 2]],
 };
 
+export const PROJECTILES_EXTRA_SPEED_TO_DAMAGE_FACTOR = 1 / 45;
+
 export const PROJECTILES_SPECS = {
   [MOB_TYPES.PREDATOR_MISSILE]: {
     maxSpeed: 9,
@@ -22,6 +24,9 @@ export const PROJECTILES_SPECS = {
 
     accel: 0.105,
 
+    /**
+     * Basic damage for speed in range [baseSpeed, maxSpeed].
+     */
     damage: 0.4,
     infernoDamageFactor: 1,
 

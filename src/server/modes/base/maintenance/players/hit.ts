@@ -1,7 +1,12 @@
-import { PLAYERS_HEALTH, PROJECTILES_SPECS, SHIPS_SPECS, UPGRADES_SPECS } from '@/constants';
+import {
+  PLAYERS_HEALTH,
+  PROJECTILES_EXTRA_SPEED_TO_DAMAGE_FACTOR,
+  PROJECTILES_SPECS,
+  SHIPS_SPECS,
+  UPGRADES_SPECS,
+} from '@/constants';
 import { BROADCAST_EVENT_STEALTH, BROADCAST_PLAYER_UPDATE, PLAYERS_HIT } from '@/events';
 import { System } from '@/server/system';
-import { getRandomInt } from '@/support/numbers';
 import { MobId, PlayerId } from '@/types';
 
 export default class GamePlayersHit extends System {
@@ -45,20 +50,50 @@ export default class GamePlayersHit extends System {
     victim.times.lastHit = now;
 
     const projectile = this.storage.mobList.get(projectileId);
+    const scalar =
+      projectile.velocity.x * victim.velocity.x + projectile.velocity.y * victim.velocity.y;
+    const { maxSpeed } = PROJECTILES_SPECS[projectile.mobtype.current];
     let { damage } = PROJECTILES_SPECS[projectile.mobtype.current];
+    let extraDamageFactor = 1;
 
-    if (projectile.velocity.length > PROJECTILES_SPECS[projectile.mobtype.current].maxSpeed) {
-      /**
-       * Critical.
-       * TODO: rewrite logic.
-       */
-      if (getRandomInt(1, 10) >= 6) {
-        damage +=
-          (projectile.velocity.length / PROJECTILES_SPECS[projectile.mobtype.current].maxSpeed -
-            1) /
-          5;
-      }
+    /**
+     * Projectile upgrades increase the damage.
+     */
+    if (projectile.velocity.length > maxSpeed) {
+      const extraSpeed = projectile.velocity.length - maxSpeed;
+
+      extraDamageFactor += extraSpeed * PROJECTILES_EXTRA_SPEED_TO_DAMAGE_FACTOR;
+
+      this.log.debug(`Extra damage by upgrades: ${extraDamageFactor - 1}`);
     }
+
+    /**
+     * Damage increases or decreases depending on the collision speed.
+     */
+    {
+      /**
+       * 0.25 — max upgrade factor.
+       */
+      const maxExtraSpeed = maxSpeed * 0.25 * 2;
+      let extraSpeed = -scalar / projectile.velocity.length;
+
+      if (Math.abs(extraSpeed) > maxExtraSpeed) {
+        extraSpeed = Math.sign(extraSpeed) * maxExtraSpeed;
+      }
+
+      extraDamageFactor += extraSpeed * PROJECTILES_EXTRA_SPEED_TO_DAMAGE_FACTOR;
+
+      this.log.debug(
+        `Extra damage by direction: ${extraSpeed * PROJECTILES_EXTRA_SPEED_TO_DAMAGE_FACTOR}`
+      );
+    }
+
+    this.log.debug(`Extra damage factor: ${extraDamageFactor}`);
+    this.log.debug(`Projectile damage before extra: ${damage}`);
+
+    damage *= extraDamageFactor;
+
+    this.log.debug(`Projectile damage after extra: ${damage}`);
 
     /**
      * Extra damage by repel.
@@ -77,7 +112,9 @@ export default class GamePlayersHit extends System {
       (1 / SHIPS_SPECS[victim.planetype.current].damageFactor) *
       UPGRADES_SPECS.DEFENSE.factor[victim.upgrades.defense];
 
+    this.log.debug('Victim health before hit', fullAirplaneHealth * victim.health.current);
     victim.health.current = fullAirplaneHealth * victim.health.current - damage;
+    this.log.debug('Victim health after hit', victim.health.current);
 
     if (victim.health.current < PLAYERS_HEALTH.MIN) {
       /**
