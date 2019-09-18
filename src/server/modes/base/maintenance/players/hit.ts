@@ -114,7 +114,7 @@ export default class GamePlayersHit extends System {
 
     this.log.debug('Victim health before hit', fullAirplaneHealth * victim.health.current);
     victim.health.current = fullAirplaneHealth * victim.health.current - damage;
-    this.log.debug('Victim health after hit', (victim.health.current /= fullAirplaneHealth));
+    this.log.debug('Victim health after hit', victim.health.current);
 
     if (victim.health.current < PLAYERS_HEALTH.MIN) {
       /**
