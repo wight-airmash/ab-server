@@ -35,8 +35,9 @@ import {
   TIMEOUT_ACK,
   TIMEOUT_BACKUP,
   PLAYERS_UPDATE_HORIZON,
+  CHAT_UNMUTE_BY_IP,
 } from '@/events';
-import { CHANNEL_CONNECT_PLAYER } from '@/server/channels';
+import { CHANNEL_CONNECT_PLAYER, CHANNEL_VOTE_MUTE } from '@/server/channels';
 import AliveStatus from '@/server/components/alive-status';
 import Captures from '@/server/components/captures';
 import Damage from '@/server/components/damage';
@@ -286,12 +287,10 @@ export default class GamePlayersConnect extends System {
     }
 
     if (this.storage.ipMuteList.has(mainConnection.meta.ip)) {
-      const now = Date.now();
-
-      if (this.storage.ipMuteList.get(mainConnection.meta.ip) >= now) {
+      if (this.storage.ipMuteList.get(mainConnection.meta.ip) >= Date.now()) {
         player.times.unmuteTime = this.storage.ipMuteList.get(mainConnection.meta.ip);
       } else {
-        this.storage.ipMuteList.delete(mainConnection.meta.ip);
+        this.channel(CHANNEL_VOTE_MUTE).delay(CHAT_UNMUTE_BY_IP, mainConnection.meta.ip);
       }
     }
 
