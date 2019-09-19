@@ -10,7 +10,7 @@ import {
   CHAT_MUTE_BY_IP,
 } from '@/events';
 import { System } from '@/server/system';
-import { CHANNEL_VOTE_MUTE } from '@/server/channels';
+import { CHANNEL_MUTE } from '@/server/channels';
 import { PlayerId, IPv4 } from '@/types';
 
 export default class GameMute extends System {
@@ -34,7 +34,7 @@ export default class GameMute extends System {
    * Emit delayed events.
    */
   onEmitDelayedMuteEvents(): void {
-    this.channel(CHANNEL_VOTE_MUTE).emitDelayed();
+    this.channel(CHANNEL_MUTE).emitDelayed();
   }
 
   onPlayerRemoved(playerId: PlayerId): void {

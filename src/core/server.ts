@@ -40,7 +40,7 @@ import {
   CHANNEL_SPECTATE,
   CHANNEL_UPDATE_HORIZON,
   CHANNEL_UPDATE_PLAYER_FLAG,
-  CHANNEL_VOTE_MUTE,
+  CHANNEL_MUTE,
 } from '@/server/channels';
 import { Channels } from '@/server/channels/channels';
 import { Helpers } from '@/server/helpers';
@@ -138,7 +138,7 @@ export default class GameServer {
       CHANNEL_CHAT,
       CHANNEL_UPDATE_HORIZON,
       CHANNEL_UPDATE_PLAYER_FLAG,
-      CHANNEL_VOTE_MUTE
+      CHANNEL_MUTE
     );
     this.storage = new GameStorage();
 

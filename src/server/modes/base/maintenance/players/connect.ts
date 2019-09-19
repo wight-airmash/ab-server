@@ -37,7 +37,7 @@ import {
   PLAYERS_UPDATE_HORIZON,
   CHAT_UNMUTE_BY_IP,
 } from '@/events';
-import { CHANNEL_CONNECT_PLAYER, CHANNEL_VOTE_MUTE } from '@/server/channels';
+import { CHANNEL_CONNECT_PLAYER, CHANNEL_MUTE } from '@/server/channels';
 import AliveStatus from '@/server/components/alive-status';
 import Captures from '@/server/components/captures';
 import Damage from '@/server/components/damage';
@@ -290,7 +290,7 @@ export default class GamePlayersConnect extends System {
       if (this.storage.ipMuteList.get(mainConnection.meta.ip) >= Date.now()) {
         player.times.unmuteTime = this.storage.ipMuteList.get(mainConnection.meta.ip);
       } else {
-        this.channel(CHANNEL_VOTE_MUTE).delay(CHAT_UNMUTE_BY_IP, mainConnection.meta.ip);
+        this.channel(CHANNEL_MUTE).delay(CHAT_UNMUTE_BY_IP, mainConnection.meta.ip);
       }
     }
 

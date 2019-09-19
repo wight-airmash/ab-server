@@ -1,5 +1,5 @@
 import { ClientPackets } from '@airbattle/protocol';
-import { CHANNEL_VOTE_MUTE } from '@/server/channels';
+import { CHANNEL_MUTE } from '@/server/channels';
 import { ROUTE_VOTEMUTE, CHAT_MUTE_VOTE } from '@/events';
 import { System } from '@/server/system';
 import { MainConnectionId } from '@/types';
@@ -26,7 +26,7 @@ export default class VotemuteMessageHandler extends System {
 
     const connection = this.storage.connectionList.get(connectionId);
 
-    this.channel(CHANNEL_VOTE_MUTE).delay(CHAT_MUTE_VOTE, connection.meta.playerId, msg.id);
+    this.channel(CHANNEL_MUTE).delay(CHAT_MUTE_VOTE, connection.meta.playerId, msg.id);
     this.log.debug(`Player id${connection.meta.playerId} requested votemute player id${msg.id}.`);
   }
 }
