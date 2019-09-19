@@ -6,10 +6,12 @@ import {
   CHAT_MUTE_VOTE,
   CHAT_MUTE_BY_SERVER,
   TIMELINE_CLOCK_DAY,
+  CHAT_UNMUTE_BY_IP,
+  CHAT_MUTE_BY_IP,
 } from '@/events';
 import { System } from '@/server/system';
 import { CHANNEL_VOTE_MUTE } from '@/server/channels';
-import { PlayerId } from '@/types';
+import { PlayerId, IPv4 } from '@/types';
 
 export default class GameMute extends System {
   protected votes: Map<PlayerId, Set<PlayerId>> = new Map();
@@ -23,6 +25,8 @@ export default class GameMute extends System {
       [PLAYERS_REMOVED]: this.onPlayerRemoved,
       [CHAT_MUTE_BY_SERVER]: this.mutePlayerByServer,
       [TIMELINE_CLOCK_DAY]: this.clearExpired,
+      [CHAT_UNMUTE_BY_IP]: this.unmuteByIp,
+      [CHAT_MUTE_BY_IP]: this.muteByIp,
     };
   }
 
@@ -109,10 +113,9 @@ export default class GameMute extends System {
 
     const player = this.storage.playerList.get(playerId);
 
-    player.times.unmuteTime = Date.now() + CHAT_MUTE_TIME_MS;
-    this.storage.ipMuteList.set(player.ip.current, player.times.unmuteTime);
+    this.muteByIp(player.ip.current, CHAT_MUTE_TIME_MS);
 
-    this.log.debug(`Player id${playerId} automute.`);
+    this.log.debug(`Player id${playerId} was automuted for spam.`);
   }
 
   clearExpired(): void {
@@ -120,8 +123,62 @@ export default class GameMute extends System {
 
     this.storage.ipMuteList.forEach((unmuteTime, ip) => {
       if (now > unmuteTime) {
-        this.storage.ipMuteList.delete(ip);
+        this.unmuteByIp(ip);
       }
     });
+  }
+
+  /**
+   *
+   * @param ip
+   * @param expired ms.
+   */
+  protected updatePlayersMuteExpireTime(ip: IPv4, expired: number): void {
+    if (!this.storage.connectionByIPList.has(ip)) {
+      return;
+    }
+
+    const connectionIdList = this.storage.connectionByIPList.get(ip);
+
+    connectionIdList.forEach(connectionId => {
+      if (!this.storage.connectionList.has(connectionId)) {
+        return;
+      }
+
+      const connection = this.storage.connectionList.get(connectionId);
+
+      if (!this.storage.playerList.has(connection.meta.playerId)) {
+        return;
+      }
+
+      const player = this.storage.playerList.get(connection.meta.playerId);
+
+      player.times.unmuteTime = expired;
+    });
+  }
+
+  /**
+   * Unmute IP and related connected players.
+   */
+  unmuteByIp(ip: IPv4): void {
+    const expired = Date.now() - 1;
+
+    this.storage.ipMuteList.delete(ip);
+
+    this.updatePlayersMuteExpireTime(ip, expired);
+  }
+
+  /**
+   * Mute IP and related connected players.
+   *
+   * @param ip
+   * @param duration ms.
+   */
+  muteByIp(ip: IPv4, duration: number): void {
+    const expired = Date.now() + duration;
+
+    this.storage.ipMuteList.set(ip, expired);
+
+    this.updatePlayersMuteExpireTime(ip, expired);
   }
 }
