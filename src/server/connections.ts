@@ -92,6 +92,14 @@ export default class Connections extends System {
       this.storage.botConnectionIdList.delete(connectionId);
       this.storage.playerMainConnectionList.delete(connection.meta.playerId);
 
+      const ipConnections = this.storage.connectionByIPList.get(connection.meta.ip);
+
+      ipConnections.delete(connectionId);
+
+      if (ipConnections.size === 0) {
+        this.storage.connectionByIPList.delete(connection.meta.ip);
+      }
+
       if (
         connection.meta.teamId !== null &&
         this.storage.connectionIdByTeam.has(connection.meta.teamId)

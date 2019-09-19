@@ -152,8 +152,8 @@ export default class WsEndpoint {
            */
           let connectionsCounter = 1;
 
-          if (this.app.storage.connectionByIPList.has(ws.meta.ip)) {
-            connectionsCounter = this.app.storage.connectionByIPList.get(ws.meta.ip) + 1;
+          if (this.app.storage.connectionByIPCounter.has(ws.meta.ip)) {
+            connectionsCounter = this.app.storage.connectionByIPCounter.get(ws.meta.ip) + 1;
           }
 
           if (
@@ -168,7 +168,7 @@ export default class WsEndpoint {
 
             this.app.events.emit(CONNECTIONS_BREAK, connectionId);
           } else {
-            this.app.storage.connectionByIPList.set(ws.meta.ip, connectionsCounter);
+            this.app.storage.connectionByIPCounter.set(ws.meta.ip, connectionsCounter);
 
             /**
              * Awaiting for Login package.
@@ -199,12 +199,12 @@ export default class WsEndpoint {
         close: (ws: PlayerConnection, code) => {
           this.log.debug(`Connection id${ws.meta.id} was closed, code ${code}`);
 
-          const connectionsCounter = this.app.storage.connectionByIPList.get(ws.meta.ip) - 1;
+          const connectionsCounter = this.app.storage.connectionByIPCounter.get(ws.meta.ip) - 1;
 
           if (connectionsCounter === 0) {
-            this.app.storage.connectionByIPList.delete(ws.meta.ip);
+            this.app.storage.connectionByIPCounter.delete(ws.meta.ip);
           } else {
-            this.app.storage.connectionByIPList.set(ws.meta.ip, connectionsCounter);
+            this.app.storage.connectionByIPCounter.set(ws.meta.ip, connectionsCounter);
           }
 
           this.app.events.emit(CONNECTIONS_CLOSED, ws.meta.id);
