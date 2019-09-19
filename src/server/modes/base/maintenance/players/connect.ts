@@ -271,6 +271,12 @@ export default class GamePlayersConnect extends System {
       this.storage.humanConnectionIdList.add(connectionId);
     }
 
+    if (this.storage.connectionByIPList.has(mainConnection.meta.ip)) {
+      this.storage.connectionByIPList.get(mainConnection.meta.ip).add(connectionId);
+    } else {
+      this.storage.connectionByIPList.set(mainConnection.meta.ip, new Set([connectionId]));
+    }
+
     if (this.storage.connectionIdByTeam.has(player.team.current)) {
       const teamConnections = this.storage.connectionIdByTeam.get(player.team.current);
 

@@ -14,6 +14,8 @@ import {
   CONNECTIONS_UNBAN_IP,
   PLAYERS_KICK,
   RESPONSE_COMMAND_REPLY,
+  CHAT_UNMUTE_BY_IP,
+  CHAT_MUTE_BY_IP,
 } from '@/events';
 import { System } from '@/server/system';
 import { has } from '@/support/objects';
@@ -28,6 +30,14 @@ export default class ServerCommandHandler extends System {
     };
   }
 
+  /**
+   * "/server" command handler.
+   *
+   * TODO: split subcommand handlers into separate files.
+   *
+   * @param connectionId
+   * @param command
+   */
   onCommandReceived(connectionId: MainConnectionId, command = ''): void {
     const connection = this.storage.connectionList.get(connectionId);
     const player = this.storage.playerList.get(connection.meta.playerId);
@@ -82,7 +92,7 @@ export default class ServerCommandHandler extends System {
           `${this.storage.connectionIdByTeam.size} teamed, `,
           `${Object.keys(this.storage.connectionIdByNameList).length} named, `,
           `next id: ${this.storage.nextConnectionId}. `,
-          `IP: ${this.storage.connectionByIPList.size} unique, `,
+          `IP: ${this.storage.connectionByIPCounter.size} unique, `,
           `${this.storage.ipBanList.size} banned, `,
           `${this.storage.ipMuteList.size} muted, `,
           `${this.storage.ipWhiteList.size} in the whitelist. `,
@@ -222,9 +232,11 @@ export default class ServerCommandHandler extends System {
         const idCommand = 'mute id ';
         const nameCommand = 'mute name ';
         const ipCommand = 'mute ip ';
-        const expired = Date.now() + CHAT_SUPERUSER_MUTE_TIME_MS;
 
         if (command.startsWith(idCommand)) {
+          /**
+           * Mute by ID.
+           */
           const playerId = ~~command.substring(idCommand.length);
 
           if (!this.helpers.isPlayerConnected(playerId)) {
@@ -238,15 +250,13 @@ export default class ServerCommandHandler extends System {
               this.storage.playerMainConnectionList.get(playerId)
             );
 
-            this.storage.ipMuteList.set(muteConnection.meta.ip, expired);
-
-            const spammer = this.storage.playerList.get(muteConnection.meta.playerId);
-
-            spammer.times.unmuteTime = expired;
-
+            this.emit(CHAT_MUTE_BY_IP, muteConnection.meta.ip, CHAT_SUPERUSER_MUTE_TIME_MS);
             this.emit(BROADCAST_CHAT_SERVER_WHISPER, connection.meta.playerId, 'Player muted.');
           }
         } else if (command.startsWith(nameCommand)) {
+          /**
+           * Mute by name.
+           */
           const playerName = command.substring(nameCommand.length);
 
           if (!has(this.storage.connectionIdByNameList, playerName)) {
@@ -254,25 +264,25 @@ export default class ServerCommandHandler extends System {
           } else {
             const muteConnectionId = this.storage.connectionIdByNameList[playerName];
 
-            if (connection.meta.id === muteConnectionId) {
+            if (
+              connection.meta.id === muteConnectionId ||
+              !this.storage.connectionList.has(muteConnectionId)
+            ) {
               return;
             }
 
             const muteConnection = this.storage.connectionList.get(muteConnectionId);
 
-            this.storage.ipMuteList.set(muteConnection.meta.ip, expired);
-
-            const spammer = this.storage.playerList.get(muteConnection.meta.playerId);
-
-            spammer.times.unmuteTime = expired;
-
+            this.emit(CHAT_MUTE_BY_IP, muteConnection.meta.ip, CHAT_SUPERUSER_MUTE_TIME_MS);
             this.emit(BROADCAST_CHAT_SERVER_WHISPER, connection.meta.playerId, 'Player muted.');
           }
         } else if (command.startsWith(ipCommand)) {
+          /**
+           * Mute by IP.
+           */
           const ip = command.substring(ipCommand.length).trim();
 
-          this.storage.ipMuteList.set(ip, expired);
-
+          this.emit(CHAT_MUTE_BY_IP, ip, CHAT_SUPERUSER_MUTE_TIME_MS);
           this.emit(BROADCAST_CHAT_SERVER_WHISPER, connection.meta.playerId, 'IP muted.');
         }
       } else if (command.startsWith('unmute')) {
@@ -281,6 +291,9 @@ export default class ServerCommandHandler extends System {
         const ipCommand = 'unmute ip ';
 
         if (command.startsWith(idCommand)) {
+          /**
+           * Unmute by ID.
+           */
           const playerId = ~~command.substring(idCommand.length);
 
           if (!this.helpers.isPlayerConnected(playerId)) {
@@ -290,28 +303,36 @@ export default class ServerCommandHandler extends System {
               this.storage.playerMainConnectionList.get(playerId)
             );
 
-            this.storage.ipMuteList.delete(unmuteConnection.meta.ip);
-
+            this.emit(CHAT_UNMUTE_BY_IP, unmuteConnection.meta.ip);
             this.emit(BROADCAST_CHAT_SERVER_WHISPER, connection.meta.playerId, 'Player unmuted.');
           }
         } else if (command.startsWith(nameCommand)) {
+          /**
+           * Unmute by name.
+           */
           const playerName = command.substring(nameCommand.length);
 
           if (!has(this.storage.connectionIdByNameList, playerName)) {
             this.emit(BROADCAST_CHAT_SERVER_WHISPER, connection.meta.playerId, 'Player not found.');
           } else {
             const unmuteConnectionId = this.storage.connectionIdByNameList[playerName];
+
+            if (!this.storage.connectionList.has(unmuteConnectionId)) {
+              return;
+            }
+
             const unmuteConnection = this.storage.connectionList.get(unmuteConnectionId);
 
-            this.storage.ipMuteList.delete(unmuteConnection.meta.ip);
-
+            this.emit(CHAT_UNMUTE_BY_IP, unmuteConnection.meta.ip);
             this.emit(BROADCAST_CHAT_SERVER_WHISPER, connection.meta.playerId, 'Player unmuted.');
           }
         } else if (command.startsWith(ipCommand)) {
+          /**
+           * Unmute by IP.
+           */
           const ip = command.substring(ipCommand.length).trim();
 
-          this.storage.ipMuteList.delete(ip);
-
+          this.emit(CHAT_UNMUTE_BY_IP, ip);
           this.emit(BROADCAST_CHAT_SERVER_WHISPER, connection.meta.playerId, 'IP unmuted.');
         }
       } else if (command.startsWith('kick')) {
