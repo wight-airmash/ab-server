@@ -1,5 +1,15 @@
 ## Future version (unversioned)
 
+## 4.6.0 (September 19, 2019)
+
+Improvements:
+
+- New storage: list of main connection IDs per IP.
+
+Bug fixes:
+
+- Instant unmute (#40).
+
 ## 4.5.0 (September 18, 2019)
 
 Improvements:
