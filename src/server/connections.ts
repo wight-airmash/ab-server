@@ -86,7 +86,7 @@ export default class Connections extends System {
      */
     this.storage.connectionList.delete(connectionId);
 
-    if (connection.meta.isMain) {
+    if (connection.meta.isMain === true) {
       this.storage.mainConnectionIdList.delete(connectionId);
       this.storage.humanConnectionIdList.delete(connectionId);
       this.storage.botConnectionIdList.delete(connectionId);
@@ -114,7 +114,7 @@ export default class Connections extends System {
 
         this.log.debug(`Team id${connection.meta.teamId} connection id${connectionId} removed.`);
       }
-    } else if (connection.meta.isBackup) {
+    } else if (connection.meta.isBackup === true) {
       this.storage.playerBackupConnectionList.delete(connection.meta.playerId);
     }
 
