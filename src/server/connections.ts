@@ -86,11 +86,19 @@ export default class Connections extends System {
      */
     this.storage.connectionList.delete(connectionId);
 
-    if (connection.meta.isMain) {
+    if (connection.meta.isMain === true) {
       this.storage.mainConnectionIdList.delete(connectionId);
       this.storage.humanConnectionIdList.delete(connectionId);
       this.storage.botConnectionIdList.delete(connectionId);
       this.storage.playerMainConnectionList.delete(connection.meta.playerId);
+
+      const ipConnections = this.storage.connectionByIPList.get(connection.meta.ip);
+
+      ipConnections.delete(connectionId);
+
+      if (ipConnections.size === 0) {
+        this.storage.connectionByIPList.delete(connection.meta.ip);
+      }
 
       if (
         connection.meta.teamId !== null &&
@@ -106,7 +114,7 @@ export default class Connections extends System {
 
         this.log.debug(`Team id${connection.meta.teamId} connection id${connectionId} removed.`);
       }
-    } else if (connection.meta.isBackup) {
+    } else if (connection.meta.isBackup === true) {
       this.storage.playerBackupConnectionList.delete(connection.meta.playerId);
     }
 

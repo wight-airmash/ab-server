@@ -1,12 +1,12 @@
+import { LIMITS_CHAT, LIMITS_CHAT_SPAM_ATTEMPTS_TO_MUTE, LIMITS_CHAT_WEIGHT } from '@/constants';
 import {
   CHAT_CHECK_LIMITS,
-  RESPONSE_VOTEMUTED,
-  RESPONSE_COMMAND_REPLY,
   CHAT_MUTE_BY_SERVER,
+  RESPONSE_COMMAND_REPLY,
+  RESPONSE_VOTEMUTED,
 } from '@/events';
 import { System } from '@/server/system';
 import { PlayerConnection } from '@/types';
-import { LIMITS_CHAT_WEIGHT, LIMITS_CHAT, LIMITS_CHAT_SPAM_ATTEMPTS_TO_MUTE } from '@/constants';
 
 export default class ChatGuard extends System {
   constructor({ app }) {

@@ -172,7 +172,12 @@ export class GameStorage {
   /**
    * Connections counter.
    */
-  public connectionByIPList: Map<IPv4, number> = new Map();
+  public connectionByIPCounter: Map<IPv4, number> = new Map();
+
+  /**
+   * List of main connections id by IP.
+   */
+  public connectionByIPList: Map<IPv4, Set<MainConnectionId>> = new Map();
 
   /**
    * Packet flooding attempts counter.

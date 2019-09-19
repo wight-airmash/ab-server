@@ -15,3 +15,7 @@ export const CHAT_MUTE_VOTE = 'CHAT_MUTE_VOTE';
 export const CHAT_MUTE_BY_SERVER = 'CHAT_MUTE_BY_SERVER';
 
 export const CHAT_CHECK_LIMITS = 'CHAT_CHECK_LIMITS';
+
+export const CHAT_MUTE_BY_IP = 'CHAT_MUTE_BY_IP';
+
+export const CHAT_UNMUTE_BY_IP = 'CHAT_UNMUTE_BY_IP';
