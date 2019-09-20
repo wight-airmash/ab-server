@@ -3,6 +3,7 @@
 Features:
 
 - Command /spectators. Shows how many players are spectating you.
+- Customise server bot by passing environment variables SERVER_BOT_NAME and SERVER_BOT_FLAG.
 
 ## 4.6.0 (September 19, 2019)
 
