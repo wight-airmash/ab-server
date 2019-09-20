@@ -1,5 +1,9 @@
 ## Future version (unversioned)
 
+Features:
+
+- Command /spectators. Shows how many players are spectating you.
+
 ## 4.6.0 (September 19, 2019)
 
 Improvements:
