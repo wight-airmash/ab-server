@@ -13,6 +13,10 @@ export default class FlagCommandHandler extends System {
   }
 
   onCommandReceived(connectionId: MainConnectionId, flagIso: string): void {
+    if (!this.storage.connectionList.has(connectionId)) {
+      return;
+    }
+
     const connection = this.storage.connectionList.get(connectionId);
 
     this.log.debug(`Player id${connection.meta.playerId} changed flag to ${flagIso}.`);
