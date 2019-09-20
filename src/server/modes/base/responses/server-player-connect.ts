@@ -1,11 +1,6 @@
-import {
-  encodeUpgrades,
-  FLAGS_ISO_TO_CODE,
-  SERVER_PACKETS,
-  ServerPackets,
-} from '@airbattle/protocol';
+import { encodeUpgrades, ServerPackets, SERVER_PACKETS } from '@airbattle/protocol';
 import { PLAYERS_ALIVE_STATUSES, SHIPS_TYPES } from '@/constants';
-import { RESPONSE_SERVER_PLAYER_CONNECT, CONNECTIONS_SEND_PACKET } from '@/events';
+import { CONNECTIONS_SEND_PACKET, RESPONSE_SERVER_PLAYER_CONNECT } from '@/events';
 import { System } from '@/server/system';
 import { MainConnectionId } from '@/types';
 
@@ -32,13 +27,13 @@ export default class ServerPlayerConnectResponse extends System {
         c: SERVER_PACKETS.PLAYER_NEW,
         id: this.storage.serverPlayerId,
         status: PLAYERS_ALIVE_STATUSES.DEAD,
-        name: this.storage.serverPlayerName,
+        name: this.app.config.bot.name,
         type: SHIPS_TYPES.PREDATOR,
         team: this.storage.serverPlayerId,
         posX: 0,
         posY: 0,
         rot: 0,
-        flag: FLAGS_ISO_TO_CODE.JOLLY,
+        flag: this.app.config.bot.flagId,
         upgrades: encodeUpgrades(0, 0, 0),
       } as ServerPackets.PlayerNew,
       connectionId

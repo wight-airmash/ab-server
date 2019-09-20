@@ -103,7 +103,7 @@ export default class GamePlayersConnect extends System {
    */
   createServerPlayer(): void {
     this.storage.serverPlayerId = this.helpers.createServiceMobId();
-    this.storage.playerNameList.add(this.storage.serverPlayerName);
+    this.storage.playerNameList.add(this.app.config.bot.name);
   }
 
   /**

@@ -1,5 +1,7 @@
 export const BOTS_SERVER_BOT_NAME = 'Server';
 
+export const BOTS_SERVER_BOT_FLAG = 'JOLLY';
+
 /**
  * If disabled all connected players are considered as bots.
  */

@@ -1,4 +1,4 @@
-import { GAME_TYPES } from '@airbattle/protocol';
+import { GAME_TYPES, FLAGS_ISO_TO_CODE } from '@airbattle/protocol';
 import dotenv from 'dotenv';
 import { mkdirSync, readFileSync } from 'fs';
 import { dirname, isAbsolute, resolve } from 'path';
@@ -25,6 +25,8 @@ import {
   SERVER_DEFAULT_TYPE,
   UPGRADES_DEFAULT_MAX_CHANCE,
   UPGRADES_DEFAULT_MIN_CHANCE,
+  BOTS_SERVER_BOT_FLAG,
+  BOTS_SERVER_BOT_NAME,
 } from '@/constants';
 
 export interface GameServerConfigInterface {
@@ -103,6 +105,17 @@ export interface GameServerConfigInterface {
      * Server zoom. Available values: `SERVER_SCALE_FACTOR_VALID_VALUE`.
      */
     scaleFactor: number;
+  };
+
+  /**
+   * Server info bot.
+   */
+  bot: {
+    name: string;
+
+    flag: string;
+
+    flagId: number;
   };
 
   /**
@@ -272,6 +285,12 @@ const config: GameServerConfigInterface = {
     scaleFactor: intValue(process.env.SCALE_FACTOR, SERVER_DEFAULT_SCALE_FACTOR),
   },
 
+  bot: {
+    name: strValue(process.env.SERVER_BOT_NAME, BOTS_SERVER_BOT_NAME),
+    flag: strValue(process.env.SERVER_BOT_FLAG, BOTS_SERVER_BOT_FLAG),
+    flagId: 0,
+  },
+
   master: {
     host: strValue(process.env.MASTER_HOST),
     secret: strValue(process.env.MASTER_SECRET),
@@ -310,10 +329,24 @@ const config: GameServerConfigInterface = {
   version,
 };
 
-if (has(GAME_TYPES, config.server.type.toLocaleUpperCase())) {
-  config.server.typeId = GAME_TYPES[config.server.type.toLocaleUpperCase()];
+config.server.type = config.server.type.toLocaleUpperCase();
+
+if (has(GAME_TYPES, config.server.type)) {
+  config.server.typeId = GAME_TYPES[config.server.type];
 } else {
   config.server.typeId = -1;
+}
+
+config.bot.flag = config.bot.flag.toLocaleUpperCase();
+
+if (!has(FLAGS_ISO_TO_CODE, config.bot.flag)) {
+  config.bot.flag = BOTS_SERVER_BOT_FLAG;
+}
+
+config.bot.flagId = FLAGS_ISO_TO_CODE[config.bot.flag];
+
+if (config.bot.name.length === 0 || config.bot.name.length > 20) {
+  config.bot.name = BOTS_SERVER_BOT_NAME;
 }
 
 mkdirSync(config.certs.path, { recursive: true });

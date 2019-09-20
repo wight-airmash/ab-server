@@ -1,22 +1,22 @@
-import { BOTS_SERVER_BOT_NAME, SERVER_MIN_MOB_ID, SERVER_MIN_SERVICE_MOB_ID } from '@/constants';
+import { SERVER_MIN_MOB_ID, SERVER_MIN_SERVICE_MOB_ID } from '@/constants';
 import Entity from '@/server/entity';
 import {
-  HitboxCacheItem,
+  BackupConnectionId,
   ConnectionId,
+  HitboxCacheItem,
+  IPv4,
+  MainConnectionId,
+  MobId,
   PlayerConnection,
   PlayerId,
-  BackupConnectionId,
-  MainConnectionId,
-  TeamId,
-  MobId,
   PlayerName,
   PlayerNameHistoryItem,
   PlayerRecoverItem,
-  Viewports,
-  IPv4,
-  UnmuteTime,
   PowerupSpawnChunk,
   SpawnZones,
+  TeamId,
+  UnmuteTime,
+  Viewports,
 } from '@/types';
 
 export class GameStorage {
@@ -219,8 +219,6 @@ export class GameStorage {
   public powerupSpawns: Map<number, PowerupSpawnChunk> = new Map();
 
   public serverPlayerId: number = null;
-
-  public serverPlayerName = BOTS_SERVER_BOT_NAME;
 
   public ctfFlagBlueId: number = null;
 
