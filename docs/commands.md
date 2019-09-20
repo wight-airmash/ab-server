@@ -18,7 +18,7 @@ Send a message to the team chat.
 
 Say a message in the bubble.
 
-### /w [player name] [message]
+### /w [player name][message]
 
 Send a private message to the player.
 
@@ -53,6 +53,10 @@ Spectate the previous players.
 ### /spectate [id]
 
 Spectate player by ID.
+
+### /spectators
+
+How many players are spectating you.
 
 ### /drop
 
