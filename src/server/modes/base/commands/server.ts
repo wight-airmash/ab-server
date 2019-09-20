@@ -360,6 +360,10 @@ export default class ServerCommandHandler extends System {
           } else {
             const kickConnectionId = this.storage.connectionIdByNameList[playerName];
 
+            if (connection.meta.id === kickConnectionId) {
+              return;
+            }
+
             this.emit(CONNECTIONS_KICK, kickConnectionId);
             this.emit(BROADCAST_CHAT_SERVER_WHISPER, connection.meta.playerId, 'Player kicked.');
           }
