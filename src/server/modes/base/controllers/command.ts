@@ -11,6 +11,7 @@ import {
   COMMAND_SWITCH,
   COMMAND_UPGRADE,
   ROUTE_COMMAND,
+  COMMAND_SPECTATORS,
 } from '@/events';
 import { System } from '@/server/system';
 import { has } from '@/support/objects';
@@ -37,6 +38,7 @@ export default class CommandMessageHandler extends System {
       drop: COMMAND_DROP_FLAG,
 
       // Custom commands.
+      spectators: COMMAND_SPECTATORS,
       upgrades: COMMAND_DROP_UPGRADE,
       server: COMMAND_SERVER,
       su: COMMAND_SU,

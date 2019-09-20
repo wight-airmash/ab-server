@@ -106,6 +106,7 @@ import LoginTimeoutHandler from '@/server/modes/base/timeouts/login';
 import PongTimeoutHandler from '@/server/modes/base/timeouts/pong';
 import ChatGuard from '@/server/modes/base/guards/chat';
 import PacketRouter from '@/server/router';
+import SpectatorsCommandHandler from '@/server/modes/base/commands/spectators';
 
 export default abstract class BaseGameManifest extends GameManifest {
   constructor({ app }) {
@@ -144,6 +145,7 @@ export default abstract class BaseGameManifest extends GameManifest {
       UpgradesCommandHandler,
       SuperuserCommandHandler,
       ServerCommandHandler,
+      SpectatorsCommandHandler,
 
       // Responses.
       ServerMessage,
