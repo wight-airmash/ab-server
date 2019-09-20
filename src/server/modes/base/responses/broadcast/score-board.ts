@@ -18,30 +18,20 @@ export default class ScoreBoardBroadcast extends System {
    * 1. Player connected.
    * 2. Every N-seconds (see `SERVER_BROADCAST_SCORE_BOARD_INTERVAL_SEC` constant).
    *
-   * Bots need to receive information about the Server bot for proper positioning (CTF),
-   * while for people it doesn't need to be displayed in the list of players.
-   *
    * Broadcast to one or all players.
    *
    * @param connectionId
    */
-  onScoreBoard(connectionId?: MainConnectionId): void {
+  onScoreBoard(connectionId: MainConnectionId = null): void {
     const playersData = [];
     const players = [];
     const rankings = [];
+    let recipients = null;
 
-    let humans = null;
-    let bots = null;
-
-    if (connectionId) {
-      if (this.storage.humanConnectionIdList.has(connectionId)) {
-        humans = connectionId;
-      } else {
-        bots = connectionId;
-      }
+    if (connectionId !== null) {
+      recipients = connectionId;
     } else {
-      humans = [...this.storage.humanConnectionIdList];
-      bots = [...this.storage.botConnectionIdList];
+      recipients = [...this.storage.mainConnectionIdList];
     }
 
     this.storage.playerList.forEach(player => {
@@ -71,40 +61,14 @@ export default class ScoreBoardBroadcast extends System {
       } as ServerPackets.ScoreBoardRanking);
     }
 
-    if (humans !== null) {
-      this.emit(
-        CONNECTIONS_SEND_PACKET,
-        {
-          c: SERVER_PACKETS.SCORE_BOARD,
-          data: players,
-          rankings,
-        } as ServerPackets.ScoreBoard,
-        humans
-      );
-    }
-
-    if (bots !== null) {
-      players.push({
-        id: this.storage.serverPlayerId,
-        score: 0,
-        level: 0,
-      } as ServerPackets.ScoreBoardData);
-
-      rankings.push({
-        id: this.storage.serverPlayerId,
-        x: 0,
-        y: 0,
-      } as ServerPackets.ScoreBoardRanking);
-
-      this.emit(
-        CONNECTIONS_SEND_PACKET,
-        {
-          c: SERVER_PACKETS.SCORE_BOARD,
-          data: players,
-          rankings,
-        } as ServerPackets.ScoreBoard,
-        bots
-      );
-    }
+    this.emit(
+      CONNECTIONS_SEND_PACKET,
+      {
+        c: SERVER_PACKETS.SCORE_BOARD,
+        data: players,
+        rankings,
+      } as ServerPackets.ScoreBoard,
+      recipients
+    );
   }
 }

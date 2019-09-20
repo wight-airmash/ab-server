@@ -321,7 +321,11 @@ export default class GamePlayersConnect extends System {
     this.emit(RESPONSE_SEND_PING, connectionId);
     this.emit(PLAYERS_APPLY_SHIELD, player.id.current, PLAYERS_SPAWN_SHIELD_DURATION_MS);
     this.emit(RESPONSE_SCORE_UPDATE, player.id.current);
-    this.emit(RESPONSE_SERVER_PLAYER_CONNECT, connectionId);
+
+    if (mainConnection.meta.isBot !== true) {
+      this.emit(RESPONSE_SERVER_PLAYER_CONNECT, connectionId);
+    }
+
     this.emit(PLAYERS_CREATED, player.id.current);
 
     if (isRecovered === true) {

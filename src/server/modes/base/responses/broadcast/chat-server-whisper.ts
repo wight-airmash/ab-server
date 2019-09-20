@@ -22,6 +22,10 @@ export default class ChatServerWhisperBroadcast extends System {
     if (this.storage.playerMainConnectionList.has(recipientId)) {
       const recipientConnectionId = this.storage.playerMainConnectionList.get(recipientId);
 
+      if (!this.storage.humanConnectionIdList.has(recipientConnectionId)) {
+        return;
+      }
+
       let offset = 0;
 
       while (offset < text.length) {
