@@ -1,5 +1,11 @@
 ## Future version (unversioned)
 
+## 4.7.1 (October 1, 2019)
+
+Bug fixes:
+
+- Docker image directories rights (#43).
+
 ## 4.7.0 (September 21, 2019)
 
 Features:
