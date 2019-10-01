@@ -112,9 +112,9 @@ ENV BOTS_IP=${BOTS_IP}
 
 WORKDIR /app
 
-RUN mkdir logs
-RUN mkdir cache
-RUN mkdir certs
+RUN mkdir logs && chown -R node: logs
+RUN mkdir cache && chown -R node: cache
+RUN mkdir certs && chown -R node: certs
 
 COPY --from=ts-build /build/dist dist
 COPY --from=prod-only /build/node_modules node_modules
