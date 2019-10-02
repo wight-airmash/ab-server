@@ -1,5 +1,11 @@
 ## Future version (unversioned)
 
+## 4.7.2 (October 3, 2019)
+
+Bug fixes:
+
+- Server crash during connection closing (#44).
+
 ## 4.7.1 (October 1, 2019)
 
 Bug fixes:
