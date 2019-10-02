@@ -116,6 +116,10 @@ export default class GamePlayersConnect extends System {
       return;
     }
 
+    if (!this.storage.connectionList.has(connectionId)) {
+      return;
+    }
+
     const mainConnection = this.storage.connectionList.get(connectionId);
     let uniqueName = name;
 
