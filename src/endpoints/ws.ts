@@ -207,7 +207,11 @@ export default class WsEndpoint {
             this.app.storage.connectionByIPCounter.set(ws.meta.ip, connectionsCounter);
           }
 
-          this.app.events.emit(CONNECTIONS_CLOSED, ws.meta.id);
+          try {
+            this.app.events.emit(CONNECTIONS_CLOSED, ws.meta.id);
+          } catch (err) {
+            this.log.error(`Connection id${ws.meta.id} closing error.`, err.stack);
+          }
         },
       })
       .get('/ping', res => {
