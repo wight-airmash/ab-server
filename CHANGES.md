@@ -1,5 +1,11 @@
 ## Future version (unversioned)
 
+## 4.7.3 (October 9, 2019)
+
+Bug fixes:
+
+- Invulnerability while crossing own dropped upgrades (#46).
+
 ## 4.7.2 (October 3, 2019)
 
 Bug fixes:
