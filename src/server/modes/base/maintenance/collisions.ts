@@ -1,3 +1,4 @@
+/* eslint-disable no-continue */
 import { Collisions } from 'collisions';
 import {
   COLLISIONS_OBJECT_TYPES,
@@ -295,7 +296,7 @@ export default class GameCollisions extends System {
                   box.owner.current === player.id.current &&
                   box.owner.lastDrop > this.now - UPGRADES_OWNER_INACTIVITY_TIMEOUT_MS
                 ) {
-                  return;
+                  continue;
                 }
               }
 
