@@ -133,13 +133,13 @@ export default class GameTicker {
         this.skippedFrames = 0;
 
         if (this.lastTickMs * NS_PER_MS > this.intervalNs) {
-          this.app.log.warn('Frame is longer than 16.6ms.', {
+          this.app.log.debug('Frame is longer than 16.6ms.', {
             counter: this.counter,
             lastTick: this.lastTickMs,
           });
         }
       } else {
-        this.app.log.warn('Frame skipped.', {
+        this.app.log.debug('Frame skipped.', {
           diffTime,
           interval: this.intervalNs,
           counter: this.counter,

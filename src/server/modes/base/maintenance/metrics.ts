@@ -8,6 +8,7 @@ import {
   BROADCAST_CHAT_SERVER_PUBLIC,
   SERVER_FRAMES_SKIPPED,
   TIMELINE_CLOCK_SECOND,
+  TIMELINE_CLOCK_HOUR,
 } from '@/events';
 import { System } from '@/server/system';
 
@@ -24,13 +25,16 @@ export default class GameMetrics extends System {
 
   private lastSkippedFramesAlert = 0;
 
-  private skippedFrames = 0;
+  private totalSkippedFrames = 0;
+
+  private lastHourSkippedFrames = 0;
 
   constructor({ app }) {
     super({ app });
 
     this.listeners = {
       [TIMELINE_CLOCK_SECOND]: this.onSecond,
+      [TIMELINE_CLOCK_HOUR]: this.onHour,
       [SERVER_FRAMES_SKIPPED]: this.onFramesSkipped,
     };
   }
@@ -43,9 +47,8 @@ export default class GameMetrics extends System {
   ): void {
     const now = Date.now();
 
-    this.skippedFrames += skippedFrames;
-
-    this.log.warn(`Frames (${skippedFrames}) was skipped.`);
+    this.totalSkippedFrames += skippedFrames;
+    this.lastHourSkippedFrames += skippedFrames;
 
     if (this.lastSkippedFramesAlert < now - LOGS_SKIPPED_FRAMES_ALERT_DELAY_MS) {
       this.lastSkippedFramesAlert = now;
@@ -53,6 +56,13 @@ export default class GameMetrics extends System {
       // this.emit(BROADCAST_CHAT_SERVER_PUBLIC, `Warning: frames (${skippedFrames}) were skipped.`);
 
       // this.log.debug('Frames skipped chat alert.');
+    }
+  }
+
+  onHour(): void {
+    if (this.lastHourSkippedFrames !== 0) {
+      this.log.warn(`${this.lastHourSkippedFrames} frames were skipped in the last hour.`);
+      this.lastHourSkippedFrames = 0;
     }
   }
 
@@ -65,7 +75,7 @@ export default class GameMetrics extends System {
     if (this.app.metrics.collect === true) {
       const now = Date.now();
 
-      this.app.metrics.sample.sf = this.skippedFrames;
+      this.app.metrics.sample.sf = this.totalSkippedFrames;
       this.app.metrics.sample.ll =
         ~~((this.app.metrics.ticksTimeMs / (ticks - this.ticks)) * 100) / 100;
 
