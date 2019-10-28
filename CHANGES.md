@@ -1,5 +1,9 @@
 ## Future version (unversioned)
 
+Improvements:
+
+- Only ASCII chars are allowed in usernames (#47).
+
 ## 4.7.3 (October 9, 2019)
 
 Bug fixes:

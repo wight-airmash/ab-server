@@ -18,10 +18,6 @@ export default class InvalidLogin extends System {
    * @param connectionId
    */
   onInvalidLogin(connectionId: MainConnectionId): void {
-    /**
-     * TODO: there must be a delay between the message and the connection break,
-     * otherwise the frontend doens't have time to process the message and to show it.
-     */
     this.emit(
       CONNECTIONS_SEND_PACKET,
       {
@@ -31,6 +27,12 @@ export default class InvalidLogin extends System {
       connectionId
     );
 
-    this.emit(CONNECTIONS_BREAK, connectionId);
+    /**
+     * There must be a delay between the message and the connection break,
+     * otherwise the frontend doens't have time to process the message and to show it.
+     */
+    setTimeout(() => {
+      this.emit(CONNECTIONS_BREAK, connectionId);
+    }, 100);
   }
 }

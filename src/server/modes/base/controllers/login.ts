@@ -62,7 +62,7 @@ export default class LoginMessageHandler extends System {
      * Validation
      */
     const user = false;
-    let { flag } = msg;
+    let { flag, name } = msg;
 
     if (msg.protocol !== 5) {
       this.emit(ERRORS_INCORRECT_PROTOCOL, connectionId);
@@ -78,7 +78,12 @@ export default class LoginMessageHandler extends System {
       }
     }
 
-    if (msg.name.length > 20) {
+    name = name
+      .replace(/[^\x20-\x7E]/g, '')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+
+    if (name.length === 0 || name.length > 20 || /^\s+$/.test(name) === true) {
       this.emit(ERRORS_INVALID_LOGIN_DATA, connectionId);
 
       return;
@@ -102,7 +107,7 @@ export default class LoginMessageHandler extends System {
 
     this.channel(CHANNEL_CONNECT_PLAYER).delay(PLAYERS_CREATE, {
       connectionId,
-      name: msg.name,
+      name,
       flag,
       horizon: {
         x: msg.horizonX,
