@@ -3,6 +3,7 @@
 Improvements:
 
 - Only ASCII chars are allowed in usernames (#47).
+- Bots are no longer counted when calculating the number of votes required for mute.
 
 ## 4.7.3 (October 9, 2019)
 

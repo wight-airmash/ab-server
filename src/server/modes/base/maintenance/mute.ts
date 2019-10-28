@@ -8,6 +8,7 @@ import {
   TIMELINE_CLOCK_DAY,
   CHAT_UNMUTE_BY_IP,
   CHAT_MUTE_BY_IP,
+  RESPONSE_COMMAND_REPLY,
 } from '@/events';
 import { System } from '@/server/system';
 import { CHANNEL_MUTE } from '@/server/channels';
@@ -53,6 +54,11 @@ export default class GameMute extends System {
     const playerToMute = this.storage.playerList.get(playerToMuteId);
 
     if (player.times.activePlaying < CHAT_MIN_PLAYER_PLAYTIME_TO_VOTEMUTE_MS) {
+      this.emit(
+        RESPONSE_COMMAND_REPLY,
+        this.storage.playerMainConnectionList.get(playerId),
+        `The vote isn't counted. Only active players can vote, please play more.`
+      );
       this.log.debug(`Player id${playerId} didn't play enough to vote mute.`);
 
       return;
@@ -64,12 +70,14 @@ export default class GameMute extends System {
       this.votes.set(playerToMuteId, new Set([playerId]));
     }
 
-    const votesToMute = Math.floor(Math.sqrt(this.storage.playerList.size)) + 1;
+    const votesToMute = Math.floor(Math.sqrt(this.storage.humanConnectionIdList.size)) + 1;
     const votedPlayers = this.votes.get(playerToMuteId);
 
     /**
      * Fast mute check.
      */
+    let isMuted = false;
+
     if (votedPlayers.size >= votesToMute) {
       let votes = 0;
 
@@ -88,6 +96,7 @@ export default class GameMute extends System {
        * Mute player.
        */
       if (votes >= votesToMute) {
+        isMuted = true;
         this.log.debug(`Player id${playerToMuteId} muted.`);
 
         playerToMute.times.unmuteTime = Date.now() + CHAT_MUTE_TIME_MS;
@@ -103,6 +112,14 @@ export default class GameMute extends System {
 
         this.votes.delete(playerToMuteId);
       }
+    }
+
+    if (isMuted === false) {
+      this.emit(
+        RESPONSE_COMMAND_REPLY,
+        this.storage.playerMainConnectionList.get(playerId),
+        `Voted to mute (${votedPlayers.size}/${votesToMute}).`
+      );
     }
   }
 
