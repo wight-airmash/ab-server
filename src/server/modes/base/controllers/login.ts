@@ -70,14 +70,6 @@ export default class LoginMessageHandler extends System {
       return;
     }
 
-    if (msg.session.length > 0 && msg.session !== 'none') {
-      if (!user) {
-        this.emit(ERRORS_INVALID_LOGIN_DATA, connectionId);
-
-        return;
-      }
-    }
-
     name = name
       .replace(/[^\x20-\x7E]/g, '')
       .replace(/\s{2,}/g, ' ')
