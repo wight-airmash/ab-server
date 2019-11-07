@@ -4,6 +4,8 @@ export const PLAYERS_ID_CACHE_LIFETIME_MS = 24 * 60 * 60 * MS_PER_SEC;
 
 export const PLAYERS_DEFAULT_FLAG = 'COMMUNIST';
 
+export const PLAYERS_ALLOW_NON_ASCII_USERNAMES = false;
+
 export const PLAYERS_ALIVE_STATUSES = {
   ALIVE: 0,
   DEAD: 1,

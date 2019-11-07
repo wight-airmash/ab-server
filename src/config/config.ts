@@ -27,6 +27,7 @@ import {
   UPGRADES_DEFAULT_MIN_CHANCE,
   BOTS_SERVER_BOT_FLAG,
   BOTS_SERVER_BOT_NAME,
+  PLAYERS_ALLOW_NON_ASCII_USERNAMES,
 } from '@/constants';
 
 export interface GameServerConfigInterface {
@@ -173,6 +174,8 @@ export interface GameServerConfigInterface {
    * If true prowlers are always visible for teammates.
    */
   visibleTeamProwlers: boolean;
+
+  allowNonAsciiUsernames: boolean;
 
   maxPlayersPerIP: number;
 
@@ -322,6 +325,11 @@ const config: GameServerConfigInterface = {
   visibleTeamProwlers: boolValue(
     process.env.PROWLERS_ALWAYS_VISIBLE_FOR_TEAMMATES,
     SERVER_DEFAULT_PROWLERS_ALWAYS_VISIBLE_FOR_TEAMMATES
+  ),
+
+  allowNonAsciiUsernames: boolValue(
+    process.env.ALLOW_NON_ASCII_USERNAMES,
+    PLAYERS_ALLOW_NON_ASCII_USERNAMES
   ),
 
   maxPlayersPerIP: intValue(process.env.MAX_PLAYERS_PER_IP, CONNECTIONS_DEFAULT_MAX_PLAYERS_PER_IP),

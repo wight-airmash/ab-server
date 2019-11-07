@@ -1,5 +1,12 @@
 ## Future version (unversioned)
 
+## 4.9.0 (November 7, 2019)
+
+Improvements:
+
+- CTF: bounty reward depends on active playing for the team (#42).
+- Optionally disabling non-ASCII chars in usernames (#47).
+
 ## 4.8.0 (October 28, 2019)
 
 Improvements:

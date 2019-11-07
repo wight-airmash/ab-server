@@ -70,10 +70,11 @@ export default class LoginMessageHandler extends System {
       return;
     }
 
-    name = name
-      .replace(/[^\x20-\x7E]/g, '')
-      .replace(/\s{2,}/g, ' ')
-      .trim();
+    if (this.app.config.allowNonAsciiUsernames === false) {
+      name = name.replace(/[^\x20-\x7E]/g, '');
+    }
+
+    name = name.replace(/\s{2,}/g, ' ').trim();
 
     if (name.length === 0 || name.length > 20 || /^\s+$/.test(name) === true) {
       this.emit(ERRORS_INVALID_LOGIN_DATA, connectionId);
