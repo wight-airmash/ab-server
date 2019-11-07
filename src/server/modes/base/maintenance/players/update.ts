@@ -1,5 +1,5 @@
 import { Polygon } from 'collisions';
-import { FLAGS_ISO_TO_CODE } from '@airbattle/protocol';
+import { FLAGS_ISO_TO_CODE, CTF_TEAMS } from '@airbattle/protocol';
 import {
   COLLISIONS_OBJECT_TYPES,
   MAP_SIZE,
@@ -284,6 +284,12 @@ export default class GamePlayersUpdate extends System {
         // rounded tick time 16.6ms.
         player.times.activePlaying += 17;
         player.times.lastMove = now;
+
+        if (player.team.current === CTF_TEAMS.RED) {
+          player.times.activePlayingRed += 17;
+        } else if (player.team.current === CTF_TEAMS.BLUE) {
+          player.times.activePlayingBlue += 17;
+        }
       }
 
       /**

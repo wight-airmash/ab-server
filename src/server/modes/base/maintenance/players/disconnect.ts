@@ -84,6 +84,8 @@ export default class GamePlayersDisconnect extends System {
 
             lastSwitch: player.times.lastSwitch,
             activePlaying: player.times.activePlaying,
+            activePlayingRed: player.times.activePlayingRed,
+            activePlayingBlue: player.times.activePlayingBlue,
           },
         });
 
