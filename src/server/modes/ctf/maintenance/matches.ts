@@ -166,7 +166,7 @@ export default class GameMatches extends System {
             ? player.times.activePlayingBlue
             : player.times.activePlayingRed;
         const shareInMatch = Math.round((timeActiveOnWinningTeam * 10) / matchDuration) / 10;
-        const shareInScore = this.storage.gameEntity.match.bounty * shareInMatch;
+        const shareInScore = Math.round(this.storage.gameEntity.match.bounty * shareInMatch);
 
         if (shareInScore > 0) {
           player.score.current += shareInScore;
