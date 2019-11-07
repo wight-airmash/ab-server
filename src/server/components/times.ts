@@ -26,9 +26,13 @@ export default class Times extends Component {
   public lastBounce = 0;
 
   /**
-   * ms.
+   * times active in ms.
    */
   public activePlaying = 0;
+
+  public activePlayingRed = 0;
+
+  public activePlayingBlue = 0;
 
   constructor() {
     super();
