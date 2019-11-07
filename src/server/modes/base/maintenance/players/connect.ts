@@ -214,6 +214,8 @@ export default class GamePlayersConnect extends System {
         player.score.current = recover.data.score;
 
         player.times.activePlaying = recover.data.activePlaying;
+        player.times.activePlayingBlue = recover.data.activePlayingBlue;
+        player.times.activePlayingRed = recover.data.activePlayingRed;
 
         this.log.debug(`Player id${player.id.current} data recovered.`);
       } else {

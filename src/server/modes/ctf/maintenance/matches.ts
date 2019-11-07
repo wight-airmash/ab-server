@@ -105,6 +105,8 @@ export default class GameMatches extends System {
 
         this.storage.playerList.forEach(player => {
           player.delayed.RESPAWN = true;
+          player.times.activePlayingBlue = 0;
+          player.times.activePlayingRed = 0;
           this.emit(PLAYERS_RESPAWN, player.id.current);
         });
 
@@ -128,10 +130,10 @@ export default class GameMatches extends System {
   /**
    * A team successfully captured the flag. Check for the end of the game.
    *
-   * @param teamId
+   * @param winnerTeamId
    */
-  onTeamCaptured(teamId: TeamId): void {
-    if (teamId === CTF_TEAMS.BLUE) {
+  onTeamCaptured(winnerTeamId: TeamId): void {
+    if (winnerTeamId === CTF_TEAMS.BLUE) {
       this.storage.gameEntity.match.blue += 1;
     } else {
       this.storage.gameEntity.match.red += 1;
@@ -140,7 +142,7 @@ export default class GameMatches extends System {
     if (this.storage.gameEntity.match.blue >= 3 || this.storage.gameEntity.match.red >= 3) {
       this.emit(CTF_RESET_FLAGS);
 
-      this.storage.gameEntity.match.winnerTeam = teamId;
+      this.storage.gameEntity.match.winnerTeam = winnerTeamId;
       this.storage.gameEntity.match.isActive = false;
       this.storage.gameEntity.match.bounty =
         CTF_WIN_BOUNTY.BASE + CTF_WIN_BOUNTY.INCREMENT * (this.storage.playerList.size - 1);
@@ -149,14 +151,25 @@ export default class GameMatches extends System {
         this.storage.gameEntity.match.bounty = CTF_WIN_BOUNTY.MAX;
       }
 
+      const matchDuration = Date.now() - this.storage.gameEntity.match.start;
+
       this.storage.playerList.forEach(player => {
         if (player.planestate.flagspeed === true) {
           player.planestate.flagspeed = false;
           this.emit(BROADCAST_PLAYER_UPDATE, player.id.current);
         }
 
-        if (player.team.current === teamId) {
-          player.score.current += this.storage.gameEntity.match.bounty;
+        // measure share in match in steps of 0.1, based on how long this player
+        // was active on the winning side of the match during the game.
+        const timeActiveOnWinningTeam =
+          winnerTeamId === CTF_TEAMS.BLUE
+            ? player.times.activePlayingBlue
+            : player.times.activePlayingRed;
+        const shareInMatch = Math.round((timeActiveOnWinningTeam * 10) / matchDuration) / 10;
+        const shareInScore = this.storage.gameEntity.match.bounty * shareInMatch;
+
+        if (shareInScore > 0) {
+          player.score.current += shareInScore;
 
           this.emit(RESPONSE_SCORE_UPDATE, player.id.current);
         }
@@ -164,7 +177,6 @@ export default class GameMatches extends System {
 
       this.emit(BROADCAST_SERVER_CUSTOM);
 
-      const matchDuration = Date.now() - this.storage.gameEntity.match.start;
       const humanTimeParts = [];
       const seconds = Math.floor((matchDuration / 1000) % 60);
       const minutes = Math.floor((matchDuration / (1000 * 60)) % 60);
