@@ -1,4 +1,4 @@
-import { CHAT_MESSAGE_PER_TICKS_LIMIT } from '@/constants';
+import { CHAT_MESSAGE_PER_TICKS_LIMIT, CHAT_HATE_SPEECH_FORBIDDEN_PHRASES } from '@/constants';
 import {
   BROADCAST_CHAT_PUBLIC,
   BROADCAST_CHAT_SAY,
@@ -48,12 +48,32 @@ export default class GameChat extends System {
     this.framesPassed = 0;
   }
 
+  static isHateSpeech(text: string): boolean {
+    const lcText = text.toLowerCase();
+
+    for (
+      let phraseIndex = 0;
+      phraseIndex < CHAT_HATE_SPEECH_FORBIDDEN_PHRASES.length;
+      phraseIndex += 1
+    ) {
+      const phrase = CHAT_HATE_SPEECH_FORBIDDEN_PHRASES[phraseIndex];
+
+      if (lcText.includes(phrase)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   onChatPublic(playerId: PlayerId, msg: string): void {
     if (!this.helpers.isPlayerConnected(playerId)) {
       return;
     }
 
-    this.emit(BROADCAST_CHAT_PUBLIC, playerId, msg);
+    if (!GameChat.isHateSpeech(msg)) {
+      this.emit(BROADCAST_CHAT_PUBLIC, playerId, msg);
+    }
   }
 
   onChatSay(playerId: PlayerId, msg: string): void {
@@ -63,8 +83,10 @@ export default class GameChat extends System {
 
     const player = this.storage.playerList.get(playerId);
 
-    if (player.planestate.stealthed === false) {
-      this.emit(BROADCAST_CHAT_SAY, playerId, msg);
+    if (!GameChat.isHateSpeech(msg)) {
+      if (player.planestate.stealthed === false) {
+        this.emit(BROADCAST_CHAT_SAY, playerId, msg);
+      }
     }
   }
 
@@ -73,7 +95,9 @@ export default class GameChat extends System {
       return;
     }
 
-    this.emit(BROADCAST_CHAT_TEAM, playerId, msg);
+    if (!GameChat.isHateSpeech(msg)) {
+      this.emit(BROADCAST_CHAT_TEAM, playerId, msg);
+    }
   }
 
   onChatWhisper(playerId: PlayerId, receiverId: PlayerId, msg: string): void {
@@ -81,6 +105,8 @@ export default class GameChat extends System {
       return;
     }
 
-    this.emit(BROADCAST_CHAT_WHISPER, playerId, receiverId, msg);
+    if (!GameChat.isHateSpeech(msg)) {
+      this.emit(BROADCAST_CHAT_WHISPER, playerId, receiverId, msg);
+    }
   }
 }
