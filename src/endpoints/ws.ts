@@ -113,7 +113,11 @@ export default class WsEndpoint {
         break;
       case 'Sanction':
         this.log.info(`Sanctioning player ${playerId}`);
-        player.upgrades.reset();
+        player.upgrades.amount = 0;
+        player.upgrades.speed = 0;
+        player.upgrades.defense = 0;
+        player.upgrades.energy = 0;
+        player.upgrades.missile = 0;
         this.app.events.emit(RESPONSE_PLAYER_UPGRADE, playerId, UPGRADES_ACTION_TYPE.LOST);
         player.score.current = 0;
         player.earningscore.current = 0;
