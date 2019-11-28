@@ -1,12 +1,13 @@
 import uws from 'uWebSockets.js';
 import {
+  CHAT_SUPERUSER_MUTE_TIME_MS,
   CONNECTIONS_STATUS,
   CONNECTIONS_IDLE_TIMEOUT_SEC,
   CONNECTIONS_MAX_PAYLOAD_BYTES,
   CONNECTIONS_PACKET_LOGIN_TIMEOUT_MS,
   CONNECTIONS_PLAYERS_TO_CONNECTIONS_MULTIPLIER,
-  CHAT_SUPERUSER_MUTE_TIME_MS,
   CONNECTIONS_SUPERUSER_BAN_MS,
+  UPGRADES_ACTION_TYPE,
 } from '@/constants';
 import GameServer from '@/core/server';
 import {
@@ -18,6 +19,8 @@ import {
   CONNECTIONS_UNBAN_IP,
   CONNECTIONS_DISCONNECT_PLAYER,
   RESPONSE_PLAYER_BAN,
+  RESPONSE_PLAYER_UPGRADE,
+  RESPONSE_SCORE_UPDATE,
   PLAYERS_KICK,
   CHAT_MUTE_BY_SERVER,
   CHAT_MUTE_BY_IP,
@@ -105,6 +108,21 @@ export default class WsEndpoint {
         CHAT_MUTE_BY_IP,
         player.ip.current,
         CHAT_SUPERUSER_MUTE_TIME_MS
+      );
+      break;
+    case "Sanction":
+      this.log.info('Sanctioning player ' + playerId);
+      player.upgrades.reset();
+      this.app.events.emit(
+        RESPONSE_PLAYER_UPGRADE,
+        playerId,
+        UPGRADES_ACTION_TYPE.LOST
+      );
+      player.score.current = 0;
+      player.earningscore.current = 0;
+      this.app.events.emit(
+        RESPONSE_SCORE_UPDATE,
+        playerId
       );
       break;
     case "Ban":
