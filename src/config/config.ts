@@ -276,12 +276,10 @@ const config: GameServerConfigInterface = {
   },
 
   admin: {
-    htmlPath: resolvePath(
-      strValue(process.env.ADMIN_HTML_PATH, '../admin/admin.html')
-    ),
+    htmlPath: resolvePath(strValue(process.env.ADMIN_HTML_PATH, '../admin/admin.html')),
     passwordsPath: resolvePath(
       strValue(process.env.ADMIN_PASSWORDS_PATH, '../admin/passwords.txt')
-    )
+    ),
   },
 
   logs: {

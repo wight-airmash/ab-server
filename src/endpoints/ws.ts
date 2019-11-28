@@ -1,4 +1,7 @@
 import uws from 'uWebSockets.js';
+import util from 'util';
+import fs from 'fs';
+import querystring from 'querystring';
 import {
   CHAT_SUPERUSER_MUTE_TIME_MS,
   CONNECTIONS_STATUS,
@@ -17,7 +20,6 @@ import {
   CONNECTIONS_PACKET_RECEIVED,
   CONNECTIONS_BAN_IP,
   CONNECTIONS_UNBAN_IP,
-  CONNECTIONS_DISCONNECT_PLAYER,
   RESPONSE_PLAYER_BAN,
   RESPONSE_PLAYER_UPGRADE,
   RESPONSE_SCORE_UPDATE,
@@ -27,29 +29,25 @@ import {
 } from '@/events';
 import { ConnectionMeta, PlayerConnection, IPv4 } from '@/types';
 import Logger from '@/logger';
-import util from 'util';
-import fs from 'fs';
-import querystring from 'querystring';
-
 
 const readFile = util.promisify(fs.readFile);
 
-
-function readRequest(res, cb, err) {
+function readRequest(res, cb, err): void {
   let buffer = Buffer.alloc(0);
+
   res.onAborted(err);
   res.onData((ab, isLast) => {
     buffer = Buffer.concat([buffer, Buffer.from(ab)]);
-    if(isLast) {
+
+    if (isLast) {
       try {
         cb(buffer.toString());
-      } catch(e) {
+      } catch (e) {
         res.close();
       }
     }
   });
 }
-
 
 export default class WsEndpoint {
   protected uws: uws.TemplatedApp;
@@ -60,101 +58,98 @@ export default class WsEndpoint {
 
   protected moderatorActions: Array<string> = [];
 
-  async getModeratorByPassword(password: string) {
+  async getModeratorByPassword(password: string): string | undefined {
+    let file;
+
     try {
-      var file = await readFile(this.app.config.admin.passwordsPath);
-    } catch(e) {
-      this.log.error('Cannot read mod passwords: '+ e);
-      return false;
+      file = await readFile(this.app.config.admin.passwordsPath);
+    } catch (e) {
+      this.log.error(`Cannot read mod passwords: ${e}`);
+
+      return undefined;
     }
 
-    for(let line of file.toString().split('\n')) {
-      let [name, test] = line.split(':');
-      if(test == password) {
+    for (const line in Object.values(file.toString().split('\n'))) {
+      const [name, test] = line.split(':');
+
+      if (test === password) {
         return name;
       }
     }
 
     this.log.error('Failed mod password attempt');
+
+    return undefined;
   }
 
-  async onActionsPost(res: uws.HttpResponse, requestData: string) {
-    let params = querystring.parse(requestData);
+  async onActionsPost(res: uws.HttpResponse, requestData: string): void {
+    const params = querystring.parse(requestData);
 
-    var mod = await this.getModeratorByPassword(params.password as string);
-    if(! mod) {
-      res.end("Invalid password");
+    const mod = await this.getModeratorByPassword(params.password as string);
+
+    if (!mod) {
+      res.end('Invalid password');
+
       return;
     }
 
-    var playerId = parseInt(params.playerid as string);
-    var player = this.app.storage.playerList.get(playerId);
-    if(! player) {
-      res.end("Invalid player");
+    const playerId = parseInt(params.playerid as string, 10);
+    const player = this.app.storage.playerList.get(playerId);
+
+    if (!player) {
+      res.end('Invalid player');
+
       return;
     }
 
-    switch(params.action) {
-    case "Mute":
-      this.log.info('Muting player ' + playerId);
-      this.app.events.emit(
-        CHAT_MUTE_BY_SERVER,
-        playerId
-      );
-      break;
-    case "IpMute":
-      this.log.info('Muting IP: ' + player.ip.current);
-      this.app.events.emit(
-        CHAT_MUTE_BY_IP,
-        player.ip.current,
-        CHAT_SUPERUSER_MUTE_TIME_MS
-      );
-      break;
-    case "Sanction":
-      this.log.info('Sanctioning player ' + playerId);
-      player.upgrades.reset();
-      this.app.events.emit(
-        RESPONSE_PLAYER_UPGRADE,
-        playerId,
-        UPGRADES_ACTION_TYPE.LOST
-      );
-      player.score.current = 0;
-      player.earningscore.current = 0;
-      this.app.events.emit(
-        RESPONSE_SCORE_UPDATE,
-        playerId
-      );
-      break;
-    case "Ban":
-      this.log.info('Banning IP: ' + player.ip.current);
-      this.app.events.emit(
-        CONNECTIONS_BAN_IP,
-        player.ip.current,
-        CONNECTIONS_SUPERUSER_BAN_MS,
-        mod
-      );
-      this.app.events.emit(
-        PLAYERS_KICK,
-        playerId
-      );
-      break;
-    default:
-      res.end("Invalid action");
-      return;
+    switch (params.action) {
+      case 'Mute':
+        this.log.info(`Muting player ${playerId}`);
+        this.app.events.emit(CHAT_MUTE_BY_SERVER, playerId);
+        break;
+      case 'IpMute':
+        this.log.info(`Muting IP: ${player.ip.current}`);
+        this.app.events.emit(CHAT_MUTE_BY_IP, player.ip.current, CHAT_SUPERUSER_MUTE_TIME_MS);
+        break;
+      case 'Sanction':
+        this.log.info(`Sanctioning player ${playerId}`);
+        player.upgrades.reset();
+        this.app.events.emit(RESPONSE_PLAYER_UPGRADE, playerId, UPGRADES_ACTION_TYPE.LOST);
+        player.score.current = 0;
+        player.earningscore.current = 0;
+        this.app.events.emit(RESPONSE_SCORE_UPDATE, playerId);
+        break;
+      case 'Ban':
+        this.log.info(`Banning IP: ${player.ip.current}`);
+        this.app.events.emit(
+          CONNECTIONS_BAN_IP,
+          player.ip.current,
+          CONNECTIONS_SUPERUSER_BAN_MS,
+          mod
+        );
+        this.app.events.emit(PLAYERS_KICK, playerId);
+        break;
+      default:
+        res.end('Invalid action');
+
+        return;
     }
 
-    this.moderatorActions.push(JSON.stringify({
-      date: Date.now(),
-      who: mod,
-      action: params.action,
-      victim: player.name.current,
-      reason: params.reason
-    }));
-    while(this.moderatorActions.length > 100) {
+    this.moderatorActions.push(
+      JSON.stringify({
+        date: Date.now(),
+        who: mod,
+        action: params.action,
+        victim: player.name.current,
+        reason: params.reason,
+      })
+    );
+
+    while (this.moderatorActions.length > 100) {
       this.moderatorActions.shift();
     }
 
-    res.end("OK");
+    res.end('OK');
   }
 
   constructor({ app }) {
@@ -356,38 +351,46 @@ export default class WsEndpoint {
         res.writeHeader('Content-type', 'application/json');
         res.end(`[${this.moderatorActions.join(',\n')}]`);
       })
-      .post('/actions', (res, req) => {
-        readRequest(res,
-          (requestData) => { this.onActionsPost(res, requestData); },
-          () => { this.log.error('failed to parse /actions POST'); }
+      .post('/actions', res => {
+        readRequest(
+          res,
+          requestData => {
+            this.onActionsPost(res, requestData);
+          },
+          () => {
+            this.log.error('failed to parse /actions POST');
+          }
         );
       })
       .get('/players', res => {
-        let list = [];
-        for(let player of this.app.storage.playerList.values()) {
-            list.push({
-                name: player.name.current,
-                id: player.id.current,
-                captures: player.captures.current,
-                spectate: player.spectate.current,
-                kills: player.kills.current,
-                deaths: player.deaths.current,
-                score: player.score.current,
-                lastMove: player.times.lastMove,
-                ping: player.ping.current,
-                flag: player.flag.current
-            });
+        const list = [];
+
+        for (const player of this.app.storage.playerList.values()) {
+          list.push({
+            name: player.name.current,
+            id: player.id.current,
+            captures: player.captures.current,
+            spectate: player.spectate.current,
+            kills: player.kills.current,
+            deaths: player.deaths.current,
+            score: player.score.current,
+            lastMove: player.times.lastMove,
+            ping: player.ping.current,
+            flag: player.flag.current,
+          });
         }
+
         res.writeHeader('Content-type', 'application/json');
         res.end(JSON.stringify(list, null, 2));
       })
       .get('/admin', async function(res) {
-          res.onAborted(() => {});
-          try {
-            res.end(await readFile(app.config.admin.htmlPath));
-          } catch(e) {
-              res.end('internal error: ' + e);
-          }
+        res.onAborted(() => {});
+
+        try {
+          res.end(await readFile(app.config.admin.htmlPath));
+        } catch (e) {
+          res.end(`internal error: ${e}`);
+        }
       })
       .any('*', res => {
         res.writeStatus('404 Not Found').end('');
