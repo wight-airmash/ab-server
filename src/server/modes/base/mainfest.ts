@@ -40,6 +40,7 @@ import GamePlayersPowerup from '@/server/modes/base/maintenance/players/powerup'
 import GamePlayersRespawn from '@/server/modes/base/maintenance/players/respawn';
 import GamePlayersUpdate from '@/server/modes/base/maintenance/players/update';
 import GamePlayersRepel from '@/server/modes/base/maintenance/players/repel';
+import GameUpgrades from '@/server/modes/base/maintenance/players/upgrades';
 import GamePowerups from '@/server/modes/base/maintenance/powerups';
 import GameSpectating from '@/server/modes/base/maintenance/spectating';
 import GameUsers from '@/server/modes/base/maintenance/users';
@@ -234,6 +235,7 @@ export default abstract class BaseGameManifest extends GameManifest {
       GamePlayersRepel,
       GameMountains,
       GamePowerups,
+      GameUpgrades,
       GameViewports,
       GameChat,
       GameMute,

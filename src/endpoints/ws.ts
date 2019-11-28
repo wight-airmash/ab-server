@@ -1,10 +1,15 @@
 import uws from 'uWebSockets.js';
+import util from 'util';
+import fs from 'fs';
+import querystring from 'querystring';
 import {
+  CHAT_SUPERUSER_MUTE_TIME_MS,
   CONNECTIONS_STATUS,
   CONNECTIONS_IDLE_TIMEOUT_SEC,
   CONNECTIONS_MAX_PAYLOAD_BYTES,
   CONNECTIONS_PACKET_LOGIN_TIMEOUT_MS,
   CONNECTIONS_PLAYERS_TO_CONNECTIONS_MULTIPLIER,
+  CONNECTIONS_SUPERUSER_BAN_MS,
 } from '@/constants';
 import GameServer from '@/core/server';
 import {
@@ -12,11 +17,36 @@ import {
   CONNECTIONS_CLOSED,
   TIMEOUT_LOGIN,
   CONNECTIONS_PACKET_RECEIVED,
+  CONNECTIONS_BAN_IP,
   CONNECTIONS_UNBAN_IP,
   RESPONSE_PLAYER_BAN,
+  RESPONSE_SCORE_UPDATE,
+  PLAYERS_KICK,
+  PLAYERS_UPGRADES_RESET,
+  CHAT_MUTE_BY_SERVER,
+  CHAT_MUTE_BY_IP,
 } from '@/events';
 import { ConnectionMeta, PlayerConnection, IPv4 } from '@/types';
 import Logger from '@/logger';
+
+const readFile = util.promisify(fs.readFile);
+
+function readRequest(res, cb, err): void {
+  let buffer = Buffer.alloc(0);
+
+  res.onAborted(err);
+  res.onData((ab, isLast) => {
+    buffer = Buffer.concat([buffer, Buffer.from(ab)]);
+
+    if (isLast) {
+      try {
+        cb(buffer.toString());
+      } catch (e) {
+        res.close();
+      }
+    }
+  });
+}
 
 export default class WsEndpoint {
   protected uws: uws.TemplatedApp;
@@ -24,6 +54,104 @@ export default class WsEndpoint {
   protected app: GameServer;
 
   protected log: Logger;
+
+  protected moderatorActions: Array<string> = [];
+
+  async getModeratorByPassword(password: string): Promise<string | undefined> {
+    let file;
+
+    try {
+      file = await readFile(this.app.config.admin.passwordsPath);
+    } catch (e) {
+      this.log.error(`Cannot read mod passwords: ${e}`);
+
+      return undefined;
+    }
+
+    const lines = file.toString().split('\n');
+
+    for (let i = 0; i < lines.length; i += 1) {
+      const line = lines[i];
+      const [name, test] = line.split(':');
+
+      if (test === password) {
+        return name;
+      }
+    }
+
+    this.log.error('Failed mod password attempt');
+
+    return undefined;
+  }
+
+  async onActionsPost(res: uws.HttpResponse, requestData: string): Promise<void> {
+    const params = querystring.parse(requestData);
+
+    const mod = await this.getModeratorByPassword(params.password as string);
+
+    if (!mod) {
+      res.end('Invalid password');
+
+      return;
+    }
+
+    const playerId = parseInt(params.playerid as string, 10);
+    const player = this.app.storage.playerList.get(playerId);
+
+    if (!player) {
+      res.end('Invalid player');
+
+      return;
+    }
+
+    switch (params.action) {
+      case 'Mute':
+        this.log.info(`Muting player ${playerId}`);
+        this.app.events.emit(CHAT_MUTE_BY_SERVER, playerId);
+        break;
+      case 'IpMute':
+        this.log.info(`Muting IP: ${player.ip.current}`);
+        this.app.events.emit(CHAT_MUTE_BY_IP, player.ip.current, CHAT_SUPERUSER_MUTE_TIME_MS);
+        break;
+      case 'Sanction':
+        this.log.info(`Sanctioning player ${playerId}`);
+        this.app.events.emit(PLAYERS_UPGRADES_RESET, playerId);
+        player.score.current = 0;
+        player.earningscore.current = 0;
+        this.app.events.emit(RESPONSE_SCORE_UPDATE, playerId);
+        break;
+      case 'Ban':
+        this.log.info(`Banning IP: ${player.ip.current}`);
+        this.app.events.emit(
+          CONNECTIONS_BAN_IP,
+          player.ip.current,
+          CONNECTIONS_SUPERUSER_BAN_MS,
+          mod
+        );
+        this.app.events.emit(PLAYERS_KICK, playerId);
+        break;
+      default:
+        res.end('Invalid action');
+
+        return;
+    }
+
+    this.moderatorActions.push(
+      JSON.stringify({
+        date: Date.now(),
+        who: mod,
+        action: params.action,
+        victim: player.name.current,
+        reason: params.reason,
+      })
+    );
+
+    while (this.moderatorActions.length > 100) {
+      this.moderatorActions.shift();
+    }
+
+    res.end('OK');
+  }
 
   constructor({ app }) {
     this.app = app;
@@ -219,6 +347,51 @@ export default class WsEndpoint {
       })
       .get('/', res => {
         res.end(`{"players":${this.app.storage.playerList.size}}`);
+      })
+      .get('/actions', res => {
+        res.writeHeader('Content-type', 'application/json');
+        res.end(`[${this.moderatorActions.join(',\n')}]`);
+      })
+      .post('/actions', res => {
+        readRequest(
+          res,
+          requestData => {
+            this.onActionsPost(res, requestData);
+          },
+          () => {
+            this.log.error('failed to parse /actions POST');
+          }
+        );
+      })
+      .get('/players', res => {
+        const list = [];
+
+        this.app.storage.playerList.forEach(player =>
+          list.push({
+            name: player.name.current,
+            id: player.id.current,
+            captures: player.captures.current,
+            spectate: player.spectate.current,
+            kills: player.kills.current,
+            deaths: player.deaths.current,
+            score: player.score.current,
+            lastMove: player.times.lastMove,
+            ping: player.ping.current,
+            flag: player.flag.current,
+          })
+        );
+
+        res.writeHeader('Content-type', 'application/json');
+        res.end(JSON.stringify(list, null, 2));
+      })
+      .get('/admin', async function onAdminGet(res) {
+        res.onAborted(() => {});
+
+        try {
+          res.end(await readFile(app.config.admin.htmlPath));
+        } catch (e) {
+          res.end(`internal error: ${e}`);
+        }
       })
       .any('*', res => {
         res.writeStatus('404 Not Found').end('');

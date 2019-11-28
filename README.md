@@ -44,6 +44,21 @@ npm run start
 
 Please see .env.example.
 
+
+## Moderation Panel
+
+The server exports a `/admin` URL to allow privileged players to moderate the
+game, and a public log to allow everyone to see moderation actions.
+
+Add passwords to `admin/passwords.txt` like so:
+
+```
+wight:somepasswordforwight
+```
+
+The username is only used to enter a name into the log.
+
+
 ## "How to run" examples
 
 ### Docker
