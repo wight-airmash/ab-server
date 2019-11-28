@@ -66,6 +66,11 @@ export interface GameServerConfigInterface {
     path: string;
   };
 
+  admin: {
+    htmlPath: string;
+    passwordsPath: string;
+  };
+
   logs: {
     level: string;
 
@@ -268,6 +273,15 @@ const config: GameServerConfigInterface = {
   tls: boolValue(process.env.ENDPOINTS_TLS, SERVER_DEFAULT_TLS),
   certs: {
     path: resolvePath(strValue(process.env.CERTS_PATH, '../certs')),
+  },
+
+  admin: {
+    htmlPath: resolvePath(
+      strValue(process.env.ADMIN_HTML_PATH, '../admin/admin.html')
+    ),
+    passwordsPath: resolvePath(
+      strValue(process.env.ADMIN_PASSWORDS_PATH, '../admin/passwords.txt')
+    )
   },
 
   logs: {
