@@ -219,12 +219,7 @@ export default class GamePlayersRespawn extends System {
       );
 
       if (player.delayed.RESPAWN) {
-        player.upgrades.speed = 0;
-        player.upgrades.defense = 0;
-        player.upgrades.energy = 0;
-        player.upgrades.missile = 0;
-        player.upgrades.amount = 0;
-
+        player.upgrades.reset();
         this.delay(RESPONSE_PLAYER_UPGRADE, player.id.current, UPGRADES_ACTION_TYPE.LOST);
       }
 

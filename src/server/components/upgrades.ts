@@ -3,17 +3,24 @@ import Component from '@/server/component';
 export default class Upgrades extends Component {
   public amount: number;
 
-  public speed = 0;
+  public speed: number;
 
-  public defense = 0;
+  public defense: number;
 
-  public energy = 0;
+  public energy: number;
 
-  public missile = 0;
+  public missile: number;
+
+  reset() {
+    this.amount = 0;
+    this.speed = 0;
+    this.defense = 0;
+    this.energy = 0;
+    this.missile = 0;
+  }
 
   constructor(amount = 0) {
     super();
-
-    this.amount = amount;
+    this.reset();
   }
 }
