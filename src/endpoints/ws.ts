@@ -58,7 +58,7 @@ export default class WsEndpoint {
 
   protected moderatorActions: Array<string> = [];
 
-  async getModeratorByPassword(password: string): string | undefined {
+  async getModeratorByPassword(password: string): Promise<string | undefined> {
     let file;
 
     try {
@@ -69,7 +69,10 @@ export default class WsEndpoint {
       return undefined;
     }
 
-    for (const line in Object.values(file.toString().split('\n'))) {
+    const lines = file.toString().split('\n');
+
+    for (let i = 0; i < lines.length; i += 1) {
+      const line = lines[i];
       const [name, test] = line.split(':');
 
       if (test === password) {
@@ -82,7 +85,7 @@ export default class WsEndpoint {
     return undefined;
   }
 
-  async onActionsPost(res: uws.HttpResponse, requestData: string): void {
+  async onActionsPost(res: uws.HttpResponse, requestData: string): Promise<void> {
     const params = querystring.parse(requestData);
 
     const mod = await this.getModeratorByPassword(params.password as string);
@@ -368,8 +371,11 @@ export default class WsEndpoint {
       })
       .get('/players', res => {
         const list = [];
+        const players = Array.from(this.app.storage.playerList.values());
 
-        for (const player of this.app.storage.playerList.values()) {
+        for (let i = 0; i < players.length; i += 1) {
+          const player = players[i];
+
           list.push({
             name: player.name.current,
             id: player.id.current,
@@ -387,7 +393,7 @@ export default class WsEndpoint {
         res.writeHeader('Content-type', 'application/json');
         res.end(JSON.stringify(list, null, 2));
       })
-      .get('/admin', async function(res) {
+      .get('/admin', async function onAdminGet(res) {
         res.onAborted(() => {});
 
         try {
