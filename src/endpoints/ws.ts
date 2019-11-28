@@ -5,6 +5,7 @@ import {
   CONNECTIONS_MAX_PAYLOAD_BYTES,
   CONNECTIONS_PACKET_LOGIN_TIMEOUT_MS,
   CONNECTIONS_PLAYERS_TO_CONNECTIONS_MULTIPLIER,
+  CHAT_SUPERUSER_MUTE_TIME_MS,
 } from '@/constants';
 import GameServer from '@/core/server';
 import {
@@ -14,9 +15,34 @@ import {
   CONNECTIONS_PACKET_RECEIVED,
   CONNECTIONS_UNBAN_IP,
   RESPONSE_PLAYER_BAN,
+  CHAT_MUTE_BY_SERVER,
+  CHAT_MUTE_BY_IP,
 } from '@/events';
 import { ConnectionMeta, PlayerConnection, IPv4 } from '@/types';
 import Logger from '@/logger';
+import util from 'util';
+import fs from 'fs';
+import querystring from 'querystring';
+
+
+const readFile = util.promisify(fs.readFile);
+
+
+function readRequest(res, cb, err) {
+  let buffer = Buffer.alloc(0);
+  res.onAborted(err);
+  res.onData((ab, isLast) => {
+    buffer = Buffer.concat([buffer, Buffer.from(ab)]);
+    if(isLast) {
+      try {
+        cb(buffer.toString());
+      } catch(e) {
+        res.close();
+      }
+    }
+  });
+}
+
 
 export default class WsEndpoint {
   protected uws: uws.TemplatedApp;
@@ -24,6 +50,74 @@ export default class WsEndpoint {
   protected app: GameServer;
 
   protected log: Logger;
+
+  protected moderatorActions: Array<object> = [];
+
+  async getModeratorByPassword(password: string) {
+    try {
+      var file = await readFile(this.app.config.admin.passwordsPath);
+    } catch(e) {
+      this.log.error('Cannot read mod passwords: '+ e);
+      return false;
+    }
+
+    for(let line of file.toString().split('\n')) {
+      let [name, test] = line.split(':');
+      if(test == password) {
+        return name;
+      }
+    }
+
+    this.log.error('Failed mod password attempt');
+  }
+
+  async onActionsPost(res: uws.HttpResponse, requestData: string) {
+    let params = querystring.parse(requestData);
+
+    var mod = await this.getModeratorByPassword(params.password as string);
+    if(! mod) {
+      res.end("Invalid password");
+      return;
+    }
+
+    var playerId = parseInt(params.playerid as string);
+    var player = this.app.storage.playerList.get(playerId);
+    if(! player) {
+      res.end("Invalid player");
+      return;
+    }
+
+    this.moderatorActions.push({
+      date: Date.now(),
+      who: mod,
+      action: params.action,
+      victim: player.name.current,
+      reason: params.reason
+    });
+
+    switch(params.action) {
+    case "Mute":
+      this.log.info('Muting player ' + playerId);
+      this.app.events.emit(
+        CHAT_MUTE_BY_SERVER,
+        playerId
+      );
+      break;
+    case "IpMute":
+      this.log.info('Muting IP: ' + player.ip.current);
+      this.app.events.emit(
+				CHAT_MUTE_BY_IP,
+        player.ip.current,
+        CHAT_SUPERUSER_MUTE_TIME_MS
+      );
+      break;
+    case "Ban":
+      this.log.info('Banning IP: ' + player.ip.current);
+      break;
+    }
+
+    res.end("OK");
+  }
 
   constructor({ app }) {
     this.app = app;
@@ -219,6 +313,43 @@ export default class WsEndpoint {
       })
       .get('/', res => {
         res.end(`{"players":${this.app.storage.playerList.size}}`);
+      })
+      .get('/actions', res => {
+        res.writeHeader('Content-type', 'application/json');
+        res.end(JSON.stringify(this.moderatorActions, null, 2));
+      })
+      .post('/actions', (res, req) => {
+        readRequest(res,
+          (requestData) => { this.onActionsPost(res, requestData); },
+          () => { this.log.error('failed to parse /actions POST'); }
+        );
+      })
+      .get('/players', res => {
+        let list = [];
+        for(let player of this.app.storage.playerList.values()) {
+            list.push({
+                name: player.name.current,
+                id: player.id.current,
+                captures: player.captures.current,
+                spectate: player.spectate.current,
+                kills: player.kills.current,
+                deaths: player.deaths.current,
+                score: player.score.current,
+                lastMove: player.times.lastMove,
+                ping: player.ping.current,
+                flag: player.flag.current
+            });
+        }
+        res.writeHeader('Content-type', 'application/json');
+        res.end(JSON.stringify(list, null, 2));
+      })
+      .get('/admin', async function(res) {
+          res.onAborted(() => {});
+          try {
+            res.end(await readFile(app.config.admin.htmlPath));
+          } catch(e) {
+              res.end('internal error: ' + e);
+          }
       })
       .any('*', res => {
         res.writeStatus('404 Not Found').end('');
