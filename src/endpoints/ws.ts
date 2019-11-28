@@ -6,6 +6,7 @@ import {
   CONNECTIONS_PACKET_LOGIN_TIMEOUT_MS,
   CONNECTIONS_PLAYERS_TO_CONNECTIONS_MULTIPLIER,
   CHAT_SUPERUSER_MUTE_TIME_MS,
+  CONNECTIONS_SUPERUSER_BAN_MS,
 } from '@/constants';
 import GameServer from '@/core/server';
 import {
@@ -13,8 +14,11 @@ import {
   CONNECTIONS_CLOSED,
   TIMEOUT_LOGIN,
   CONNECTIONS_PACKET_RECEIVED,
+  CONNECTIONS_BAN_IP,
   CONNECTIONS_UNBAN_IP,
+  CONNECTIONS_DISCONNECT_PLAYER,
   RESPONSE_PLAYER_BAN,
+  PLAYERS_KICK,
   CHAT_MUTE_BY_SERVER,
   CHAT_MUTE_BY_IP,
 } from '@/events';
@@ -51,7 +55,7 @@ export default class WsEndpoint {
 
   protected log: Logger;
 
-  protected moderatorActions: Array<object> = [];
+  protected moderatorActions: Array<string> = [];
 
   async getModeratorByPassword(password: string) {
     try {
@@ -87,14 +91,6 @@ export default class WsEndpoint {
       return;
     }
 
-    this.moderatorActions.push({
-      date: Date.now(),
-      who: mod,
-      action: params.action,
-      victim: player.name.current,
-      reason: params.reason
-    });
-
     switch(params.action) {
     case "Mute":
       this.log.info('Muting player ' + playerId);
@@ -113,7 +109,31 @@ export default class WsEndpoint {
       break;
     case "Ban":
       this.log.info('Banning IP: ' + player.ip.current);
+      this.app.events.emit(
+        CONNECTIONS_BAN_IP,
+        player.ip.current,
+        CONNECTIONS_SUPERUSER_BAN_MS,
+        mod
+      );
+      this.app.events.emit(
+        PLAYERS_KICK,
+        playerId
+      );
       break;
+    default:
+      res.end("Invalid action");
+      return;
+    }
+
+    this.moderatorActions.push(JSON.stringify({
+      date: Date.now(),
+      who: mod,
+      action: params.action,
+      victim: player.name.current,
+      reason: params.reason
+    }));
+    while(this.moderatorActions.length > 100) {
+      this.moderatorActions.shift();
     }
 
     res.end("OK");
@@ -316,7 +336,7 @@ export default class WsEndpoint {
       })
       .get('/actions', res => {
         res.writeHeader('Content-type', 'application/json');
-        res.end(JSON.stringify(this.moderatorActions, null, 2));
+        res.end(`[${this.moderatorActions.join(',\n')}]`);
       })
       .post('/actions', (res, req) => {
         readRequest(res,
