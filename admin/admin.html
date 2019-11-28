@@ -5,28 +5,36 @@
 </script>
 
 <style>
-body {
-    background: black;
-    color: #c0c0c0;
-    font-size: smaller;
-    font-family: sans-serif;
-}
-input, button {
-    padding: 2px;
-    border: none;
-    background: none;
+  body {
+      background: black;
+      color: #c0c0c0;
+      font-size: smaller;
+      font-family: sans-serif;
+  }
 
-    background: #2f2f2f;
-    color: red;
-    border: 1px solid #4f4f4f;
-}
+  input, button {
+      padding: 2px;
+      border: none;
+      background: none;
 
-#response {
-    color: red;
-}
+      background: #2f2f2f;
+      color: red;
+      border: 1px solid #4f4f4f;
+  }
 
-table{border-collapse:collapse;}
-td,th{text-align:left; padding: 10px; border: 1px solid #4f4f4f;}
+  #response {
+      color: red;
+  }
+
+  table {
+      border-collapse:collapse;
+  }
+
+  td, th {
+      text-align: left;
+      padding: 10px;
+      border: 1px solid #4f4f4f;
+  }
 </style>
 
 <form>
@@ -46,9 +54,9 @@ td,th{text-align:left; padding: 10px; border: 1px solid #4f4f4f;}
     <p>
     <strong>Mute</strong>: mute player,
     <strong>IpMute</strong>: mute IP
+    <strong>Ban</strong>: ban IP
     <!--
     <strong>Sanction</strong>: zero score/ups,
-    <strong>Ban</strong>: ban IP
     -->
     </p>
 
@@ -142,9 +150,9 @@ td,th{text-align:left; padding: 10px; border: 1px solid #4f4f4f;}
                 <td>
                     <button>Mute</button>
                     <button>IpMute</button>
+                    <button>Ban</button>
                     <!--
                     <button>Sanction</button>
-                    <button>Ban</button>
                     -->
             `).appendTo(table);
         }
@@ -204,5 +212,4 @@ td,th{text-align:left; padding: 10px; border: 1px solid #4f4f4f;}
         refresh();
         $(document).on('click', 'button', onButtonClick);
     });
-
 </script>
