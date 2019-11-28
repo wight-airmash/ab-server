@@ -106,7 +106,7 @@ export default class WsEndpoint {
     case "IpMute":
       this.log.info('Muting IP: ' + player.ip.current);
       this.app.events.emit(
-				CHAT_MUTE_BY_IP,
+        CHAT_MUTE_BY_IP,
         player.ip.current,
         CHAT_SUPERUSER_MUTE_TIME_MS
       );
