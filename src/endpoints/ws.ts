@@ -371,11 +371,8 @@ export default class WsEndpoint {
       })
       .get('/players', res => {
         const list = [];
-        const players = Array.from(this.app.storage.playerList.values());
 
-        for (let i = 0; i < players.length; i += 1) {
-          const player = players[i];
-
+        this.app.storage.playerList.forEach(player =>
           list.push({
             name: player.name.current,
             id: player.id.current,
@@ -387,8 +384,8 @@ export default class WsEndpoint {
             lastMove: player.times.lastMove,
             ping: player.ping.current,
             flag: player.flag.current,
-          });
-        }
+          })
+        );
 
         res.writeHeader('Content-type', 'application/json');
         res.end(JSON.stringify(list, null, 2));
