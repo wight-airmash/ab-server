@@ -11,7 +11,6 @@ import {
   REPEL_COLLISIONS,
   SHIPS_SPECS,
   SHIPS_TYPES,
-  UPGRADES_ACTION_TYPE,
   UPGRADES_SPECS,
 } from '@/constants';
 import {
@@ -24,8 +23,8 @@ import {
   PLAYERS_EMIT_CHANNEL_RESPAWN,
   PLAYERS_RESPAWN,
   PLAYERS_REPEL_UPDATE,
+  PLAYERS_UPGRADES_RESET,
   ERRORS_RESPAWN_INACTIVITY_HEALTH_REQUIRED,
-  RESPONSE_PLAYER_UPGRADE,
   RESPONSE_SPECTATE_KILL,
   VIEWPORTS_UPDATE_POSITION,
 } from '@/events';
@@ -219,13 +218,7 @@ export default class GamePlayersRespawn extends System {
       );
 
       if (player.delayed.RESPAWN) {
-        player.upgrades.speed = 0;
-        player.upgrades.defense = 0;
-        player.upgrades.energy = 0;
-        player.upgrades.missile = 0;
-        player.upgrades.amount = 0;
-
-        this.delay(RESPONSE_PLAYER_UPGRADE, player.id.current, UPGRADES_ACTION_TYPE.LOST);
+        this.emit(PLAYERS_UPGRADES_RESET, player.id.current);
       }
 
       /**
