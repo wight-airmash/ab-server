@@ -163,11 +163,11 @@
         clearTimeout(disableButtonsTimerId);
         disableButtonsTimerId = setTimeout(
             disableActionButtons,
-            REFRESH_INTERVAL_MS - 2000
+            REFRESH_INTERVAL_MS - 1000
         );
     }
 
-    /* Disable action buttons 2 seconds before a refresh, to reduce change of
+    /* Disable action buttons 1 second before refresh, to reduce chance of
        accidentally banning wrong player. */
     function disableActionButtons()
     {
