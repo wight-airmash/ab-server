@@ -99,6 +99,7 @@
 
 <script>
     const REFRESH_INTERVAL_MS = 10000;
+    var disableButtonsTimerId;
 
     function date(ms)
     {
@@ -159,7 +160,11 @@
             `).appendTo(table);
         }
 
-        setTimeout(disableActionButtons, REFRESH_INTERVAL_MS - 2000);
+        clearTimeout(disableButtonsTimerId);
+        disableButtonsTimerId = setTimeout(
+            disableActionButtons,
+            REFRESH_INTERVAL_MS - 2000
+        );
     }
 
     /* Disable action buttons 2 seconds before a refresh, to reduce change of
