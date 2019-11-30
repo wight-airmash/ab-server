@@ -44,7 +44,6 @@ npm run start
 
 Please see .env.example.
 
-
 ## Moderation Panel
 
 The server exports a `/admin` URL to allow privileged players to moderate the
@@ -58,6 +57,7 @@ wight:somepasswordforwight
 
 The username is only used to enter a name into the log.
 
+Set `MODERATION_PANEL` to `false` to turn moderation panel off. To change panel URL set `MODERATION_PANEL_URL_ROUTE` variable value (`admin` by default).
 
 ## "How to run" examples
 

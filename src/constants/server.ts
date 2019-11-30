@@ -81,3 +81,7 @@ export const SERVER_MIN_MOB_ID = 1024;
 export const SERVER_MAX_MOB_ID = MAX_UINT16 - 128;
 
 export const SERVER_BROADCAST_SCORE_BOARD_INTERVAL_SEC = 5;
+
+export const SERVER_MODERATION_PANEL = true;
+
+export const SERVER_MODERATION_PANEL_URL_ROUTE = 'admin';

@@ -342,60 +342,70 @@ export default class WsEndpoint {
           }
         },
       })
+
       .get('/ping', res => {
         res.end('{"pong":1}');
       })
+
       .get('/', res => {
         res.end(`{"players":${this.app.storage.playerList.size}}`);
       })
-      .get('/actions', res => {
-        res.writeHeader('Content-type', 'application/json');
-        res.end(`[${this.moderatorActions.join(',\n')}]`);
-      })
-      .post('/actions', res => {
-        readRequest(
-          res,
-          requestData => {
-            this.onActionsPost(res, requestData);
-          },
-          () => {
-            this.log.error('failed to parse /actions POST');
-          }
-        );
-      })
-      .get('/players', res => {
-        const list = [];
 
-        this.app.storage.playerList.forEach(player =>
-          list.push({
-            name: player.name.current,
-            id: player.id.current,
-            captures: player.captures.current,
-            spectate: player.spectate.current,
-            kills: player.kills.current,
-            deaths: player.deaths.current,
-            score: player.score.current,
-            lastMove: player.times.lastMove,
-            ping: player.ping.current,
-            flag: player.flag.current,
-          })
-        );
-
-        res.writeHeader('Content-type', 'application/json');
-        res.end(JSON.stringify(list, null, 2));
-      })
-      .get('/admin', async function onAdminGet(res) {
-        res.onAborted(() => {});
-
-        try {
-          res.end(await readFile(app.config.admin.htmlPath));
-        } catch (e) {
-          res.end(`internal error: ${e}`);
-        }
-      })
       .any('*', res => {
         res.writeStatus('404 Not Found').end('');
       });
+
+    if (this.app.config.admin.active === true) {
+      this.uws
+        .get(`${this.app.config.admin.route}/actions`, res => {
+          res.writeHeader('Content-type', 'application/json');
+          res.end(`[${this.moderatorActions.join(',\n')}]`);
+        })
+
+        .post(`${this.app.config.admin.route}/actions`, res => {
+          readRequest(
+            res,
+            requestData => {
+              this.onActionsPost(res, requestData);
+            },
+            () => {
+              this.log.error('failed to parse /actions POST');
+            }
+          );
+        })
+
+        .get(`${this.app.config.admin.route}/players`, res => {
+          const list = [];
+
+          this.app.storage.playerList.forEach(player =>
+            list.push({
+              name: player.name.current,
+              id: player.id.current,
+              captures: player.captures.current,
+              spectate: player.spectate.current,
+              kills: player.kills.current,
+              deaths: player.deaths.current,
+              score: player.score.current,
+              lastMove: player.times.lastMove,
+              ping: player.ping.current,
+              flag: player.flag.current,
+            })
+          );
+
+          res.writeHeader('Content-type', 'application/json');
+          res.end(JSON.stringify(list, null, 2));
+        })
+
+        .get(`${this.app.config.admin.route}/`, async res => {
+          res.onAborted(() => {});
+
+          try {
+            res.end(await readFile(app.config.admin.htmlPath));
+          } catch (e) {
+            res.end(`internal error: ${e}`);
+          }
+        });
+    }
   }
 
   async run(): Promise<void> {

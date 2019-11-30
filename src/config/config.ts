@@ -28,6 +28,8 @@ import {
   BOTS_SERVER_BOT_FLAG,
   BOTS_SERVER_BOT_NAME,
   PLAYERS_ALLOW_NON_ASCII_USERNAMES,
+  SERVER_MODERATION_PANEL,
+  SERVER_MODERATION_PANEL_URL_ROUTE,
 } from '@/constants';
 
 export interface GameServerConfigInterface {
@@ -67,6 +69,8 @@ export interface GameServerConfigInterface {
   };
 
   admin: {
+    active: boolean;
+    route: string;
     htmlPath: string;
     passwordsPath: string;
   };
@@ -276,6 +280,8 @@ const config: GameServerConfigInterface = {
   },
 
   admin: {
+    active: boolValue(process.env.MODERATION_PANEL, SERVER_MODERATION_PANEL),
+    route: strValue(process.env.MODERATION_PANEL_URL_ROUTE, SERVER_MODERATION_PANEL_URL_ROUTE),
     htmlPath: resolvePath(strValue(process.env.ADMIN_HTML_PATH, '../admin/admin.html')),
     passwordsPath: resolvePath(
       strValue(process.env.ADMIN_PASSWORDS_PATH, '../admin/passwords.txt')
