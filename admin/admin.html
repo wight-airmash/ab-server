@@ -5,103 +5,114 @@
 </script>
 
 <style>
-  body {
-      background: black;
-      color: #c0c0c0;
-      font-size: smaller;
-      font-family: sans-serif;
-  }
+    body {
+        background: black;
+        color: #c0c0c0;
+        font-size: smaller;
+        font-family: sans-serif;
+    }
 
-  input, button {
-      padding: 2px;
-      border: none;
-      background: none;
+    input,
+    button {
+        padding: 2px;
+        border: none;
+        background: none;
 
-      background: #2f2f2f;
-      color: red;
-      border: 1px solid #4f4f4f;
-  }
+        background: #2f2f2f;
+        color: red;
+        border: 1px solid #4f4f4f;
+    }
 
-  button[disabled] {
-      color: #4f4f4f;
-  }
+    button:hover {
+        cursor: pointer;
+    }
 
-  #response {
-      color: red;
-  }
+    button[disabled] {
+        color: #4f4f4f;
 
-  table {
-      border-collapse:collapse;
-  }
+        cursor: not-allowed;
+    }
 
-  td, th {
-      text-align: left;
-      padding: 5px;
-      border: 1px solid #4f4f4f;
-  }
+    #response {
+        color: red;
+    }
+
+    table {
+        border-collapse: collapse;
+    }
+
+    td,
+    th {
+        text-align: left;
+        padding: 5px;
+        border: 1px solid #4f4f4f;
+    }
 </style>
 
 <form>
-<center>
-    <h1>Airbattle Moderator</h1>
+    <center>
+        <h1>Airbattle Moderator</h1>
 
-    <p>
-    Password: <input type="password" name="password" id="password"> &nbsp; &nbsp;
-    Reason: <input id="reason" value="disruptive">
+        <p>
+            Password: <input type="password" name="password" id="password"> &nbsp; &nbsp;
+            Reason: <input id="reason" value="disruptive">
 
-    <p>
-    Server Response: <span id="response">-</span>
+            <p>
+                Server Response: <span id="response">-</span>
 
-    <h2>Players</h2>
+                <h2>Players</h2>
 
-    <p>
-    <strong>Mute</strong>: mute player,
-    <strong>IpMute</strong>: mute IP
-    <strong>Sanction</strong>: zero score/ups,
-    <strong>Ban</strong>: ban IP
-    </p>
+                <p>
+                    <strong>Mute</strong>: mute player,
+                    <strong>IpMute</strong>: mute IP
+                    <strong>Sanction</strong>: zero score/ups,
+                    <strong>Ban</strong>: ban IP
+                </p>
 
-    <table id="players">
-    <thead>
-        <tr>
-        <th>ID
-        <th>Caps
-        <th>Spec
-        <th>K / D
-        <th>Score
-        <th>Idle
-        <th>Ping
-        <th>Flag
-        <th>Name
-        <th>
-    </thead>
-    <tbody>
-    </tbody>
-    </table>
+                <table id="players">
+                    <thead>
+                        <tr>
+                            <th>ID
+                            <th>Caps
+                            <th>Spec
+                            <th>K / D
+                            <th>Score
+                            <th>Idle
+                            <th>Ping
+                            <th>Flag
+                            <th>Name
+                            <th>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
 
-    <h2>History</h2>
+                <h2>History</h2>
 
-    <table id="actions">
-    <thead>
-        <tr>
-        <th>Date
-        <th>Who
-        <th>Action
-        <th>Victim
-        <th>Reason
-    </thead>
-    <tbody>
-    </tbody>
-    </table>
-</center>
+                <table id="actions">
+                    <thead>
+                        <tr>
+                            <th>Date
+                            <th>Who
+                            <th>Action
+                            <th>Victim
+                            <th>Reason
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+    </center>
 </form>
 
 <script>
+    if (window.location.pathname.endsWith('/') === false) {
+        window.history.replaceState(null, 'Airbattle Moderator', `${window.location.pathname}/`);
+    }
+
     const REFRESH_INTERVAL_MS = 10000;
     var disableButtonsTimerId;
 
-    function date(ms)
-    {
+    function date(ms) {
         let d = new Date(ms);
         return (
             d.getUTCFullYear() + '-' +
@@ -113,38 +124,35 @@
         );
     }
 
-    function safe(s)
-    {
+    function safe(s) {
         return $('<span>').text(s).html();
     }
 
-    function onPlayersRefreshComplete(response)
-    {
+    function onPlayersRefreshComplete(response) {
         var table = $('#players tbody');
         table.empty();
 
-        if(! (response && response.length)) {
+        if (!(response && response.length)) {
             $(`<tr><td colspan=11><em>(no players online)</em></td></tr>`)
                 .appendTo(table);
             return;
         }
 
-        response.sort(function(a, b)
-        {
-            if(a.id < b.id) {
+        response.sort(function (a, b) {
+            if (a.id < b.id) {
                 return -1;
-            } else if(a.id > b.id) {
+            } else if (a.id > b.id) {
                 return 1;
             }
             return 0;
         });
 
-        for(let player of response) {
+        for (let player of response) {
             $(`
                 <tr data-playerid=${player.id}>
                 <td>${player.id}
                 <td>${player.captures}
-                <td>${player.spectate ? "✔️" : "❌" }
+                <td>${player.spectate ? "✔️" : "❌"}
                 <td>${player.kills} / ${player.deaths}
                 <td>${player.score}
                 <td>${Math.round((Date.now() - player.lastMove) / (1000.0 * 60))} min
@@ -168,24 +176,22 @@
 
     /* Disable action buttons 1 second before refresh, to reduce chance of
        accidentally banning wrong player. */
-    function disableActionButtons()
-    {
+    function disableActionButtons() {
         $('#players tbody button').attr('disabled', 'disabled');
     }
 
-    function onActionsRefreshComplete(response)
-    {
+    function onActionsRefreshComplete(response) {
         var table = $('#actions tbody');
         table.empty();
 
-        if(! (response && response.length)) {
+        if (!(response && response.length)) {
             $(`<tr><td colspan=6><em>(no actions since restart)</em></td></tr>`)
                 .appendTo(table);
             return;
         }
 
         response.reverse();
-        for(let action of response) {
+        for (let action of response) {
             $(`
                 <tr>
                 <td>${date(action.date)}
@@ -197,14 +203,12 @@
         }
     }
 
-    function onApplyComplete(response)
-    {
+    function onApplyComplete(response) {
         $('#response').text(response || "(no response)");
         refresh();
     }
 
-    function onButtonClick(event)
-    {
+    function onButtonClick(event) {
         event.preventDefault();
         var params = {
             playerid: $(event.target).parents('tr').data('playerid'),
@@ -212,17 +216,15 @@
             reason: $('#reason').val(),
             password: $('#password').val()
         };
-        $.post('/actions', params, onApplyComplete);
+        $.post('actions', params, onApplyComplete);
     }
 
-    function refresh()
-    {
-        $.get('/players', onPlayersRefreshComplete);
-        $.get('/actions', onActionsRefreshComplete);
+    function refresh() {
+        $.get('players', onPlayersRefreshComplete);
+        $.get('actions', onActionsRefreshComplete);
     }
 
-    $(function()
-    {
+    $(function () {
         setInterval(refresh, REFRESH_INTERVAL_MS);
         refresh();
         $(document).on('click', 'button', onButtonClick);
