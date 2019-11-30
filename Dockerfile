@@ -9,12 +9,12 @@ RUN apk update && apk upgrade && \
   apk add --no-cache git openssh && \
   apk add --no-cache clang llvm5-dev alpine-sdk
 
-RUN git clone -b v16.1.0 https://github.com/uNetworking/uWebSockets.js.git ./binaries
+RUN git clone -b v16.4.0 https://github.com/uNetworking/uWebSockets.js.git ./binaries
 RUN git clone --recurse-submodules https://github.com/uNetworking/uWebSockets.js.git ./sources
 
 WORKDIR /build/sources
-# Checkout v16.1.0
-RUN git checkout --recurse-submodules 6c4bca61efa13a1682b2f7422236ad61bafa9aea
+# Checkout v16.4.0
+RUN git checkout --recurse-submodules 4f6c9d85b762a53fef0c1bdf1968d172624476f1
 RUN make
 
 WORKDIR /build/
