@@ -31,11 +31,7 @@ import Logger from '@/logger';
 
 const readFile = util.promisify(fs.readFile);
 
-const readRequest = (
-  res: uws.HttpResponse,
-  cb: Function,
-  err: (res: uws.HttpResponse) => void
-): void => {
+const readRequest = (res: uws.HttpResponse, cb: Function, err: () => void): void => {
   let buffer = Buffer.alloc(0);
 
   res.onAborted(err);
