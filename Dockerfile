@@ -128,6 +128,7 @@ RUN mkdir certs && chown -R node: certs
 COPY --from=ts-build /build/dist dist
 COPY --from=prod-only /build/node_modules node_modules
 COPY --from=uws-build /build/uws ./packages/uws
+COPY ./admin ./admin
 COPY ./data ./data
 COPY package.json ./
 
