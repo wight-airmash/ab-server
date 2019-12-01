@@ -1,5 +1,15 @@
 ## Future version (unversioned)
 
+## 4.10.0 (December 1, 2019)
+
+Features:
+
+- Moderation panel (see readme.md).
+
+Improvements:
+
+- CTF: block #attack command (#53).
+
 ## 4.9.0 (November 7, 2019)
 
 Improvements:
