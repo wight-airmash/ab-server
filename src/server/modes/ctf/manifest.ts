@@ -14,10 +14,16 @@ import FlagTakenBroadcast from '@/server/modes/ctf/responses/broadcast/flag-take
 import FlagCapturedBroadcast from '@/server/modes/ctf/responses/broadcast/flag-captured';
 import SwitchCommandHandler from '@/server/modes/ctf/commands/switch';
 import MatchCommandHandler from '@/server/modes/ctf/commands/match';
+import GameChat from '@/server/modes/base/maintenance/chat';
+import CTFGameChat from '@/server/modes/ctf/maintenance/chat';
 
 export default class CTFGameManifest extends BaseGameManifest {
   constructor({ app }) {
     super({ app });
+
+    const GameChatSystem = [...this.app.systems].find(system => system.constructor === GameChat);
+
+    this.app.stopSystem(GameChatSystem);
 
     this.systems = [
       // Commands.
@@ -43,6 +49,7 @@ export default class CTFGameManifest extends BaseGameManifest {
       GamePlayers,
       GameFlags,
       GameMatches,
+      CTFGameChat,
     ];
 
     this.startSystems();

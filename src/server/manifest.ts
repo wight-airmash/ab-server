@@ -7,7 +7,7 @@ export abstract class GameManifest {
 
   protected storage: GameStorage;
 
-  protected systemsToLoad: (typeof System)[];
+  protected systemsToLoad: typeof System[];
 
   constructor({ app }) {
     this.app = app;
@@ -15,7 +15,7 @@ export abstract class GameManifest {
     this.systemsToLoad = [];
   }
 
-  protected set systems(systems: (typeof System) | (typeof System)[]) {
+  protected set systems(systems: typeof System | typeof System[]) {
     if (Array.isArray(systems)) {
       systems.forEach(s => {
         this.systemsToLoad.push(s);
@@ -29,5 +29,7 @@ export abstract class GameManifest {
     this.systemsToLoad.forEach(S => {
       this.app.startSystem(new S({ app: this.app }));
     });
+
+    this.systemsToLoad = [];
   }
 }

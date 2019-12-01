@@ -236,6 +236,8 @@ export default class GameServer {
     Object.keys(system.listeners).forEach(listener => {
       this.events.removeListener(listener, system.listeners[listener], system);
     });
+
+    this.log.debug(`System ${system.constructor.name} removed.`);
   }
 
   protected async initEndpoints(): Promise<void> {
