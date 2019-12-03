@@ -1,5 +1,11 @@
 ## Future version (unversioned)
 
+## 4.10.1 (December 3, 2019)
+
+Bug fixes:
+
+- Add content-type header to /admin response (#60).
+
 ## 4.10.0 (December 1, 2019)
 
 Features:
