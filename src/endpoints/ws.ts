@@ -305,6 +305,7 @@ export default class WsEndpoint {
           res.onAborted(() => {});
 
           try {
+            res.writeHeader('Content-type', 'text/html');
             res.end(await readFile(app.config.admin.htmlPath));
           } catch (e) {
             res.end(`internal error: ${e}`);
