@@ -61,13 +61,37 @@ export default class LoginMessageHandler extends System {
     /**
      * Validation
      */
-    const user = false;
+    let userId: string;
     let { flag, name } = msg;
 
     if (msg.protocol !== 5) {
       this.emit(ERRORS_INCORRECT_PROTOCOL, connectionId);
 
       return;
+    }
+
+    if (msg.session !== 'none') {
+      let validSessionData = true;
+
+      try {
+        const session = JSON.parse(msg.session);
+
+        if (session.id) {
+          if (typeof session.id === 'string' && /^[0-9a-f]{32}$/im.test(session.id)) {
+            userId = session.id;
+          } else {
+            validSessionData = false;
+          }
+        }
+      } catch (e) {
+        validSessionData = false;
+      }
+
+      if (!validSessionData) {
+        this.emit(ERRORS_INVALID_LOGIN_DATA, connectionId);
+
+        return;
+      }
     }
 
     if (this.app.config.allowNonAsciiUsernames === false) {
@@ -106,7 +130,7 @@ export default class LoginMessageHandler extends System {
         x: msg.horizonX,
         y: msg.horizonY,
       },
-      user,
+      userId,
       shipType: SHIPS_TYPES.PREDATOR,
     });
   }
