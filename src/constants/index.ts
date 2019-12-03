@@ -17,3 +17,4 @@ export * from '@/constants/mountains';
 export * from '@/constants/ffa';
 export * from '@/constants/ctf';
 export * from '@/constants/btr';
+export * from '@/constants/user-stats';

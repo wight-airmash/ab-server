@@ -98,6 +98,10 @@ export interface GameServerConfigInterface {
     path: string;
   };
 
+  userStats: {
+    path: string;
+  };
+
   server: {
     typeId: number;
 
@@ -299,6 +303,10 @@ const config: GameServerConfigInterface = {
     path: resolvePath(strValue(process.env.CACHE_PATH, '../cache')),
   },
 
+  userStats: {
+    path: resolvePath(strValue(process.env.STATS_PATH, '../data/user-stats.json')),
+  },
+
   server: {
     typeId: 0,
     type: strValue(process.env.SERVER_TYPE, SERVER_DEFAULT_TYPE),
@@ -378,5 +386,6 @@ if (config.bot.name.length === 0 || config.bot.name.length > 20) {
 mkdirSync(config.certs.path, { recursive: true });
 mkdirSync(dirname(config.logs.path), { recursive: true });
 mkdirSync(config.cache.path, { recursive: true });
+mkdirSync(dirname(config.userStats.path), { recursive: true });
 
 export default config;

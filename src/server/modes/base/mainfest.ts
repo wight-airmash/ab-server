@@ -49,6 +49,7 @@ import GameWarming from '@/server/modes/base/maintenance/warming';
 import PingPeriodic from '@/server/modes/base/periodic/ping';
 import PowerupsPeriodic from '@/server/modes/base/periodic/powerups';
 import ScoreBoardPeriodic from '@/server/modes/base/periodic/score-board';
+import UserStatsPeriodic from '@/server/modes/base/periodic/user-stats';
 import BackupResponse from '@/server/modes/base/responses/backup';
 import ChatPublicBroadcast from '@/server/modes/base/responses/broadcast/chat-public';
 import ChatSayBroadcast from '@/server/modes/base/responses/broadcast/chat-say';
@@ -211,6 +212,7 @@ export default abstract class BaseGameManifest extends GameManifest {
       PingPeriodic,
       ScoreBoardPeriodic,
       PowerupsPeriodic,
+      UserStatsPeriodic,
 
       // Support.
       MobIdStorageOptimizer,
