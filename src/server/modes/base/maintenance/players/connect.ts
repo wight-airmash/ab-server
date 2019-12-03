@@ -54,6 +54,7 @@ import Ip from '@/server/components/ip';
 import Keystate from '@/server/components/keystate';
 import Kills from '@/server/components/kills';
 import Level from '@/server/components/level';
+import LifetimeStats from '@/server/components/lifetime-stats';
 import Id from '@/server/components/mob-id';
 import Ping from '@/server/components/ping';
 import PlaneState from '@/server/components/plane-state';
@@ -76,6 +77,7 @@ import Velocity from '@/server/components/velocity';
 import Entity from '@/server/entity';
 import { System } from '@/server/system';
 import { getRandomInt } from '@/support/numbers';
+import User from '@/server/components/user';
 
 export default class GamePlayersConnect extends System {
   constructor({ app }) {
@@ -109,7 +111,7 @@ export default class GamePlayersConnect extends System {
   /**
    * Create player.
    */
-  onCreatePlayer({ connectionId, name, flag, horizon, shipType }): void {
+  onCreatePlayer({ connectionId, name, flag, horizon, shipType, userId }): void {
     if (this.storage.playerList.size > SERVER_MAX_PLAYERS_LIMIT) {
       this.emit(PLAYERS_LIMIT_REACHED, connectionId);
 
@@ -165,6 +167,17 @@ export default class GamePlayersConnect extends System {
     );
 
     player.attach(new Team(player.id.current));
+
+    if (userId) {
+      player.attach(new User(userId));
+
+      let user = this.storage.userList.get(userId);
+
+      if (!user) {
+        user = new Entity().attach(new Id(userId), new LifetimeStats());
+        this.storage.userList.set(userId, user);
+      }
+    }
 
     this.log.info('Player connected.', {
       id: player.id.current,

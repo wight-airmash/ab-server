@@ -16,6 +16,7 @@ import {
   SpawnZones,
   TeamId,
   UnmuteTime,
+  UserId,
   Viewports,
 } from '@/types';
 
@@ -128,6 +129,11 @@ export class GameStorage {
    * like repels and viewports).
    */
   public mobList: Map<MobId, Entity> = new Map();
+
+  /**
+   * Logged-in user entities.
+   */
+  public userList: Map<UserId, Entity> = new Map();
 
   /**
    * Repel is a mob with the same as its owner id.
