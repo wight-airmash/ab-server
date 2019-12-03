@@ -26,16 +26,28 @@ export default class ScoreUpdate extends System {
     const player = this.storage.playerList.get(playerId);
     const connectionId = this.storage.playerMainConnectionList.get(playerId);
 
+    let earnings = 0;
+    let totalkills = player.kills.current;
+    let totaldeaths = player.deaths.current;
+
+    if (player.user) {
+      const user = this.storage.userList.get(player.user.id);
+
+      earnings = user.lifetimestats.earnings;
+      totalkills = user.lifetimestats.totalkills;
+      totaldeaths = user.lifetimestats.totaldeaths;
+    }
+
     this.emit(
       CONNECTIONS_SEND_PACKET,
       {
         c: SERVER_PACKETS.SCORE_UPDATE,
         id: player.id.current,
         score: player.score.current,
-        earnings: player.earningscore.current,
+        earnings,
         upgrades: player.upgrades.amount,
-        totalkills: player.kills.total,
-        totaldeaths: player.deaths.total,
+        totalkills,
+        totaldeaths,
       } as ServerPackets.ScoreUpdate,
       connectionId
     );
