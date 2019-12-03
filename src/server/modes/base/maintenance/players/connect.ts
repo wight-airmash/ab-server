@@ -65,7 +65,6 @@ import Recaptures from '@/server/components/recaptures';
 import Repel from '@/server/components/repel';
 import Rotation from '@/server/components/rotation';
 import Score from '@/server/components/score';
-import EarningScore from '@/server/components/score-earning';
 import Shield from '@/server/components/shield-powerup';
 import Spectate from '@/server/components/spectate';
 import Su from '@/server/components/su';
@@ -154,7 +153,6 @@ export default class GamePlayersConnect extends System {
       new Kills(),
       new Deaths(),
       new Score(),
-      new EarningScore(),
       new Ping(),
       new Times(),
       new Delayed(),
