@@ -1,3 +1,4 @@
+/* eslint-disable class-methods-use-this */
 import { SERVER_MAX_MOB_ID, MAX_UINT32, SERVER_MIN_MOB_ID, NS_PER_SEC } from '@/constants';
 import Logger from '@/logger';
 import { GameStorage } from '@/server/storage';
@@ -123,6 +124,10 @@ export class Helpers {
     }
 
     return mobId;
+  }
+
+  convertEarningsToLevel(earnings: number): number {
+    return Math.floor(0.0111 * earnings ** 0.5) + 1;
   }
 }
 

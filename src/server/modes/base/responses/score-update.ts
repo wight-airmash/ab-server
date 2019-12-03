@@ -1,5 +1,5 @@
-import { SERVER_PACKETS, ServerPackets } from '@airbattle/protocol';
-import { RESPONSE_SCORE_UPDATE, CONNECTIONS_SEND_PACKET } from '@/events';
+import { PLAYER_LEVEL_UPDATE_TYPES, SERVER_PACKETS, ServerPackets } from '@airbattle/protocol';
+import { RESPONSE_PLAYER_LEVEL, RESPONSE_SCORE_UPDATE, CONNECTIONS_SEND_PACKET } from '@/events';
 import { System } from '@/server/system';
 import { PlayerId } from '@/types';
 
@@ -36,6 +36,13 @@ export default class ScoreUpdate extends System {
       earnings = user.lifetimestats.earnings;
       totalkills = user.lifetimestats.totalkills;
       totaldeaths = user.lifetimestats.totaldeaths;
+
+      const newLevel = this.helpers.convertEarningsToLevel(earnings);
+
+      if (newLevel > player.level.current) {
+        player.level.current = newLevel;
+        this.emit(RESPONSE_PLAYER_LEVEL, player.id.current, PLAYER_LEVEL_UPDATE_TYPES.LEVELUP);
+      }
     }
 
     this.emit(

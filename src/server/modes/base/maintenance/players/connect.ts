@@ -1,5 +1,5 @@
 import { Polygon } from 'collisions';
-import { GAME_TYPES } from '@airbattle/protocol';
+import { GAME_TYPES, PLAYER_LEVEL_UPDATE_TYPES } from '@airbattle/protocol';
 import cryptoRandomString from 'crypto-random-string';
 import {
   COLLISIONS_OBJECT_TYPES,
@@ -27,6 +27,7 @@ import {
   PLAYERS_LIMIT_REACHED,
   PLAYERS_CREATED,
   RESPONSE_LOGIN,
+  RESPONSE_PLAYER_LEVEL,
   RESPONSE_PLAYER_UPGRADE,
   RESPONSE_SCORE_UPDATE,
   RESPONSE_SEND_PING,
@@ -175,6 +176,8 @@ export default class GamePlayersConnect extends System {
         user = new Entity().attach(new Id(userId), new LifetimeStats());
         this.storage.userList.set(userId, user);
       }
+
+      player.level.current = this.helpers.convertEarningsToLevel(user.lifetimestats.earnings);
     }
 
     this.log.info('Player connected.', {
@@ -337,6 +340,11 @@ export default class GamePlayersConnect extends System {
     this.emit(BROADCAST_SCORE_BOARD, connectionId);
     this.emit(RESPONSE_SEND_PING, connectionId);
     this.emit(PLAYERS_APPLY_SHIELD, player.id.current, PLAYERS_SPAWN_SHIELD_DURATION_MS);
+
+    if (player.user) {
+      this.emit(RESPONSE_PLAYER_LEVEL, player.id.current, PLAYER_LEVEL_UPDATE_TYPES.INFORM);
+    }
+
     this.emit(RESPONSE_SCORE_UPDATE, player.id.current);
 
     if (mainConnection.meta.isBot !== true) {
