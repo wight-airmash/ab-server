@@ -171,6 +171,12 @@ export default class GameMatches extends System {
         if (shareInScore > 0) {
           player.score.current += shareInScore;
 
+          if (player.user) {
+            const user = this.storage.userList.get(player.user.id);
+
+            user.lifetimestats.earnings += shareInScore;
+          }
+
           this.emit(RESPONSE_SCORE_UPDATE, player.id.current);
         }
       });
