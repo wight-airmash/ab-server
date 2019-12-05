@@ -53,7 +53,7 @@ export default class GameChat extends System {
   }
 
   protected static isAttackCommand(msg: string): boolean {
-    if (msg === '#attack') {
+    if (msg === '#attack' || msg === '#atack') {
       return true;
     }
 

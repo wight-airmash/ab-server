@@ -1,5 +1,11 @@
 ## Future version (unversioned)
 
+## 4.10.2 (December 5, 2019)
+
+Bug fixes:
+
+- Add synonym "#atack" for the blocked command #attack.
+
 ## 4.10.1 (December 3, 2019)
 
 Bug fixes:
