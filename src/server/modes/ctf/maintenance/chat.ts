@@ -53,7 +53,13 @@ export default class GameChat extends System {
   }
 
   protected static isAttackCommand(msg: string): boolean {
-    if (msg === '#attack' || msg === '#atack') {
+    if (msg.charAt(0) !== '#' || msg.length > 7) {
+      return false;
+    }
+
+    const command = msg.toLowerCase();
+
+    if (command === '#attack' || command === '#atack') {
       return true;
     }
 

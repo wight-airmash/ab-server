@@ -1,5 +1,11 @@
 ## Future version (unversioned)
 
+## 4.10.3 (December 7, 2019)
+
+Bug fixes:
+
+- Add non case-sensitive #attack blocking.
+
 ## 4.10.2 (December 5, 2019)
 
 Bug fixes:
