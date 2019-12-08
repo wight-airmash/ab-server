@@ -1,3 +1,4 @@
+import { KeyObject } from 'crypto';
 import { SERVER_MIN_MOB_ID, SERVER_MIN_SERVICE_MOB_ID } from '@/constants';
 import Entity from '@/server/entity';
 import {
@@ -229,4 +230,9 @@ export class GameStorage {
   public ctfFlagBlueId: number = null;
 
   public ctfFlagRedId: number = null;
+
+  /**
+   * Public key from login server
+   */
+  public loginPublicKey: KeyObject = null;
 }

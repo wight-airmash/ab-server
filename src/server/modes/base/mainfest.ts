@@ -109,6 +109,7 @@ import PongTimeoutHandler from '@/server/modes/base/timeouts/pong';
 import ChatGuard from '@/server/modes/base/guards/chat';
 import PacketRouter from '@/server/router';
 import SpectatorsCommandHandler from '@/server/modes/base/commands/spectators';
+import LoginPublicKeyDownloader from '@/server/modes/base/support/auth';
 
 export default abstract class BaseGameManifest extends GameManifest {
   constructor({ app }) {
@@ -218,6 +219,7 @@ export default abstract class BaseGameManifest extends GameManifest {
       MobIdStorageOptimizer,
       BansGuard,
       Recovering,
+      LoginPublicKeyDownloader,
 
       // Game Maintenance.
       GameClock,

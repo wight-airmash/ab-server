@@ -76,9 +76,13 @@ export default class LoginMessageHandler extends System {
       try {
         const session = JSON.parse(msg.session);
 
-        if (session.id) {
-          if (typeof session.id === 'string' && /^[0-9a-f]{32}$/im.test(session.id)) {
-            userId = session.id;
+        if (session.token) {
+          if (typeof session.token === 'string') {
+            userId = this.helpers.getUserIdFromToken(session.token);
+
+            if (!userId) {
+              validSessionData = false;
+            }
           } else {
             validSessionData = false;
           }
