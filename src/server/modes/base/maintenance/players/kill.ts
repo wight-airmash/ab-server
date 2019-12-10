@@ -19,6 +19,7 @@ import Entity from '@/server/entity';
 import { System } from '@/server/system';
 import { getRandomInt } from '@/support/numbers';
 import { MobId, PlayerId } from '@/types';
+import { has } from '@/support/objects';
 
 export default class GamePlayersKill extends System {
   constructor({ app }) {
@@ -55,7 +56,7 @@ export default class GamePlayersKill extends System {
 
       killer.score.current += earnedScore;
 
-      if (killer.user) {
+      if (has(killer, 'user')) {
         const user = this.storage.userList.get(killer.user.id);
 
         user.lifetimestats.totalkills += 1;
@@ -69,7 +70,7 @@ export default class GamePlayersKill extends System {
     victim.deaths.current += 1;
     victim.score.current = Math.round(victim.score.current * 0.8) - 5;
 
-    if (victim.user) {
+    if (has(victim, 'user')) {
       const user = this.storage.userList.get(victim.user.id);
 
       user.lifetimestats.totaldeaths += 1;

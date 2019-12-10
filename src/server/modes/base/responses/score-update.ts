@@ -2,6 +2,7 @@ import { PLAYER_LEVEL_UPDATE_TYPES, SERVER_PACKETS, ServerPackets } from '@airba
 import { RESPONSE_PLAYER_LEVEL, RESPONSE_SCORE_UPDATE, CONNECTIONS_SEND_PACKET } from '@/events';
 import { System } from '@/server/system';
 import { PlayerId } from '@/types';
+import { has } from '@/support/objects';
 
 export default class ScoreUpdate extends System {
   constructor({ app }) {
@@ -30,12 +31,10 @@ export default class ScoreUpdate extends System {
     let totalkills = player.kills.current;
     let totaldeaths = player.deaths.current;
 
-    if (player.user) {
+    if (has(player, 'user')) {
       const user = this.storage.userList.get(player.user.id);
 
-      earnings = user.lifetimestats.earnings;
-      totalkills = user.lifetimestats.totalkills;
-      totaldeaths = user.lifetimestats.totaldeaths;
+      ({ earnings, totalkills, totaldeaths } = user.lifetimestats);
 
       const newLevel = this.helpers.convertEarningsToLevel(earnings);
 

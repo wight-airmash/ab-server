@@ -1,4 +1,4 @@
-import crypto, { KeyObject } from 'crypto';
+import { createPublicKey, KeyObject } from 'crypto';
 import https from 'https';
 import { AUTH_LOGIN_SERVER_DOWNLOAD_RETRY_INTERVAL_SEC } from '@/constants';
 import { TIMELINE_BEFORE_GAME_START } from '@/events';
@@ -48,25 +48,25 @@ export default class LoginPublicKeyDownloader extends System {
   }
 
   extractAndCreatePublicKey(data: string): KeyObject {
-    let json;
+    let json: { key: string };
     let key: KeyObject;
 
     try {
       json = JSON.parse(data);
     } catch (e) {
-      this.log.debug('Error parsing key data');
+      this.log.debug('Error parsing key data', e.stack);
 
       return null;
     }
 
     try {
-      key = crypto.createPublicKey({
+      key = createPublicKey({
         key: Buffer.from(json.key, 'base64'),
         format: 'der',
         type: 'spki',
       });
     } catch (e) {
-      this.log.debug('Error creating public key');
+      this.log.debug('Error creating public key', e.stack);
 
       return null;
     }

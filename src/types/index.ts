@@ -165,3 +165,15 @@ export interface PeriodicPowerup extends PeriodicPowerupTemplate {
    */
   permanent: boolean;
 }
+
+type AuthTokenJsonData = string;
+
+type AuthTokenSignature = string;
+
+export type AuthToken = [AuthTokenJsonData, AuthTokenSignature];
+
+export type AuthTokenData = {
+  uid: string;
+  ts: number;
+  for: string;
+};

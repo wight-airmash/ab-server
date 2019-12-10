@@ -78,6 +78,7 @@ import Entity from '@/server/entity';
 import { System } from '@/server/system';
 import { getRandomInt } from '@/support/numbers';
 import User from '@/server/components/user';
+import { has } from '@/support/objects';
 
 export default class GamePlayersConnect extends System {
   constructor({ app }) {
@@ -167,12 +168,14 @@ export default class GamePlayersConnect extends System {
 
     player.attach(new Team(player.id.current));
 
-    if (userId) {
+    if (userId.length > 0) {
       player.attach(new User(userId));
 
-      let user = this.storage.userList.get(userId);
+      let user: Entity;
 
-      if (!user) {
+      if (this.storage.userList.has(userId)) {
+        user = this.storage.userList.get(userId);
+      } else {
         user = new Entity().attach(new Id(userId), new LifetimeStats());
         this.storage.userList.set(userId, user);
       }
@@ -341,7 +344,7 @@ export default class GamePlayersConnect extends System {
     this.emit(RESPONSE_SEND_PING, connectionId);
     this.emit(PLAYERS_APPLY_SHIELD, player.id.current, PLAYERS_SPAWN_SHIELD_DURATION_MS);
 
-    if (player.user) {
+    if (has(player, 'user')) {
       this.emit(RESPONSE_PLAYER_LEVEL, player.id.current, PLAYER_LEVEL_UPDATE_TYPES.INFORM);
     }
 

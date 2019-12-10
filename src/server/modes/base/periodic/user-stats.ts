@@ -49,9 +49,9 @@ export default class UserStatsPeriodic extends System {
     this.saveInProgress = true;
 
     try {
-      data = JSON.stringify(Array.from(this.storage.userList.entries()));
+      data = JSON.stringify([...this.storage.userList.entries()]);
     } catch (e) {
-      this.log.error(`Error while serialising user stats: ${e}`);
+      this.log.error(`Error while serialising user stats: ${e.stack}`);
       this.saveInProgress = false;
 
       return;
@@ -59,7 +59,7 @@ export default class UserStatsPeriodic extends System {
 
     writeFile(this.app.config.userStats.path, data, e => {
       if (e) {
-        this.log.error(`Error while saving user stats: ${e}`);
+        this.log.error(`Error while saving user stats: ${e.stack}`);
       }
 
       this.saveInProgress = false;

@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import { SERVER_MAX_MOB_ID, MAX_UINT32, SERVER_MIN_MOB_ID, NS_PER_SEC } from '@/constants';
 import Logger from '@/logger';
 import { GameStorage } from '@/server/storage';
-import { MobId, ConnectionId, PlayerId } from '@/types';
+import { MobId, ConnectionId, PlayerId, AuthToken, AuthTokenData } from '@/types';
 
 export class Helpers {
   /**
@@ -138,12 +138,12 @@ export class Helpers {
     /**
      * Token must be two base64 strings separated by a dot.
      */
-    const tokenParts = token.split('.');
+    const tokenParts = token.split('.') as AuthToken;
 
     if (tokenParts.length !== 2) {
       this.log.debug('Wrong number of parts in authentication token');
 
-      return null;
+      return '';
     }
 
     /**
@@ -151,7 +151,7 @@ export class Helpers {
      */
     let data: Buffer;
     let signature: Buffer;
-    let auth;
+    let auth: AuthTokenData;
 
     try {
       data = Buffer.from(tokenParts[0], 'base64');
@@ -160,7 +160,7 @@ export class Helpers {
     } catch (e) {
       this.log.debug('Cannot parse authentication token');
 
-      return null;
+      return '';
     }
 
     /**
@@ -169,7 +169,7 @@ export class Helpers {
     if (undefined === auth.uid || undefined === auth.ts || undefined === auth.for) {
       this.log.debug('Required fields not present in authentication token data');
 
-      return null;
+      return '';
     }
 
     /**
@@ -178,7 +178,7 @@ export class Helpers {
     if (typeof auth.uid !== 'string') {
       this.log.debug('In authentication token, uid field must be a string');
 
-      return null;
+      return '';
     }
 
     /**
@@ -187,7 +187,7 @@ export class Helpers {
     if (typeof auth.ts !== 'number') {
       this.log.debug('In authentication token, ts field must be a number');
 
-      return null;
+      return '';
     }
 
     /**
@@ -196,7 +196,7 @@ export class Helpers {
     if (auth.for !== 'game') {
       this.log.debug('Authentication token purpose is incorrect');
 
-      return null;
+      return '';
     }
 
     /**
@@ -205,7 +205,7 @@ export class Helpers {
     if (signature.length !== 64) {
       this.log.debug('Invalid signature length in authentication token');
 
-      return null;
+      return '';
     }
 
     /**
@@ -214,7 +214,7 @@ export class Helpers {
     if (!crypto.verify(null, data, this.storage.loginPublicKey, signature)) {
       this.log.debug('Authentication token signature not verified');
 
-      return null;
+      return '';
     }
 
     return auth.uid;

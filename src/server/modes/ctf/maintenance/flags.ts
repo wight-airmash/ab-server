@@ -39,6 +39,7 @@ import HitCircles from '@/server/components/hit-circles';
 import Rotation from '@/server/components/rotation';
 import FlagState from '@/server/components/flag-state';
 import { PlayerId, MobId } from '@/types';
+import { has } from '@/support/objects';
 
 const [, , CTF_FLAG_RADUIS] = CTF_FLAG_COLLISIONS[0];
 
@@ -333,7 +334,7 @@ export default class GameFlags extends System {
       player.planestate.flagspeed = false;
       player.captures.current += 1;
 
-      if (player.user) {
+      if (has(player, 'user')) {
         const user = this.storage.userList.get(player.user.id);
 
         user.lifetimestats.earnings += earnedScore;

@@ -61,7 +61,7 @@ export default class LoginMessageHandler extends System {
     /**
      * Validation
      */
-    let userId: string;
+    let userId = '';
     let { flag, name } = msg;
 
     if (msg.protocol !== 5) {
@@ -76,11 +76,11 @@ export default class LoginMessageHandler extends System {
       try {
         const session = JSON.parse(msg.session);
 
-        if (session.token) {
+        if (has(session, 'token')) {
           if (typeof session.token === 'string') {
             userId = this.helpers.getUserIdFromToken(session.token);
 
-            if (!userId) {
+            if (userId.length === 0) {
               validSessionData = false;
             }
           } else {
