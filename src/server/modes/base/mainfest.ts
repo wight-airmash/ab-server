@@ -43,7 +43,6 @@ import GamePlayersRepel from '@/server/modes/base/maintenance/players/repel';
 import GameUpgrades from '@/server/modes/base/maintenance/players/upgrades';
 import GamePowerups from '@/server/modes/base/maintenance/powerups';
 import GameSpectating from '@/server/modes/base/maintenance/spectating';
-import GameUsers from '@/server/modes/base/maintenance/users';
 import GameViewports from '@/server/modes/base/maintenance/viewports';
 import GameWarming from '@/server/modes/base/maintenance/warming';
 import PingPeriodic from '@/server/modes/base/periodic/ping';
@@ -233,7 +232,6 @@ export default abstract class BaseGameManifest extends GameManifest {
       GamePlayersKill,
       GamePlayersPowerup,
       GamePlayersBounce,
-      GameUsers,
       GameCollisions,
       GameProjectiles,
       GamePlayersRepel,
