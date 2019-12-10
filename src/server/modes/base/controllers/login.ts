@@ -70,7 +70,7 @@ export default class LoginMessageHandler extends System {
       return;
     }
 
-    if (msg.session !== 'none') {
+    if (this.app.config.auth.active === true && msg.session !== 'none') {
       let validSessionData = true;
 
       try {

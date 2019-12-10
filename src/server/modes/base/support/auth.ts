@@ -1,9 +1,6 @@
 import crypto, { KeyObject } from 'crypto';
 import https from 'https';
-import {
-  AUTH_LOGIN_SERVER_KEY_URL,
-  AUTH_LOGIN_SERVER_DOWNLOAD_RETRY_INTERVAL_SEC,
-} from '@/constants';
+import { AUTH_LOGIN_SERVER_DOWNLOAD_RETRY_INTERVAL_SEC } from '@/constants';
 import { TIMELINE_BEFORE_GAME_START } from '@/events';
 import { System } from '@/server/system';
 
@@ -17,9 +14,17 @@ export default class LoginPublicKeyDownloader extends System {
   }
 
   downloadLoginServerPublicKey(): void {
-    this.log.info('Initiating login server public key download');
+    if (this.app.config.auth.active === true) {
+      this.log.info(
+        `Initiating login server public key download from ${this.app.config.auth.loginKeyServer}.`
+      );
+    } else {
+      this.log.info('User accounts are disabled.');
 
-    https.get(AUTH_LOGIN_SERVER_KEY_URL, res => {
+      return;
+    }
+
+    https.get(this.app.config.auth.loginKeyServer, res => {
       let data = '';
 
       res.on('data', chunk => {

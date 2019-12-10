@@ -30,6 +30,8 @@ import {
   PLAYERS_ALLOW_NON_ASCII_USERNAMES,
   SERVER_MODERATION_PANEL,
   SERVER_MODERATION_PANEL_URL_ROUTE,
+  AUTH_LOGIN_SERVER_KEY_URL,
+  USER_ACCOUNTS,
 } from '@/constants';
 
 export interface GameServerConfigInterface {
@@ -96,6 +98,18 @@ export interface GameServerConfigInterface {
 
   cache: {
     path: string;
+  };
+
+  auth: {
+    /**
+     * Allow players to use accounts.
+     */
+    active: boolean;
+
+    /**
+     * URL of the public key server.
+     */
+    loginKeyServer: string;
   };
 
   userStats: {
@@ -301,6 +315,11 @@ const config: GameServerConfigInterface = {
 
   cache: {
     path: resolvePath(strValue(process.env.CACHE_PATH, '../cache')),
+  },
+
+  auth: {
+    active: boolValue(process.env.USER_ACCOUNTS, USER_ACCOUNTS),
+    loginKeyServer: strValue(process.env.AUTH_LOGIN_SERVER_KEY_URL, AUTH_LOGIN_SERVER_KEY_URL),
   },
 
   userStats: {
