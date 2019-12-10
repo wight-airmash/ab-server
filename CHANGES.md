@@ -4,6 +4,24 @@ Features:
 
 - Players who are logged in will have their stats (earnings/kills/deaths) saved.
 
+## 4.10.3 (December 7, 2019)
+
+Bug fixes:
+
+- Add non case-sensitive #attack blocking.
+
+## 4.10.2 (December 5, 2019)
+
+Bug fixes:
+
+- Add synonym "#atack" for the blocked command #attack.
+
+## 4.10.1 (December 3, 2019)
+
+Bug fixes:
+
+- Add content-type header to /admin response (#60).
+
 ## 4.10.0 (December 1, 2019)
 
 Features:
