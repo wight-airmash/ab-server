@@ -1,4 +1,4 @@
-import fs from 'fs';
+import { existsSync, readFileSync, writeFile } from 'fs';
 import { USER_STATS_SAVE_INTERVAL_SEC } from '@/constants';
 import { TIMELINE_BEFORE_GAME_START, TIMELINE_CLOCK_SECOND } from '@/events';
 import { System } from '@/server/system';
@@ -18,7 +18,11 @@ export default class UserStatsPeriodic extends System {
   }
 
   onBeforeGameStart(): void {
-    this.load();
+    if (existsSync(this.app.config.userStats.path) === true) {
+      this.load();
+    } else {
+      this.save();
+    }
   }
 
   onSecondTick(): void {
@@ -31,11 +35,11 @@ export default class UserStatsPeriodic extends System {
 
   load(): void {
     try {
-      const data = fs.readFileSync(this.app.config.userStats.path);
+      const data = readFileSync(this.app.config.userStats.path);
 
       this.storage.userList = new Map(JSON.parse(data.toString()));
     } catch (e) {
-      this.log.error(`Error while loading user stats: ${e}`);
+      this.log.error(`Error while loading user stats: ${e.stack}`);
     }
   }
 
@@ -53,7 +57,7 @@ export default class UserStatsPeriodic extends System {
       return;
     }
 
-    fs.writeFile(this.app.config.userStats.path, data, e => {
+    writeFile(this.app.config.userStats.path, data, e => {
       if (e) {
         this.log.error(`Error while saving user stats: ${e}`);
       }
