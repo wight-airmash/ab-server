@@ -1,7 +1,7 @@
 import { SERVER_PACKETS, ServerPackets, PLAYER_LEVEL_UPDATE_TYPES } from '@airbattle/protocol';
 import { RESPONSE_PLAYER_LEVEL, CONNECTIONS_SEND_PACKET } from '@/events';
 import { System } from '@/server/system';
-import { MainConnectionId } from '@/types';
+import { PlayerId } from '@/types';
 
 export default class PlayerLevelResponse extends System {
   constructor({ app }) {
@@ -22,9 +22,9 @@ export default class PlayerLevelResponse extends System {
    * @param connectionId
    * @param type
    */
-  onPlayerLevel(connectionId: MainConnectionId, type: PLAYER_LEVEL_UPDATE_TYPES): void {
-    const connection = this.storage.connectionList.get(connectionId);
-    const player = this.storage.playerList.get(connection.meta.playerId);
+  onPlayerLevel(playerId: PlayerId, type: PLAYER_LEVEL_UPDATE_TYPES): void {
+    const player = this.storage.playerList.get(playerId);
+    const connectionId = this.storage.playerMainConnectionList.get(playerId);
 
     this.emit(
       CONNECTIONS_SEND_PACKET,

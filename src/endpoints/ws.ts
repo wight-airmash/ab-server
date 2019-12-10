@@ -376,7 +376,6 @@ export default class WsEndpoint {
         this.log.info(`Sanctioning player ${playerId}`);
         this.app.events.emit(PLAYERS_UPGRADES_RESET, playerId);
         player.score.current = 0;
-        player.earningscore.current = 0;
         this.app.events.emit(RESPONSE_SCORE_UPDATE, playerId);
         break;
 

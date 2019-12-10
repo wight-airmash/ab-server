@@ -51,16 +51,29 @@ export default class GamePlayersKill extends System {
       killer = this.storage.playerList.get(projectile.owner.current);
 
       killer.kills.current += 1;
-      killer.kills.total += 1;
-      killer.score.current += Math.round(victim.score.current * 0.2) + 25;
+      const earnedScore = Math.round(victim.score.current * 0.2) + 25;
+
+      killer.score.current += earnedScore;
+
+      if (killer.user) {
+        const user = this.storage.userList.get(killer.user.id);
+
+        user.lifetimestats.totalkills += 1;
+        user.lifetimestats.earnings += earnedScore;
+      }
     }
 
     /**
      * Tracking victim deaths and score.
      */
     victim.deaths.current += 1;
-    victim.deaths.total += 1;
     victim.score.current = Math.round(victim.score.current * 0.8) - 5;
+
+    if (victim.user) {
+      const user = this.storage.userList.get(victim.user.id);
+
+      user.lifetimestats.totaldeaths += 1;
+    }
 
     if (victim.score.current < 0) {
       victim.score.current = 0;

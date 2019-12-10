@@ -1,3 +1,4 @@
+import { KeyObject } from 'crypto';
 import { SERVER_MIN_MOB_ID, SERVER_MIN_SERVICE_MOB_ID } from '@/constants';
 import Entity from '@/server/entity';
 import {
@@ -16,6 +17,7 @@ import {
   SpawnZones,
   TeamId,
   UnmuteTime,
+  UserId,
   Viewports,
 } from '@/types';
 
@@ -130,6 +132,11 @@ export class GameStorage {
   public mobList: Map<MobId, Entity> = new Map();
 
   /**
+   * Logged-in user entities.
+   */
+  public userList: Map<UserId, Entity> = new Map();
+
+  /**
    * Repel is a mob with the same as its owner id.
    */
   public repelList: Map<PlayerId, Entity> = new Map();
@@ -223,4 +230,9 @@ export class GameStorage {
   public ctfFlagBlueId: number = null;
 
   public ctfFlagRedId: number = null;
+
+  /**
+   * Public key from login server
+   */
+  public loginPublicKey: KeyObject = null;
 }

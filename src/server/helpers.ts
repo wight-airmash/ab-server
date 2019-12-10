@@ -1,3 +1,5 @@
+/* eslint-disable class-methods-use-this */
+import crypto from 'crypto';
 import { SERVER_MAX_MOB_ID, MAX_UINT32, SERVER_MIN_MOB_ID, NS_PER_SEC } from '@/constants';
 import Logger from '@/logger';
 import { GameStorage } from '@/server/storage';
@@ -123,6 +125,99 @@ export class Helpers {
     }
 
     return mobId;
+  }
+
+  convertEarningsToLevel(earnings: number): number {
+    return Math.floor(0.0111 * earnings ** 0.5) + 1;
+  }
+
+  /**
+   * For verifying authentication tokens.
+   */
+  getUserIdFromToken(token: string): string {
+    /**
+     * Token must be two base64 strings separated by a dot.
+     */
+    const tokenParts = token.split('.');
+
+    if (tokenParts.length !== 2) {
+      this.log.debug('Wrong number of parts in authentication token');
+
+      return null;
+    }
+
+    /**
+     * First part is data, second part is signature.
+     */
+    let data: Buffer;
+    let signature: Buffer;
+    let auth;
+
+    try {
+      data = Buffer.from(tokenParts[0], 'base64');
+      signature = Buffer.from(tokenParts[1], 'base64');
+      auth = JSON.parse(data.toString());
+    } catch (e) {
+      this.log.debug('Cannot parse authentication token');
+
+      return null;
+    }
+
+    /**
+     * User id, timestamp, and purpose must be specified in token.
+     */
+    if (undefined === auth.uid || undefined === auth.ts || undefined === auth.for) {
+      this.log.debug('Required fields not present in authentication token data');
+
+      return null;
+    }
+
+    /**
+     * Check uid type.
+     */
+    if (typeof auth.uid !== 'string') {
+      this.log.debug('In authentication token, uid field must be a string');
+
+      return null;
+    }
+
+    /**
+     * Check ts type.
+     */
+    if (typeof auth.ts !== 'number') {
+      this.log.debug('In authentication token, ts field must be a number');
+
+      return null;
+    }
+
+    /**
+     * Purpose of token must be 'game'.
+     */
+    if (auth.for !== 'game') {
+      this.log.debug('Authentication token purpose is incorrect');
+
+      return null;
+    }
+
+    /**
+     * Ed25519 signature must be exactly 64 bytes long.
+     */
+    if (signature.length !== 64) {
+      this.log.debug('Invalid signature length in authentication token');
+
+      return null;
+    }
+
+    /**
+     * Verify signature.
+     */
+    if (!crypto.verify(null, data, this.storage.loginPublicKey, signature)) {
+      this.log.debug('Authentication token signature not verified');
+
+      return null;
+    }
+
+    return auth.uid;
   }
 }
 

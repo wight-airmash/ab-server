@@ -320,7 +320,9 @@ export default class GameFlags extends System {
       const bounty =
         CTF_CAPTURE_BOUNTY.BASE + CTF_CAPTURE_BOUNTY.INCREMENT * (this.storage.playerList.size - 1);
 
-      player.score.current += bounty > CTF_CAPTURE_BOUNTY.MAX ? CTF_CAPTURE_BOUNTY.MAX : bounty;
+      const earnedScore = bounty > CTF_CAPTURE_BOUNTY.MAX ? CTF_CAPTURE_BOUNTY.MAX : bounty;
+
+      player.score.current += earnedScore;
 
       if (flag.team.current === CTF_TEAMS.BLUE) {
         this.resetBlueFlag();
@@ -330,6 +332,12 @@ export default class GameFlags extends System {
 
       player.planestate.flagspeed = false;
       player.captures.current += 1;
+
+      if (player.user) {
+        const user = this.storage.userList.get(player.user.id);
+
+        user.lifetimestats.earnings += earnedScore;
+      }
 
       this.emit(BROADCAST_FLAG_CAPTURED, flag.team.current, player.name.current);
 

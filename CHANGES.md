@@ -1,5 +1,9 @@
 ## Future version (unversioned)
 
+Features:
+
+- Players who are logged in will have their stats (earnings/kills/deaths) saved.
+
 ## 4.10.3 (December 7, 2019)
 
 Bug fixes:

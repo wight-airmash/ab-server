@@ -49,6 +49,7 @@ import GameWarming from '@/server/modes/base/maintenance/warming';
 import PingPeriodic from '@/server/modes/base/periodic/ping';
 import PowerupsPeriodic from '@/server/modes/base/periodic/powerups';
 import ScoreBoardPeriodic from '@/server/modes/base/periodic/score-board';
+import UserStatsPeriodic from '@/server/modes/base/periodic/user-stats';
 import BackupResponse from '@/server/modes/base/responses/backup';
 import ChatPublicBroadcast from '@/server/modes/base/responses/broadcast/chat-public';
 import ChatSayBroadcast from '@/server/modes/base/responses/broadcast/chat-say';
@@ -108,6 +109,7 @@ import PongTimeoutHandler from '@/server/modes/base/timeouts/pong';
 import ChatGuard from '@/server/modes/base/guards/chat';
 import PacketRouter from '@/server/router';
 import SpectatorsCommandHandler from '@/server/modes/base/commands/spectators';
+import LoginPublicKeyDownloader from '@/server/modes/base/support/auth';
 
 export default abstract class BaseGameManifest extends GameManifest {
   constructor({ app }) {
@@ -211,11 +213,13 @@ export default abstract class BaseGameManifest extends GameManifest {
       PingPeriodic,
       ScoreBoardPeriodic,
       PowerupsPeriodic,
+      UserStatsPeriodic,
 
       // Support.
       MobIdStorageOptimizer,
       BansGuard,
       Recovering,
+      LoginPublicKeyDownloader,
 
       // Game Maintenance.
       GameClock,

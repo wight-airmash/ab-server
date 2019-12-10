@@ -1,5 +1,5 @@
 import { Polygon } from 'collisions';
-import { GAME_TYPES } from '@airbattle/protocol';
+import { GAME_TYPES, PLAYER_LEVEL_UPDATE_TYPES } from '@airbattle/protocol';
 import cryptoRandomString from 'crypto-random-string';
 import {
   COLLISIONS_OBJECT_TYPES,
@@ -27,6 +27,7 @@ import {
   PLAYERS_LIMIT_REACHED,
   PLAYERS_CREATED,
   RESPONSE_LOGIN,
+  RESPONSE_PLAYER_LEVEL,
   RESPONSE_PLAYER_UPGRADE,
   RESPONSE_SCORE_UPDATE,
   RESPONSE_SEND_PING,
@@ -54,6 +55,7 @@ import Ip from '@/server/components/ip';
 import Keystate from '@/server/components/keystate';
 import Kills from '@/server/components/kills';
 import Level from '@/server/components/level';
+import LifetimeStats from '@/server/components/lifetime-stats';
 import Id from '@/server/components/mob-id';
 import Ping from '@/server/components/ping';
 import PlaneState from '@/server/components/plane-state';
@@ -64,7 +66,6 @@ import Recaptures from '@/server/components/recaptures';
 import Repel from '@/server/components/repel';
 import Rotation from '@/server/components/rotation';
 import Score from '@/server/components/score';
-import EarningScore from '@/server/components/score-earning';
 import Shield from '@/server/components/shield-powerup';
 import Spectate from '@/server/components/spectate';
 import Su from '@/server/components/su';
@@ -76,6 +77,7 @@ import Velocity from '@/server/components/velocity';
 import Entity from '@/server/entity';
 import { System } from '@/server/system';
 import { getRandomInt } from '@/support/numbers';
+import User from '@/server/components/user';
 
 export default class GamePlayersConnect extends System {
   constructor({ app }) {
@@ -109,7 +111,7 @@ export default class GamePlayersConnect extends System {
   /**
    * Create player.
    */
-  onCreatePlayer({ connectionId, name, flag, horizon, shipType }): void {
+  onCreatePlayer({ connectionId, name, flag, horizon, shipType, userId }): void {
     if (this.storage.playerList.size > SERVER_MAX_PLAYERS_LIMIT) {
       this.emit(PLAYERS_LIMIT_REACHED, connectionId);
 
@@ -152,7 +154,6 @@ export default class GamePlayersConnect extends System {
       new Kills(),
       new Deaths(),
       new Score(),
-      new EarningScore(),
       new Ping(),
       new Times(),
       new Delayed(),
@@ -165,6 +166,19 @@ export default class GamePlayersConnect extends System {
     );
 
     player.attach(new Team(player.id.current));
+
+    if (userId) {
+      player.attach(new User(userId));
+
+      let user = this.storage.userList.get(userId);
+
+      if (!user) {
+        user = new Entity().attach(new Id(userId), new LifetimeStats());
+        this.storage.userList.set(userId, user);
+      }
+
+      player.level.current = this.helpers.convertEarningsToLevel(user.lifetimestats.earnings);
+    }
 
     this.log.info('Player connected.', {
       id: player.id.current,
@@ -326,6 +340,11 @@ export default class GamePlayersConnect extends System {
     this.emit(BROADCAST_SCORE_BOARD, connectionId);
     this.emit(RESPONSE_SEND_PING, connectionId);
     this.emit(PLAYERS_APPLY_SHIELD, player.id.current, PLAYERS_SPAWN_SHIELD_DURATION_MS);
+
+    if (player.user) {
+      this.emit(RESPONSE_PLAYER_LEVEL, player.id.current, PLAYER_LEVEL_UPDATE_TYPES.INFORM);
+    }
+
     this.emit(RESPONSE_SCORE_UPDATE, player.id.current);
 
     if (mainConnection.meta.isBot !== true) {
