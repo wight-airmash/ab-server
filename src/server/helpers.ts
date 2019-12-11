@@ -163,6 +163,12 @@ export class Helpers {
       return '';
     }
 
+    if (typeof auth !== 'object' || auth === null) {
+      this.log.debug('Decoded token data was not an object');
+
+      return '';
+    }
+
     /**
      * User id, timestamp, and purpose must be specified in token.
      */
