@@ -23,8 +23,8 @@ import {
   RESPONSE_SCORE_UPDATE,
   PLAYERS_KICK,
   PLAYERS_UPGRADES_RESET,
-  CHAT_MUTE_BY_SERVER,
   CHAT_MUTE_BY_IP,
+  CHAT_UNMUTE_BY_IP,
 } from '@/events';
 import { ConnectionMeta, PlayerConnection, IPv4 } from '@/types';
 import Logger from '@/logger';
@@ -280,6 +280,7 @@ export default class WsEndpoint {
         })
 
         .get(`${this.app.config.admin.route}/players`, res => {
+          const now = Date.now();
           const list = [];
 
           this.app.storage.playerList.forEach(player =>
@@ -294,6 +295,7 @@ export default class WsEndpoint {
               lastMove: player.times.lastMove,
               ping: player.ping.current,
               flag: player.flag.current,
+              isMuted: player.times.unmuteTime > now,
             })
           );
 
@@ -363,13 +365,13 @@ export default class WsEndpoint {
 
     switch (params.action) {
       case 'Mute':
-        this.log.info(`Muting player ${playerId}`);
-        this.app.events.emit(CHAT_MUTE_BY_SERVER, playerId);
+        this.log.info(`Muting IP ${player.ip.current} (${playerId}: ${player.name.current})`);
+        this.app.events.emit(CHAT_MUTE_BY_IP, player.ip.current, CHAT_SUPERUSER_MUTE_TIME_MS);
         break;
 
-      case 'IpMute':
-        this.log.info(`Muting IP: ${player.ip.current}`);
-        this.app.events.emit(CHAT_MUTE_BY_IP, player.ip.current, CHAT_SUPERUSER_MUTE_TIME_MS);
+      case 'Unmute':
+        this.log.info(`Unmuting IP: ${player.ip.current}`);
+        this.app.events.emit(CHAT_UNMUTE_BY_IP, player.ip.current);
         break;
 
       case 'Sanction':

@@ -251,6 +251,9 @@ export default class GamePlayers extends System {
       this.log.debug(`Shuffle, next team ${nextTeamId}.`);
     }
 
-    this.emit(BROADCAST_PLAYER_RETEAM, shuffleRateList.map(player => player.id));
+    this.emit(
+      BROADCAST_PLAYER_RETEAM,
+      shuffleRateList.map(player => player.id)
+    );
   }
 }

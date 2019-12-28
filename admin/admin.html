@@ -63,8 +63,7 @@
                 <h2>Players</h2>
 
                 <p>
-                    <strong>Mute</strong>: mute player,
-                    <strong>IpMute</strong>: mute IP
+                    <strong>Mute</strong>: mute player IP,
                     <strong>Sanction</strong>: zero score/ups,
                     <strong>Ban</strong>: ban IP
                 </p>
@@ -81,6 +80,7 @@
                             <th>Ping
                             <th>Flag
                             <th>Name
+                            <th>
                             <th>
                     </thead>
                     <tbody>
@@ -148,8 +148,8 @@
         });
 
         for (let player of response) {
-            $(`
-                <tr data-playerid=${player.id}>
+            var tr = $(`<tr data-playerid=${player.id}>`);
+            tr.append(`
                 <td>${player.id}
                 <td>${player.captures}
                 <td>${player.spectate ? "✔️" : "❌"}
@@ -159,12 +159,19 @@
                 <td>${player.ping}
                 <td>${player.flag}
                 <td>${safe(player.name)}
-                <td>
-                    <button>Mute</button>
-                    <button>IpMute</button>
-                    <button>Sanction</button>
-                    <button>Ban</button>
-            `).appendTo(table);
+            `);
+
+            if (player.isMuted) {
+                tr.append(`<td><button>Unmute</button>`);
+            } else {
+                tr.append(`<td><button>Mute</button>`);
+            }
+
+            tr.append(`<td>
+                <button>Sanction</button>
+                <button>Ban</button>
+            `);
+            table.append(tr);
         }
 
         clearTimeout(disableButtonsTimerId);
