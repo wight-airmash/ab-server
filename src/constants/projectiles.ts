@@ -7,9 +7,21 @@ export const PROJECTILES_SHAPES = {
 };
 
 export const PROJECTILES_COLLISIONS = {
-  [PROJECTILES_SHAPES.REGULAR]: [[0, 3, 3], [0, 9, 3], [0, 15, 3]],
-  [PROJECTILES_SHAPES.FAT]: [[0, 4, 4], [0, 12, 4], [0, 20, 4]],
-  [PROJECTILES_SHAPES.SMALL]: [[0, 2, 2], [0, 6, 2], [0, 10, 2]],
+  [PROJECTILES_SHAPES.REGULAR]: [
+    [0, 3, 3],
+    [0, 9, 3],
+    [0, 15, 3],
+  ],
+  [PROJECTILES_SHAPES.FAT]: [
+    [0, 4, 4],
+    [0, 12, 4],
+    [0, 20, 4],
+  ],
+  [PROJECTILES_SHAPES.SMALL]: [
+    [0, 2, 2],
+    [0, 6, 2],
+    [0, 10, 2],
+  ],
 };
 
 export const PROJECTILES_EXTRA_SPEED_TO_DAMAGE_FACTOR = 1 / 45;
