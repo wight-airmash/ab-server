@@ -224,7 +224,7 @@
             playerid: $(event.target).parents('tr').data('playerid'),
             action: $(event.target).html(),
             reason: $('#reason').val(),
-            password: $password.val()
+            password: $('#password').val()
         };
         $.post('actions', params, onApplyComplete);
     }
