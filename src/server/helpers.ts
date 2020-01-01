@@ -135,6 +135,12 @@ export class Helpers {
    * For verifying authentication tokens.
    */
   getUserIdFromToken(token: string): string {
+    if (this.storage.loginPublicKey === null) {
+      this.log.debug('The public key is not installed. Authentication request rejected.');
+
+      return '';
+    }
+
     /**
      * Token must be two base64 strings separated by a dot.
      */

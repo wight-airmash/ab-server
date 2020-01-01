@@ -141,7 +141,7 @@ export default class Connections extends System {
 
       ws.close();
 
-      this.log.debug(`Connection id${connectionId} was breaked.`);
+      this.log.debug(`Connection id${connectionId} was broken.`);
     } catch (err) {
       this.log.error('onBreakConnection', err);
     }
