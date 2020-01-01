@@ -34,12 +34,11 @@ export default class LoginPublicKeyDownloader extends System {
       res.on('end', () => {
         this.storage.loginPublicKey = this.extractAndCreatePublicKey(data);
 
-        if (this.storage.loginPublicKey == null) {
+        if (this.storage.loginPublicKey === null) {
           this.log.error('Could not retrieve public key from login server, will retry');
-          setTimeout(
-            this.downloadLoginServerPublicKey,
-            AUTH_LOGIN_SERVER_DOWNLOAD_RETRY_INTERVAL_SEC
-          );
+          setTimeout(() => {
+            this.downloadLoginServerPublicKey();
+          }, AUTH_LOGIN_SERVER_DOWNLOAD_RETRY_INTERVAL_SEC);
         } else {
           this.log.info('Login server public key download successful');
         }
