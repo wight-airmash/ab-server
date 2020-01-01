@@ -1,6 +1,6 @@
 import { createPublicKey, KeyObject } from 'crypto';
 import https from 'https';
-import { AUTH_LOGIN_SERVER_DOWNLOAD_RETRY_INTERVAL_SEC } from '@/constants';
+import { AUTH_LOGIN_SERVER_DOWNLOAD_RETRY_INTERVAL_MS } from '@/constants';
 import { TIMELINE_BEFORE_GAME_START } from '@/events';
 import { System } from '@/server/system';
 
@@ -38,7 +38,7 @@ export default class LoginPublicKeyDownloader extends System {
           this.log.error('Could not retrieve public key from login server, will retry');
           setTimeout(() => {
             this.downloadLoginServerPublicKey();
-          }, AUTH_LOGIN_SERVER_DOWNLOAD_RETRY_INTERVAL_SEC);
+          }, AUTH_LOGIN_SERVER_DOWNLOAD_RETRY_INTERVAL_MS);
         } else {
           this.log.info('Login server public key download successful');
         }
