@@ -44,25 +44,33 @@ export default class UserStatsPeriodic extends System {
   }
 
   save(): void {
-    let data: string;
+    if (this.saveInProgress === false) {
+      let data: string;
 
-    this.saveInProgress = true;
+      this.saveInProgress = true;
 
-    try {
-      data = JSON.stringify([...this.storage.userList.entries()]);
-    } catch (e) {
-      this.log.error(`Error while serialising user stats: ${e.stack}`);
-      this.saveInProgress = false;
+      try {
+        data = JSON.stringify([...this.storage.userList.entries()], (key, value) => {
+          if (key === 'destroyed' || key === 'key') {
+            return undefined;
+          }
 
-      return;
-    }
+          return value;
+        });
+      } catch (e) {
+        this.log.error(`Error while serialising user stats: ${e.stack}`);
+        this.saveInProgress = false;
 
-    writeFile(this.app.config.userStats.path, data, e => {
-      if (e) {
-        this.log.error(`Error while saving user stats: ${e.stack}`);
+        return;
       }
 
-      this.saveInProgress = false;
-    });
+      writeFile(this.app.config.userStats.path, data, e => {
+        if (e) {
+          this.log.error(`Error while saving user stats: ${e.stack}`);
+        }
+
+        this.saveInProgress = false;
+      });
+    }
   }
 }
