@@ -96,6 +96,8 @@ export default class ServerCommandHandler extends System {
           `${this.storage.ipBanList.size} banned, `,
           `${this.storage.ipMuteList.size} muted, `,
           `${this.storage.ipWhiteList.size} in the whitelist. `,
+          `Users: ${this.storage.userList.size} total, `,
+          `${this.storage.onlineUserIdList.size} online. `,
           `Mobs: ${this.storage.mobIdList.size} total, `,
           `${this.storage.playerList.size} players, `,
           `${this.storage.botIdList.size} bots, `,
