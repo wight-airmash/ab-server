@@ -1,8 +1,15 @@
 ## Future version (unversioned)
 
+## 4.11.0 (January 2, 2020)
+
 Features:
 
-- Players who are logged in will have their stats (earnings/kills/deaths) saved.
+- Players who are logged in will have their stats (earnings/kills/deaths) saved. Don't forget to mount ./data directory to not to lose users data. Use USER_ACCOUNTS to disable this feature.
+- Unmute feature in moderators panel.
+
+Improvements:
+
+- Update /votemute: only unique IPs are counted.
 
 ## 4.10.3 (December 7, 2019)
 
