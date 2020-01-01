@@ -110,6 +110,9 @@
     }
 
     const REFRESH_INTERVAL_MS = 10000;
+    const persistantStorageKey = 'persistantFormValues';
+    const $password = document.querySelector('#password');
+    const $reason = document.querySelector('#reason');
     var disableButtonsTimerId;
 
     function date(ms) {
@@ -221,7 +224,7 @@
             playerid: $(event.target).parents('tr').data('playerid'),
             action: $(event.target).html(),
             reason: $('#reason').val(),
-            password: $('#password').val()
+            password: $password.val()
         };
         $.post('actions', params, onApplyComplete);
     }
@@ -231,9 +234,43 @@
         $.get('actions', onActionsRefreshComplete);
     }
 
+    const storePersistantValue = (key, value) => {
+        let storage = {};
+
+        if (localStorage.getItem(persistantStorageKey) !== null) {
+            storage = JSON.parse(localStorage.getItem(persistantStorageKey));
+        }
+
+        storage[key] = value;
+        localStorage.setItem(persistantStorageKey, JSON.stringify(storage));
+    }
+
+    const restorePersistantValues = () => {
+        if (localStorage.getItem(persistantStorageKey) !== null) {
+            storage = JSON.parse(localStorage.getItem(persistantStorageKey));
+
+            Object.entries(storage).forEach(([id, value]) => {
+                const field = document.querySelector(`#${id}`);
+
+                if (field !== null) {
+                    field.value = value
+                }
+            });
+        }
+    }
+
     $(function () {
         setInterval(refresh, REFRESH_INTERVAL_MS);
         refresh();
+        restorePersistantValues();
         $(document).on('click', 'button', onButtonClick);
+
+        $password.addEventListener('input', () => {
+            storePersistantValue('password', $password.value)
+        });
+
+        $reason.addEventListener('input', () => {
+            storePersistantValue('reason', $reason.value)
+        });
     });
 </script>
