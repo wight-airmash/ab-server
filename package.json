@@ -45,27 +45,27 @@
     "eventemitter3": "^4.0.0",
     "maxmind": "^4.0.0",
     "module-alias": "^2.2.2",
-    "pino": "^5.14.0",
-    "uWebSockets.js": "github:uNetworking/uWebSockets.js#v16.4.0"
+    "pino": "^5.15.0",
+    "uWebSockets.js": "github:uNetworking/uWebSockets.js#v16.5.0"
   },
   "devDependencies": {
     "@types/dotenv": "^8.2.0",
-    "@types/node": "^12.12.14",
-    "@types/pino": "^5.8.13",
-    "@typescript-eslint/eslint-plugin": "^2.9.0",
-    "@typescript-eslint/parser": "^2.9.0",
-    "eslint": "^6.7.2",
+    "@types/node": "^12.12.22",
+    "@types/pino": "^5.15.1",
+    "@typescript-eslint/eslint-plugin": "^2.14.0",
+    "@typescript-eslint/parser": "^2.14.0",
+    "eslint": "^6.8.0",
     "eslint-config-airbnb": "^18.0.1",
     "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-config-prettier": "^6.7.0",
+    "eslint-config-prettier": "^6.9.0",
     "eslint-import-resolver-alias": "^1.1.2",
-    "eslint-plugin-import": "^2.18.2",
-    "eslint-plugin-prettier": "^3.1.1",
+    "eslint-plugin-import": "^2.19.1",
+    "eslint-plugin-prettier": "^3.1.2",
     "lint-staged": "^9.5.0",
-    "pino-pretty": "^3.4.0",
+    "pino-pretty": "^3.5.0",
     "pre-commit": "^1.2.2",
     "prettier": "^1.19.1",
-    "typescript": "^3.7.2"
+    "typescript": "^3.7.4"
   },
   "_moduleAliases": {
     "@": "dist"
