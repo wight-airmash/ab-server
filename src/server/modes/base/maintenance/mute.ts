@@ -1,18 +1,18 @@
-import { CHAT_MUTE_TIME_MS, CHAT_MIN_PLAYER_PLAYTIME_TO_VOTEMUTE_MS } from '@/constants';
+import { CHAT_MIN_PLAYER_PLAYTIME_TO_VOTEMUTE_MS, CHAT_MUTE_TIME_MS } from '@/constants';
 import {
-  CHAT_MUTE_EMIT_DELAYED_EVENTS,
-  PLAYERS_REMOVED,
-  RESPONSE_VOTEMUTE_PASSED,
-  CHAT_MUTE_VOTE,
-  CHAT_MUTE_BY_SERVER,
-  TIMELINE_CLOCK_DAY,
-  CHAT_UNMUTE_BY_IP,
   CHAT_MUTE_BY_IP,
+  CHAT_MUTE_BY_SERVER,
+  CHAT_MUTE_EMIT_DELAYED_EVENTS,
+  CHAT_MUTE_VOTE,
+  CHAT_UNMUTE_BY_IP,
+  PLAYERS_REMOVED,
   RESPONSE_COMMAND_REPLY,
+  RESPONSE_VOTEMUTE_PASSED,
+  TIMELINE_CLOCK_DAY,
 } from '@/events';
-import { System } from '@/server/system';
 import { CHANNEL_MUTE } from '@/server/channels';
-import { PlayerId, IPv4 } from '@/types';
+import { System } from '@/server/system';
+import { IPv4, PlayerId } from '@/types';
 
 export default class GameMute extends System {
   protected votes: Map<PlayerId, Set<PlayerId>> = new Map();
@@ -77,16 +77,33 @@ export default class GameMute extends System {
      * Fast mute check.
      */
     let isMuted = false;
+    let validVotes = votedPlayers.size;
 
     if (votedPlayers.size >= votesToMute) {
-      let votes = 0;
+      const uniqueIPs: Set<IPv4> = new Set();
 
       /**
        * Accurate mute check.
        */
+      validVotes = 0;
+
       votedPlayers.forEach(votedPlayerId => {
         if (this.helpers.isPlayerConnected(votedPlayerId)) {
-          votes += 1;
+          const votedPlayer = this.storage.playerList.get(votedPlayerId);
+
+          /**
+           * This condition can be weakened if additional conditions are passed:
+           * - increased minimum playing time,
+           * - minimum shots,
+           * - minimum hits,
+           * - minimum kills,
+           * - etc.
+           */
+          if (!uniqueIPs.has(votedPlayer.ip.current)) {
+            uniqueIPs.add(votedPlayer.ip.current);
+
+            validVotes += 1;
+          }
         } else {
           votedPlayers.delete(votedPlayerId);
         }
@@ -95,9 +112,9 @@ export default class GameMute extends System {
       /**
        * Mute player.
        */
-      if (votes >= votesToMute) {
+      if (validVotes >= votesToMute) {
         isMuted = true;
-        this.log.debug(`Player id${playerToMuteId} muted.`);
+        this.log.debug(`Player id${playerToMuteId} muted by players.`);
 
         playerToMute.times.unmuteTime = Date.now() + CHAT_MUTE_TIME_MS;
         this.storage.ipMuteList.set(playerToMute.ip.current, playerToMute.times.unmuteTime);
@@ -118,7 +135,7 @@ export default class GameMute extends System {
       this.emit(
         RESPONSE_COMMAND_REPLY,
         this.storage.playerMainConnectionList.get(playerId),
-        `Voted to mute (${votedPlayers.size}/${votesToMute}).`
+        `Voted to mute ${playerToMute.name.current} (${validVotes}/${votesToMute}).`
       );
     }
   }
