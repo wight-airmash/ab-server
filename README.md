@@ -44,6 +44,14 @@ npm run start
 
 Please see .env.example.
 
+## User accounts
+
+The current implementation does not support accounts synchronization between server instances.
+
+User accounts data are stored in `./data/user-stats.json` and in memory during the server run. Set `USER_ACCOUNTS` to `false` to turn user accounts off.
+
+Each user session is signed by the [login server](https://github.com/airmash-refugees/airmash-backend) (Ed25519). Validation uses the public key, which is downloaded when the server starts. To change the default key server URL set `AUTH_LOGIN_SERVER_KEY_URL` variable value (only https is supported).
+
 ## Moderation Panel
 
 The server exports a `/admin` URL to allow privileged players to moderate the
@@ -69,7 +77,7 @@ Set `MODERATION_PANEL` to `false` to turn moderation panel off. To change panel 
    `docker build -t airbattle-server .`
 2. Run. Don't forget to pass envirounment variables and mount the volumes you need. Example:
 
-   `docker run -v /host/logs:/app/logs -p 3501:3501 -e SERVER_TYPE=FFA -e SU_PASSWORD=mypass airbattle-server`
+   `docker run -v /host/logs:/app/logs -v /host/data:/app/data -p 3501:3501 -e SERVER_TYPE=FFA -e SU_PASSWORD=mypass airbattle-server`
 
    If you want to use TLS also mount `/app/certs` to the host directory with `privkey.pem` and `fullchain.pem`, and set ENDPOINTS_TLS=true.
 
