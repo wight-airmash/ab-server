@@ -30,6 +30,7 @@ export default class UserStatsPeriodic extends System {
 
     if (this.seconds >= USER_STATS_SAVE_INTERVAL_SEC) {
       this.save();
+      this.seconds = 0;
     }
   }
 
