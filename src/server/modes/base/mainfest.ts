@@ -109,6 +109,7 @@ import ChatGuard from '@/server/modes/base/guards/chat';
 import PacketRouter from '@/server/router';
 import SpectatorsCommandHandler from '@/server/modes/base/commands/spectators';
 import LoginPublicKeyDownloader from '@/server/modes/base/support/auth';
+import AlreadyLoggedInResponse from '@/server/modes/base/responses/already-logged-in';
 
 export default abstract class BaseGameManifest extends GameManifest {
   constructor({ app }) {
@@ -173,6 +174,7 @@ export default abstract class BaseGameManifest extends GameManifest {
       VotemutePassedResponse,
       SpectateKillResponse,
       PlayerBanResponse,
+      AlreadyLoggedInResponse,
 
       // Broadcast.
       PlayerNewBroadcast,

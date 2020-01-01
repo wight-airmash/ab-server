@@ -1,5 +1,5 @@
-import { Polygon } from 'collisions';
 import { GAME_TYPES, PLAYER_LEVEL_UPDATE_TYPES } from '@airbattle/protocol';
+import { Polygon } from 'collisions';
 import cryptoRandomString from 'crypto-random-string';
 import {
   COLLISIONS_OBJECT_TYPES,
@@ -14,18 +14,20 @@ import {
   UPGRADES_START_AMOUNT,
 } from '@/constants';
 import {
-  COLLISIONS_ADD_OBJECT,
-  PLAYERS_ASSIGN_SPAWN_POSITION,
-  PLAYERS_ASSIGN_TEAM,
   BROADCAST_CHAT_SERVER_WHISPER,
   BROADCAST_PLAYER_NEW,
   BROADCAST_SCORE_BOARD,
-  PLAYERS_EMIT_CHANNEL_CONNECT,
-  PLAYERS_CREATE,
-  VIEWPORTS_CREATE,
+  CHAT_UNMUTE_BY_IP,
+  COLLISIONS_ADD_OBJECT,
+  ERRORS_ALREADY_LOGGED_IN,
   PLAYERS_APPLY_SHIELD,
-  PLAYERS_LIMIT_REACHED,
+  PLAYERS_ASSIGN_SPAWN_POSITION,
+  PLAYERS_ASSIGN_TEAM,
+  PLAYERS_CREATE,
   PLAYERS_CREATED,
+  PLAYERS_EMIT_CHANNEL_CONNECT,
+  PLAYERS_LIMIT_REACHED,
+  PLAYERS_UPDATE_HORIZON,
   RESPONSE_LOGIN,
   RESPONSE_PLAYER_LEVEL,
   RESPONSE_PLAYER_UPGRADE,
@@ -35,8 +37,7 @@ import {
   TIMELINE_BEFORE_GAME_START,
   TIMEOUT_ACK,
   TIMEOUT_BACKUP,
-  PLAYERS_UPDATE_HORIZON,
-  CHAT_UNMUTE_BY_IP,
+  VIEWPORTS_CREATE,
 } from '@/events';
 import { CHANNEL_CONNECT_PLAYER, CHANNEL_MUTE } from '@/server/channels';
 import AliveStatus from '@/server/components/alive-status';
@@ -73,11 +74,11 @@ import Team from '@/server/components/team';
 import Times from '@/server/components/times';
 import Token from '@/server/components/token';
 import Upgrades from '@/server/components/upgrades';
+import User from '@/server/components/user';
 import Velocity from '@/server/components/velocity';
 import Entity from '@/server/entity';
 import { System } from '@/server/system';
 import { getRandomInt } from '@/support/numbers';
-import User from '@/server/components/user';
 import { has } from '@/support/objects';
 
 export default class GamePlayersConnect extends System {
@@ -120,6 +121,12 @@ export default class GamePlayersConnect extends System {
     }
 
     if (!this.storage.connectionList.has(connectionId)) {
+      return;
+    }
+
+    if (this.storage.onlineUserIdList.has(userId)) {
+      this.emit(ERRORS_ALREADY_LOGGED_IN, connectionId);
+
       return;
     }
 
@@ -169,6 +176,7 @@ export default class GamePlayersConnect extends System {
     player.attach(new Team(player.id.current));
 
     if (userId.length > 0) {
+      this.storage.onlineUserIdList.add(userId);
       player.attach(new User(userId));
 
       let user: Entity;

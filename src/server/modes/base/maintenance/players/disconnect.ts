@@ -1,16 +1,17 @@
 import { GAME_TYPES } from '@airbattle/protocol';
 import { PLAYERS_TIME_TO_RESTORE_PLAYER_MS } from '@/constants';
 import {
-  PLAYERS_BEFORE_REMOVE,
   BROADCAST_PLAYER_LEAVE,
-  PLAYERS_REMOVE,
-  PLAYERS_EMIT_CHANNEL_DISCONNECT,
-  PLAYERS_REMOVED,
   COLLISIONS_REMOVE_OBJECT,
+  PLAYERS_BEFORE_REMOVE,
+  PLAYERS_EMIT_CHANNEL_DISCONNECT,
+  PLAYERS_REMOVE,
+  PLAYERS_REMOVED,
   VIEWPORTS_REMOVE,
 } from '@/events';
 import { CHANNEL_DISCONNECT_PLAYER } from '@/server/channels';
 import { System } from '@/server/system';
+import { has } from '@/support/objects';
 import { PlayerId } from '@/types';
 
 export default class GamePlayersDisconnect extends System {
@@ -106,6 +107,10 @@ export default class GamePlayersDisconnect extends System {
       this.storage.mobIdList.delete(playerId);
       this.storage.backupTokenList.delete(player.backuptoken.current);
       this.storage.botIdList.delete(playerId);
+
+      if (has(player, 'user')) {
+        this.storage.onlineUserIdList.delete(player.user.id);
+      }
 
       if (this.storage.viewportList.has(player.spectate.current)) {
         const viewport = this.storage.viewportList.get(player.spectate.current);

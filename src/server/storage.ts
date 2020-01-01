@@ -132,9 +132,14 @@ export class GameStorage {
   public mobList: Map<MobId, Entity> = new Map();
 
   /**
-   * Logged-in user entities.
+   * User entities.
    */
   public userList: Map<UserId, Entity> = new Map();
+
+  /**
+   * Logged-in user ids.
+   */
+  public onlineUserIdList: Set<UserId> = new Set();
 
   /**
    * Repel is a mob with the same as its owner id.
