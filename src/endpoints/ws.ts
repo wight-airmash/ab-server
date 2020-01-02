@@ -304,7 +304,9 @@ export default class WsEndpoint {
         })
 
         .get(`${this.app.config.admin.route}/`, async res => {
-          res.onAborted(() => {});
+          res.onAborted(() => {
+            // Do nothing.
+          });
 
           try {
             res.writeHeader('Content-type', 'text/html');
