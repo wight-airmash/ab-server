@@ -1,5 +1,11 @@
 ## Future version (unversioned)
 
+## 4.11.1 (January 2, 2020)
+
+Bug fixes:
+
+- Fix uWebSockets.js checkout in Dockerfile.
+
 ## 4.11.0 (January 2, 2020)
 
 Features:
