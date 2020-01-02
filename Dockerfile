@@ -14,8 +14,8 @@ RUN git clone --recurse-submodules https://github.com/uNetworking/uWebSockets.js
 
 WORKDIR /build/sources
 # Checkout v16.5.0
-RUN git status
-RUN git checkout --recurse-submodules 723efe9d2d4b139586b86d465aed241d4de311f1
+RUN git reset --hard 723efe9d2d4b139586b86d465aed241d4de311f1
+RUN git submodule update --recursive
 RUN make
 
 WORKDIR /build/
