@@ -1,5 +1,11 @@
 ## Future version (unversioned)
 
+## 4.11.2 (January 3, 2020)
+
+Bug fixes:
+
+- The PLAYER_LEVEL packet is now sent to every player to correctly visual updates.
+
 ## 4.11.1 (January 2, 2020)
 
 Bug fixes:

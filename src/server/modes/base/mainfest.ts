@@ -87,7 +87,7 @@ import KickPlayer from '@/server/modes/base/responses/kick';
 import LoginResponse from '@/server/modes/base/responses/login';
 import NotEnoughUpgrades from '@/server/modes/base/responses/not-enough-upgrades';
 import PingResult from '@/server/modes/base/responses/ping-result';
-import PlayerLevelResponse from '@/server/modes/base/responses/player-level';
+import PlayerLevelBroadcast from '@/server/modes/base/responses/broadcast/player-level';
 import PlayerPowerup from '@/server/modes/base/responses/player-powerup';
 import PlayerUpgrade from '@/server/modes/base/responses/player-upgrade';
 import PlayersLimit from '@/server/modes/base/responses/players-limit';
@@ -168,7 +168,6 @@ export default abstract class BaseGameManifest extends GameManifest {
       CommandReply,
       GameSpectate,
       PlayerPowerup,
-      PlayerLevelResponse,
       ServerPlayerConnectResponse,
       VotemutedResponse,
       VotemutePassedResponse,
@@ -203,6 +202,7 @@ export default abstract class BaseGameManifest extends GameManifest {
       PlayerReteamBroadcast,
       EventRepelBroadcast,
       ServerMessageBroadcast,
+      PlayerLevelBroadcast,
 
       // Timeouts.
       AckTimeoutHandler,

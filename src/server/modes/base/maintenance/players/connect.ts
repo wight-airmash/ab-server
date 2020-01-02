@@ -15,6 +15,7 @@ import {
 } from '@/constants';
 import {
   BROADCAST_CHAT_SERVER_WHISPER,
+  BROADCAST_PLAYER_LEVEL,
   BROADCAST_PLAYER_NEW,
   BROADCAST_SCORE_BOARD,
   CHAT_UNMUTE_BY_IP,
@@ -29,7 +30,6 @@ import {
   PLAYERS_LIMIT_REACHED,
   PLAYERS_UPDATE_HORIZON,
   RESPONSE_LOGIN,
-  RESPONSE_PLAYER_LEVEL,
   RESPONSE_PLAYER_UPGRADE,
   RESPONSE_SCORE_UPDATE,
   RESPONSE_SEND_PING,
@@ -353,7 +353,7 @@ export default class GamePlayersConnect extends System {
     this.emit(PLAYERS_APPLY_SHIELD, player.id.current, PLAYERS_SPAWN_SHIELD_DURATION_MS);
 
     if (has(player, 'user')) {
-      this.emit(RESPONSE_PLAYER_LEVEL, player.id.current, PLAYER_LEVEL_UPDATE_TYPES.INFORM);
+      this.emit(BROADCAST_PLAYER_LEVEL, player.id.current, PLAYER_LEVEL_UPDATE_TYPES.INFORM);
     }
 
     this.emit(RESPONSE_SCORE_UPDATE, player.id.current);

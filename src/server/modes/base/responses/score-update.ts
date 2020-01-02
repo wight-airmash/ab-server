@@ -1,8 +1,8 @@
 import { PLAYER_LEVEL_UPDATE_TYPES, SERVER_PACKETS, ServerPackets } from '@airbattle/protocol';
-import { RESPONSE_PLAYER_LEVEL, RESPONSE_SCORE_UPDATE, CONNECTIONS_SEND_PACKET } from '@/events';
+import { BROADCAST_PLAYER_LEVEL, CONNECTIONS_SEND_PACKET, RESPONSE_SCORE_UPDATE } from '@/events';
 import { System } from '@/server/system';
-import { PlayerId } from '@/types';
 import { has } from '@/support/objects';
+import { PlayerId } from '@/types';
 
 export default class ScoreUpdate extends System {
   constructor({ app }) {
@@ -40,7 +40,7 @@ export default class ScoreUpdate extends System {
 
       if (newLevel > player.level.current) {
         player.level.current = newLevel;
-        this.emit(RESPONSE_PLAYER_LEVEL, player.id.current, PLAYER_LEVEL_UPDATE_TYPES.LEVELUP);
+        this.emit(BROADCAST_PLAYER_LEVEL, player.id.current, PLAYER_LEVEL_UPDATE_TYPES.LEVELUP);
       }
     }
 
