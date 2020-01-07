@@ -43,15 +43,25 @@ export default class PacketsGuard extends System {
 
     const connection = this.storage.connectionList.get(connectionId);
 
+    if (connection.meta.status === CONNECTIONS_STATUS.PENDING_TO_CLOSE) {
+      return;
+    }
+
     if (connection.meta.playerId !== null) {
       if (this.helpers.isPlayerConnected(connection.meta.playerId)) {
         const secondConnectionId =
           connection.meta.isBackup === true
-            ? this.storage.playerBackupConnectionList.get(connection.meta.playerId)
-            : this.storage.playerMainConnectionList.get(connection.meta.playerId);
+            ? this.storage.playerMainConnectionList.get(connection.meta.playerId)
+            : this.storage.playerBackupConnectionList.get(connection.meta.playerId);
         const secondConnection = this.storage.connectionList.get(secondConnectionId);
 
-        if (secondConnection.meta.status > CONNECTIONS_STATUS.OPENED) {
+        if (secondConnection.meta.status > CONNECTIONS_STATUS.ESTABLISHED) {
+          connection.meta.status = CONNECTIONS_STATUS.PENDING_TO_CLOSE;
+
+          setTimeout(() => {
+            this.emit(CONNECTIONS_BREAK, connectionId);
+          }, 200);
+
           return;
         }
       }

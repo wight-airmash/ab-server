@@ -1,5 +1,6 @@
 import { CLIENT_PACKETS } from '@airbattle/protocol';
 import { ProtocolPacket } from '@airbattle/protocol/dist/packets';
+import { CONNECTIONS_STATUS } from '@/constants';
 import {
   ERRORS_PACKET_FLOODING_DETECTED,
   ROUTE_ACK,
@@ -97,6 +98,10 @@ export default class PacketRouter extends System {
 
   onRouteMessage(msg: ProtocolPacket, connectionId: ConnectionId): void {
     const connection = this.storage.connectionList.get(connectionId);
+
+    if (connection.meta.status !== CONNECTIONS_STATUS.ESTABLISHED) {
+      return;
+    }
 
     if (connection.meta.isBackup === true) {
       if (this.validBackupPackets.includes(msg.c)) {

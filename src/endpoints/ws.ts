@@ -77,15 +77,15 @@ export default class WsEndpoint {
         maxPayloadLength: CONNECTIONS_MAX_PAYLOAD_BYTES,
         idleTimeout: CONNECTIONS_IDLE_TIMEOUT_SEC,
 
-        open: (ws: PlayerConnection, req) => {
+        open: (connection: PlayerConnection, req) => {
           const connectionId = this.app.helpers.createConnectionId();
           const now = Date.now();
 
-          this.app.storage.connectionList.set(connectionId, ws);
+          this.app.storage.connectionList.set(connectionId, connection);
 
-          ws.meta = {
+          connection.meta = {
             id: connectionId,
-            ip: WsEndpoint.decodeIPv4(ws.getRemoteAddress()),
+            ip: WsEndpoint.decodeIPv4(connection.getRemoteAddress()),
             isBackup: false,
             isMain: false,
             status: CONNECTIONS_STATUS.OPENED,
@@ -129,37 +129,49 @@ export default class WsEndpoint {
           } as ConnectionMeta;
 
           if (req.getHeader('x-forwarded-for') !== '') {
-            ws.meta.ip = req.getHeader('x-forwarded-for');
+            connection.meta.ip = req.getHeader('x-forwarded-for');
           } else if (req.getHeader('x-real-ip') !== '') {
-            ws.meta.ip = req.getHeader('x-real-ip');
+            connection.meta.ip = req.getHeader('x-real-ip');
           }
 
-          this.log.debug(`Open connection id${connectionId}, ${req.getMethod()}, ${ws.meta.ip}`);
+          this.log.debug(
+            `Open connection id${connectionId}, ${req.getMethod()}, ${connection.meta.ip}`
+          );
 
           /**
            * Detect bots.
            */
-          if (this.app.config.whitelist === false || this.app.storage.ipWhiteList.has(ws.meta.ip)) {
-            ws.meta.isBot = true;
+          if (
+            this.app.config.whitelist === false ||
+            this.app.storage.ipWhiteList.has(connection.meta.ip)
+          ) {
+            connection.meta.isBot = true;
 
             if (this.app.config.whitelist === false) {
               this.log.debug(
-                `Connection id${connectionId} IP ${ws.meta.ip} is a bot (whitelist is disabled).`
+                `Connection id${connectionId} IP ${connection.meta.ip} is a bot (whitelist is disabled).`
               );
             } else {
               this.log.debug(
-                `Connection id${connectionId} IP ${ws.meta.ip} is in a white list (bot).`
+                `Connection id${connectionId} IP ${connection.meta.ip} is in a white list (bot).`
               );
             }
           }
 
+          req.forEach((key, value) => {
+            connection.meta.headers[key] = value;
+            this.log.debug(`Connection id${connectionId} header: '${key}': '${value}'`);
+          });
+
           /**
            * Ban check.
            */
-          if (this.app.storage.ipBanList.has(ws.meta.ip)) {
-            if (this.app.storage.ipBanList.get(ws.meta.ip).expire > ws.meta.createdAt) {
+          if (this.app.storage.ipBanList.has(connection.meta.ip)) {
+            if (
+              this.app.storage.ipBanList.get(connection.meta.ip).expire > connection.meta.createdAt
+            ) {
               this.log.info('IP is banned. Connection refused.', {
-                ip: ws.meta.ip,
+                ip: connection.meta.ip,
                 connection: connectionId,
               });
 
@@ -172,78 +184,76 @@ export default class WsEndpoint {
               return;
             }
 
-            this.app.events.emit(CONNECTIONS_UNBAN_IP, ws.meta.ip);
+            this.app.events.emit(CONNECTIONS_UNBAN_IP, connection.meta.ip);
           }
-
-          req.forEach((key, value) => {
-            ws.meta.headers[key] = value;
-            this.log.debug(`Connection id${connectionId} header: '${key}': '${value}'`);
-          });
 
           /**
            * Max IP connections check.
            */
           let connectionsCounter = 1;
 
-          if (this.app.storage.connectionByIPCounter.has(ws.meta.ip)) {
-            connectionsCounter = this.app.storage.connectionByIPCounter.get(ws.meta.ip) + 1;
+          if (this.app.storage.connectionByIPCounter.has(connection.meta.ip)) {
+            connectionsCounter = this.app.storage.connectionByIPCounter.get(connection.meta.ip) + 1;
           }
 
           if (
             connectionsCounter >
               this.app.config.maxPlayersPerIP * CONNECTIONS_PLAYERS_TO_CONNECTIONS_MULTIPLIER &&
-            !this.app.storage.ipWhiteList.has(ws.meta.ip)
+            !this.app.storage.ipWhiteList.has(connection.meta.ip)
           ) {
             this.log.info('Max connections per IP reached. Connection refused.', {
-              ip: ws.meta.ip,
+              ip: connection.meta.ip,
               connection: connectionId,
             });
 
             this.app.events.emit(CONNECTIONS_BREAK, connectionId);
           } else {
-            this.app.storage.connectionByIPCounter.set(ws.meta.ip, connectionsCounter);
+            this.app.storage.connectionByIPCounter.set(connection.meta.ip, connectionsCounter);
+
+            connection.meta.status = CONNECTIONS_STATUS.ESTABLISHED;
 
             /**
              * Awaiting for Login package.
              */
-            ws.meta.timeouts.login = setTimeout(() => {
+            connection.meta.timeouts.login = setTimeout(() => {
               this.app.events.emit(TIMEOUT_LOGIN, connectionId);
             }, CONNECTIONS_PACKET_LOGIN_TIMEOUT_MS);
           }
         },
 
-        message: (ws: PlayerConnection, message, isBinary) => {
-          if (isBinary) {
+        message: (connection: PlayerConnection, message, isBinary) => {
+          if (isBinary === true) {
             try {
-              this.app.events.emit(CONNECTIONS_PACKET_RECEIVED, message, ws.meta.id);
+              this.app.events.emit(CONNECTIONS_PACKET_RECEIVED, message, connection.meta.id);
             } catch (err) {
-              this.log.error(`Connection id${ws.meta.id} error.`, err.stack);
+              this.log.error(`Connection id${connection.meta.id} error.`, err.stack);
             }
           } else {
-            this.log.debug(`Connection id${ws.meta.id} message isn't binary.`);
-            this.app.events.emit(CONNECTIONS_BREAK, ws.meta.id);
+            this.log.debug(`Connection id${connection.meta.id} message isn't binary.`);
+            this.app.events.emit(CONNECTIONS_BREAK, connection.meta.id);
           }
         },
 
-        drain: ws => {
-          this.log.debug(`WebSocket backpressure: ${ws.getBufferedAmount()}`);
+        drain: connection => {
+          this.log.debug(`WebSocket backpressure: ${connection.getBufferedAmount()}`);
         },
 
-        close: (ws: PlayerConnection, code) => {
-          this.log.debug(`Connection id${ws.meta.id} was closed, code ${code}`);
+        close: (connection: PlayerConnection, code) => {
+          this.log.debug(`Connection id${connection.meta.id} was closed, code ${code}`);
 
-          const connectionsCounter = this.app.storage.connectionByIPCounter.get(ws.meta.ip) - 1;
+          const connectionsCounter =
+            this.app.storage.connectionByIPCounter.get(connection.meta.ip) - 1;
 
           if (connectionsCounter === 0) {
-            this.app.storage.connectionByIPCounter.delete(ws.meta.ip);
+            this.app.storage.connectionByIPCounter.delete(connection.meta.ip);
           } else {
-            this.app.storage.connectionByIPCounter.set(ws.meta.ip, connectionsCounter);
+            this.app.storage.connectionByIPCounter.set(connection.meta.ip, connectionsCounter);
           }
 
           try {
-            this.app.events.emit(CONNECTIONS_CLOSED, ws.meta.id);
+            this.app.events.emit(CONNECTIONS_CLOSED, connection.meta.id);
           } catch (err) {
-            this.log.error(`Connection id${ws.meta.id} closing error.`, err.stack);
+            this.log.error(`Connection id${connection.meta.id} closing error.`, err.stack);
           }
         },
       })
