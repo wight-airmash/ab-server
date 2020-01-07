@@ -20,7 +20,7 @@ export default class EventLeaveHorizon extends System {
    */
   onLeaveHorizon(connectionId: MainConnectionId, mobIds: Set<MobId>): void {
     mobIds.forEach(id => {
-      if (this.storage.mobIdList.has(id) && !this.storage.playerInSpecModeList.has(id)) {
+      if (this.storage.mobIdList.has(id)) {
         const type = this.storage.playerList.has(id)
           ? LEAVE_HORIZON_TYPES.PLAYER
           : LEAVE_HORIZON_TYPES.MOB;
