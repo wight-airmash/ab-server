@@ -1,7 +1,7 @@
-import { encodeKeystate, SERVER_PACKETS, ServerPackets } from '@airbattle/protocol';
+import { encodeKeystate, ServerPackets, SERVER_PACKETS } from '@airbattle/protocol';
 import { BROADCAST_EVENT_BOUNCE, CONNECTIONS_SEND_PACKET } from '@/events';
 import { System } from '@/server/system';
-import { PlayerId } from '@/types';
+import { MainConnectionId, PlayerId } from '@/types';
 
 export default class EventBounceBroadcast extends System {
   constructor({ app }) {
@@ -28,20 +28,23 @@ export default class EventBounceBroadcast extends System {
     const player = this.storage.playerList.get(playerId);
     const playerConnectionId = this.storage.playerMainConnectionList.get(playerId);
     const playerTeamConnections = this.storage.connectionIdByTeam.get(player.team.current);
-    const recipients = [];
+    const recipients: MainConnectionId[] = [];
 
-    this.storage.broadcast.get(playerId).forEach(connectionId => {
+    this.storage.broadcast.get(playerId).forEach(recipientConnectionId => {
+      const recipientConnection = this.storage.connectionList.get(recipientConnectionId);
+      const recipient = this.storage.playerList.get(recipientConnection.meta.playerId);
+
       /**
        * Visibility check.
        */
       if (
-        playerConnectionId === connectionId ||
+        playerConnectionId === recipientConnectionId ||
         player.planestate.stealthed === false ||
         (player.planestate.stealthed === true &&
-          this.app.config.visibleTeamProwlers === true &&
-          playerTeamConnections.has(connectionId))
+          playerTeamConnections.has(recipientConnectionId) &&
+          (recipient.spectate.isActive === false || this.app.config.visibleTeamProwlers === true))
       ) {
-        recipients.push(connectionId);
+        recipients.push(recipientConnectionId);
       }
     });
 
