@@ -81,21 +81,39 @@ export class GameStorage {
    */
   public connectionList: Map<ConnectionId, PlayerConnection> = new Map();
 
+  /**
+   * All main connection ids map.
+   */
   public playerMainConnectionList: Map<PlayerId, MainConnectionId> = new Map();
 
+  /**
+   * All backup connection ids map.
+   */
   public playerBackupConnectionList: Map<PlayerId, BackupConnectionId> = new Map();
 
   /**
-   * All main connections ids.
+   * All main connection ids.
    */
   public mainConnectionIdList: Set<MainConnectionId> = new Set();
 
+  /**
+   * Human main connection ids.
+   */
   public humanConnectionIdList: Set<MainConnectionId> = new Set();
 
+  /**
+   * Bot main connection ids.
+   */
   public botConnectionIdList: Set<MainConnectionId> = new Set();
 
+  /**
+   * Connection ids lists grouped by team.
+   */
   public connectionIdByTeam: Map<TeamId, Set<MainConnectionId>> = new Map();
 
+  /**
+   * Main connection ids accessible by username.
+   */
   public connectionIdByNameList: {
     [playerName: string]: MainConnectionId;
   } = {};

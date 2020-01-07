@@ -1,5 +1,18 @@
 ## Future version (unversioned)
 
+## 4.12.0 (January 7, 2020)
+
+Improvements:
+
+- EVENT_LEAVEHORIZON is used to instantly hide players who have switched to spectator mode. Previously, within 3 seconds (frontend value), players could see the phantom.
+- Optimised and speeded up the docker image building.
+
+Bug fixes:
+
+- Allow no-spectating teammates to see prowlers (#63).
+- Player might get muted for spam due to network lag (#41).
+- Packet flooding banhammer (#56).
+
 ## 4.11.2 (January 3, 2020)
 
 Bug fixes:

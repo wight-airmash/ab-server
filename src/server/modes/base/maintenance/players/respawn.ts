@@ -224,7 +224,7 @@ export default class GamePlayersRespawn extends System {
       /**
        * "Kill" the player before type update.
        */
-      if (isNewType) {
+      if (isNewType === true) {
         player.hitcircles.current = [...SHIPS_SPECS[shipType].collisions];
 
         this.emit(RESPONSE_SPECTATE_KILL, connection.meta.id, player.id.current);
@@ -232,7 +232,7 @@ export default class GamePlayersRespawn extends System {
 
       this.emit(BROADCAST_PLAYER_RESPAWN, player.id.current);
 
-      if (isNewType) {
+      if (isNewType === true) {
         this.emit(BROADCAST_PLAYER_TYPE, player.id.current, shipType);
       }
 

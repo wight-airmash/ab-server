@@ -1,7 +1,7 @@
 import { encodeKeystate, encodeUpgrades, SERVER_PACKETS, ServerPackets } from '@airbattle/protocol';
 import { BROADCAST_PLAYER_UPDATE, CONNECTIONS_SEND_PACKET } from '@/events';
 import { System } from '@/server/system';
-import { PlayerId } from '@/types';
+import { MainConnectionId, PlayerId } from '@/types';
 
 export default class PlayerUpdateBroadcast extends System {
   constructor({ app }) {
@@ -50,39 +50,42 @@ export default class PlayerUpdateBroadcast extends System {
     const playerTeamConnections = this.storage.connectionIdByTeam.get(player.team.current);
     const clock = this.helpers.clock();
 
-    let recipients = null;
+    const recipients: MainConnectionId[] = [];
     let isHorizonUpdate = false;
 
-    if (recipientId) {
+    if (recipientId !== undefined) {
       isHorizonUpdate = true;
-      recipients = this.storage.playerMainConnectionList.get(recipientId);
+
+      const recipient = this.storage.playerList.get(recipientId);
+      const recipientConnectionId = this.storage.playerMainConnectionList.get(recipientId);
 
       if (
-        recipientId !== playerId &&
-        player.planestate.stealthed === true &&
-        (!playerTeamConnections.has(recipients) || this.app.config.visibleTeamProwlers === false)
+        recipientId === playerId ||
+        player.planestate.stealthed === false ||
+        (player.planestate.stealthed === true &&
+          playerTeamConnections.has(recipientConnectionId) &&
+          (recipient.spectate.isActive === false || this.app.config.visibleTeamProwlers === true))
       ) {
-        return;
+        recipients.push(recipientConnectionId);
       }
-    } else {
-      recipients = [];
+    } else if (this.storage.broadcast.has(playerId)) {
+      this.storage.broadcast.get(playerId).forEach(recipientConnectionId => {
+        const recipientConnection = this.storage.connectionList.get(recipientConnectionId);
+        const recipient = this.storage.playerList.get(recipientConnection.meta.playerId);
 
-      if (this.storage.broadcast.has(playerId)) {
-        this.storage.broadcast.get(playerId).forEach(connectionId => {
-          if (
-            playerConnectionId === connectionId ||
-            player.planestate.stealthed === false ||
-            (player.planestate.stealthed === true &&
-              this.app.config.visibleTeamProwlers === true &&
-              playerTeamConnections.has(connectionId))
-          ) {
-            recipients.push(connectionId);
-          }
-        });
-      }
+        if (
+          playerConnectionId === recipientConnectionId ||
+          player.planestate.stealthed === false ||
+          (player.planestate.stealthed === true &&
+            playerTeamConnections.has(recipientConnectionId) &&
+            (recipient.spectate.isActive === false || this.app.config.visibleTeamProwlers === true))
+        ) {
+          recipients.push(recipientConnectionId);
+        }
+      });
     }
 
-    if (Array.isArray(recipients) && recipients.length === 0) {
+    if (recipients.length === 0) {
       return;
     }
 

@@ -8,6 +8,8 @@ import {
 
 export enum CONNECTIONS_STATUS {
   OPENED = 1,
+  ESTABLISHED = 10,
+  PENDING_TO_CLOSE = 20,
   PRECLOSED = 101,
   CLOSED = 201,
 }

@@ -1,76 +1,60 @@
+FROM node:12-alpine AS updated-node-alpine
+
+RUN apk update && apk upgrade
+
 #
-# uWebSockets build from sources.
+# The preparation stage for use during the installation
+# of app dependencies.
 #
-FROM node:12-alpine AS uws-build
+FROM updated-node-alpine AS build-ready
 
-WORKDIR /build
-
-RUN apk update && apk upgrade && \
-  apk add --no-cache git openssh && \
-  apk add --no-cache clang llvm5-dev alpine-sdk
-
-RUN git clone -b v16.5.0 https://github.com/uNetworking/uWebSockets.js.git ./binaries
-RUN git clone --recurse-submodules https://github.com/uNetworking/uWebSockets.js.git ./sources
-
-WORKDIR /build/sources
-# Checkout v16.5.0
-RUN git reset --hard 723efe9d2d4b139586b86d465aed241d4de311f1
-RUN git submodule update --recursive
-RUN make
-
-WORKDIR /build/
-RUN mkdir uws
-RUN cp -R ./sources/dist/* ./uws/
-RUN cp -f ./binaries/index.d.ts ./uws/
-RUN cp -f ./binaries/package.json ./uws/
+RUN apk add --no-cache git openssh
 
 #
 # Transpiling.
 #
-FROM node:12-alpine AS ts-build
+FROM build-ready AS app-build
 
 WORKDIR /build
 
-RUN apk update && apk upgrade && \
-  apk add --no-cache git openssh
-
-COPY --from=uws-build /build/uws ./packages/uws
 COPY package*.json ./
 
 RUN npm config set unsafe-perm true
-RUN npm uninstall uWebSockets.js
-RUN npm i -S ./packages/uws
 RUN npm i
 
-COPY tsconfig.prod.json .
-
+COPY tsconfig.prod.json ./
 COPY ./src ./src
 COPY .env.production ./.env
 
 RUN npm run build
 
 #
-# Install production dependencied.
+# Removing non-production dependencies from node_modules.
 #
-FROM node:12-alpine AS prod-only
+FROM app-build AS prod-deps
 
-WORKDIR /build
-
-RUN apk update && apk upgrade && \
-  apk add --no-cache git openssh
-
-COPY --from=uws-build /build/uws ./packages/uws
-COPY package*.json ./
-
-RUN npm config set unsafe-perm true
-RUN npm uninstall uWebSockets.js
-RUN npm install -S ./packages/uws
-RUN npm install --production
+RUN npm prune --production
 
 #
-# Build game server container.
+# Building game server image.
 #
-FROM node:12-alpine
+FROM updated-node-alpine
+
+# Install uWebSockets deps.
+RUN apk add --no-cache gcompat
+RUN rm -rf /var/cache/apk/*
+
+WORKDIR /app
+
+RUN mkdir logs && chown -R node: logs
+RUN mkdir cache && chown -R node: cache
+RUN mkdir certs && chown -R node: certs
+
+COPY --from=app-build /build/dist ./dist
+COPY --from=prod-deps /build/node_modules ./node_modules
+COPY --chown=node:node ./admin ./admin
+COPY --chown=node:node ./data ./data
+COPY package.json ./
 
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
@@ -125,19 +109,6 @@ ENV USER_ACCOUNTS=${USER_ACCOUNTS}
 
 ARG AUTH_LOGIN_SERVER_KEY_URL=
 ENV AUTH_LOGIN_SERVER_KEY_URL=${AUTH_LOGIN_SERVER_KEY_URL}
-
-WORKDIR /app
-
-RUN mkdir logs && chown -R node: logs
-RUN mkdir cache && chown -R node: cache
-RUN mkdir certs && chown -R node: certs
-
-COPY --from=ts-build /build/dist dist
-COPY --from=prod-only /build/node_modules node_modules
-COPY --from=uws-build /build/uws ./packages/uws
-COPY ./admin ./admin
-COPY ./data ./data
-COPY package.json ./
 
 EXPOSE ${PORT}
 

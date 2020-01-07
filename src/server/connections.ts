@@ -131,7 +131,7 @@ export default class Connections extends System {
 
       this.log.debug(`Connection id${connectionId} was closed.`);
     } catch (err) {
-      this.log.error('onDisconnectPlayer', err);
+      this.log.error('onDisconnectPlayer', err.stack);
     }
   }
 
@@ -143,7 +143,7 @@ export default class Connections extends System {
 
       this.log.debug(`Connection id${connectionId} was broken.`);
     } catch (err) {
-      this.log.error('onBreakConnection', err);
+      this.log.error('onBreakConnection', err.stack);
     }
   }
 
