@@ -1,5 +1,6 @@
 import { ClientPackets } from '@airbattle/protocol';
-import { CHAT_TEAM, ROUTE_TEAMCHAT, CHAT_CHECK_LIMITS } from '@/events';
+import { LIMITS_CHAT } from '@/constants';
+import { CHAT_CHECK_LIMITS, CHAT_TEAM, ROUTE_TEAMCHAT } from '@/events';
 import { CHANNEL_CHAT } from '@/server/channels';
 import { System } from '@/server/system';
 import { MainConnectionId } from '@/types';
@@ -26,11 +27,20 @@ export default class TeamchatMessageHandler extends System {
 
     const connection = this.storage.connectionList.get(connectionId);
 
+    this.log.debug(`Player id${connection.meta.playerId} requested chat team '${msg.text}'.`);
+
+    if (connection.meta.limits.chat > LIMITS_CHAT) {
+      this.log.debug(
+        `Player id${connection.meta.playerId} team chat request was skipped due to chat limits.`
+      );
+
+      return;
+    }
+
     this.emit(CHAT_CHECK_LIMITS, connection);
 
     if (!this.helpers.isPlayerMuted(connection.meta.playerId)) {
       this.channel(CHANNEL_CHAT).delay(CHAT_TEAM, connection.meta.playerId, msg.text);
-      this.log.debug(`Player id${connection.meta.playerId} requested chat team '${msg.text}'.`);
     }
   }
 }
