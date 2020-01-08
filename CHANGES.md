@@ -1,5 +1,11 @@
 ## Future version (unversioned)
 
+## 4.12.1 (January 8, 2020)
+
+Bug fixes:
+
+- Fix undefined connections bug (#66).
+
 ## 4.12.0 (January 7, 2020)
 
 Improvements:

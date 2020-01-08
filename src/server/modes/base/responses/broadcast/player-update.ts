@@ -56,6 +56,10 @@ export default class PlayerUpdateBroadcast extends System {
     if (recipientId !== undefined) {
       isHorizonUpdate = true;
 
+      if (!this.helpers.isPlayerConnected(recipientId)) {
+        return;
+      }
+
       const recipient = this.storage.playerList.get(recipientId);
       const recipientConnectionId = this.storage.playerMainConnectionList.get(recipientId);
 
@@ -70,6 +74,10 @@ export default class PlayerUpdateBroadcast extends System {
       }
     } else if (this.storage.broadcast.has(playerId)) {
       this.storage.broadcast.get(playerId).forEach(recipientConnectionId => {
+        if (!this.storage.connectionList.has(recipientConnectionId)) {
+          return;
+        }
+
         const recipientConnection = this.storage.connectionList.get(recipientConnectionId);
         const recipient = this.storage.playerList.get(recipientConnection.meta.playerId);
 
