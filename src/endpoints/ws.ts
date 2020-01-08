@@ -1,33 +1,34 @@
-import uws from 'uWebSockets.js';
-import util from 'util';
 import fs from 'fs';
 import querystring from 'querystring';
+import util from 'util';
+import uws from 'uWebSockets.js';
 import {
   CHAT_SUPERUSER_MUTE_TIME_MS,
-  CONNECTIONS_STATUS,
   CONNECTIONS_IDLE_TIMEOUT_SEC,
   CONNECTIONS_MAX_PAYLOAD_BYTES,
   CONNECTIONS_PACKET_LOGIN_TIMEOUT_MS,
   CONNECTIONS_PLAYERS_TO_CONNECTIONS_MULTIPLIER,
+  CONNECTIONS_STATUS,
   CONNECTIONS_SUPERUSER_BAN_MS,
 } from '@/constants';
 import GameServer from '@/core/server';
 import {
-  CONNECTIONS_BREAK,
-  CONNECTIONS_CLOSED,
-  TIMEOUT_LOGIN,
-  CONNECTIONS_PACKET_RECEIVED,
-  CONNECTIONS_BAN_IP,
-  CONNECTIONS_UNBAN_IP,
-  RESPONSE_PLAYER_BAN,
-  RESPONSE_SCORE_UPDATE,
-  PLAYERS_KICK,
-  PLAYERS_UPGRADES_RESET,
   CHAT_MUTE_BY_IP,
   CHAT_UNMUTE_BY_IP,
+  CONNECTIONS_BAN_IP,
+  CONNECTIONS_BREAK,
+  CONNECTIONS_CLOSED,
+  CONNECTIONS_PACKET_RECEIVED,
+  CONNECTIONS_UNBAN_IP,
+  CTF_REMOVE_PLAYER_FROM_LEADER,
+  PLAYERS_KICK,
+  PLAYERS_UPGRADES_RESET,
+  RESPONSE_PLAYER_BAN,
+  RESPONSE_SCORE_UPDATE,
+  TIMEOUT_LOGIN,
 } from '@/events';
-import { ConnectionMeta, PlayerConnection, IPv4 } from '@/types';
 import Logger from '@/logger';
+import { ConnectionMeta, IPv4, PlayerConnection } from '@/types';
 
 const readFile = util.promisify(fs.readFile);
 
@@ -391,6 +392,11 @@ export default class WsEndpoint {
         this.app.events.emit(PLAYERS_UPGRADES_RESET, playerId);
         player.score.current = 0;
         this.app.events.emit(RESPONSE_SCORE_UPDATE, playerId);
+        break;
+
+      case 'Dismiss':
+        this.log.info(`Dismissing player ${playerId}`);
+        this.app.events.emit(CTF_REMOVE_PLAYER_FROM_LEADER, playerId);
         break;
 
       case 'Ban':

@@ -2,6 +2,10 @@
 
 ## 4.12.1 (January 8, 2020)
 
+Features:
+
+- Forced election: dismiss a player from the position of leader in moderators panel.
+
 Bug fixes:
 
 - Fix undefined connections bug (#66).

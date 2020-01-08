@@ -16,6 +16,7 @@ import SwitchCommandHandler from '@/server/modes/ctf/commands/switch';
 import MatchCommandHandler from '@/server/modes/ctf/commands/match';
 import GameChat from '@/server/modes/base/maintenance/chat';
 import CTFGameChat from '@/server/modes/ctf/maintenance/chat';
+import PhantomPlayerKick from '@/server/modes/ctf/qbots/phantom-kick';
 
 export default class CTFGameManifest extends BaseGameManifest {
   constructor({ app }) {
@@ -50,6 +51,9 @@ export default class CTFGameManifest extends BaseGameManifest {
       GameFlags,
       GameMatches,
       CTFGameChat,
+
+      // Q-bots
+      PhantomPlayerKick,
     ];
 
     this.startSystems();
