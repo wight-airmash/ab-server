@@ -1,10 +1,12 @@
 ## Future version (unversioned)
 
-## 4.12.1 (January 8, 2020)
+## 4.13.0 (January 8, 2020)
 
 Features:
 
-- Forced election: dismiss a player from the position of leader in moderators panel.
+- Forced elections: dismiss a player from the position of leader in moderators panel.
+
+## 4.12.1 (January 8, 2020)
 
 Bug fixes:
 
