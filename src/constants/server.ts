@@ -85,3 +85,7 @@ export const SERVER_BROADCAST_SCORE_BOARD_INTERVAL_SEC = 5;
 export const SERVER_MODERATION_PANEL = true;
 
 export const SERVER_MODERATION_PANEL_URL_ROUTE = 'admin';
+
+export const SERVER_WELCOME_MESSAGES = [];
+
+export const SERVER_WELCOME_MESSAGES_DELIMITER = '%split%';

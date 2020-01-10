@@ -1,15 +1,19 @@
-import { GAME_TYPES, FLAGS_ISO_TO_CODE } from '@airbattle/protocol';
+import { FLAGS_ISO_TO_CODE, GAME_TYPES } from '@airbattle/protocol';
 import dotenv from 'dotenv';
 import { mkdirSync, readFileSync } from 'fs';
 import { dirname, isAbsolute, resolve } from 'path';
 import { IPv4 } from '@/types';
 import { has } from '@/support/objects';
 import {
+  AUTH_LOGIN_SERVER_KEY_URL,
   BOTS_DEFAULT_IP_LIST,
+  BOTS_SERVER_BOT_FLAG,
+  BOTS_SERVER_BOT_NAME,
   BOTS_WHITELIST_ENABLED,
   CONNECTIONS_DEFAULT_MAX_PLAYERS_PER_IP,
   METRICS_LOG_INTERVAL_SEC,
   METRICS_LOG_SAMPLES,
+  PLAYERS_ALLOW_NON_ASCII_USERNAMES,
   POWERUPS_SPAWN_CHANCE,
   SERVER_DEFAULT_ENVIRONMENT,
   SERVER_DEFAULT_GEO_DB_PATH,
@@ -23,14 +27,12 @@ import {
   SERVER_DEFAULT_SU_PASSWORD,
   SERVER_DEFAULT_TLS,
   SERVER_DEFAULT_TYPE,
-  UPGRADES_DEFAULT_MAX_CHANCE,
-  UPGRADES_DEFAULT_MIN_CHANCE,
-  BOTS_SERVER_BOT_FLAG,
-  BOTS_SERVER_BOT_NAME,
-  PLAYERS_ALLOW_NON_ASCII_USERNAMES,
   SERVER_MODERATION_PANEL,
   SERVER_MODERATION_PANEL_URL_ROUTE,
-  AUTH_LOGIN_SERVER_KEY_URL,
+  SERVER_WELCOME_MESSAGES,
+  SERVER_WELCOME_MESSAGES_DELIMITER,
+  UPGRADES_DEFAULT_MAX_CHANCE,
+  UPGRADES_DEFAULT_MIN_CHANCE,
   USER_ACCOUNTS,
 } from '@/constants';
 
@@ -206,6 +208,8 @@ export interface GameServerConfigInterface {
 
   maxPlayersPerIP: number;
 
+  welcomeMessages: string[];
+
   /**
    * Server version.
    */
@@ -269,6 +273,14 @@ const strValue = (value: string | undefined, def = ''): string => {
 const parseBotsIP = (value: string | undefined, def: IPv4[]): IPv4[] => {
   if (typeof value === 'string' && value.length > 0) {
     return value.split(',');
+  }
+
+  return def;
+};
+
+const parseWelcomeMessages = (value: string | undefined, def: string[]): string[] => {
+  if (typeof value === 'string' && value.length > 0) {
+    return value.split(SERVER_WELCOME_MESSAGES_DELIMITER);
   }
 
   return def;
@@ -378,6 +390,8 @@ const config: GameServerConfigInterface = {
   ),
 
   maxPlayersPerIP: intValue(process.env.MAX_PLAYERS_PER_IP, CONNECTIONS_DEFAULT_MAX_PLAYERS_PER_IP),
+
+  welcomeMessages: parseWelcomeMessages(process.env.WELCOME_MESSAGES, SERVER_WELCOME_MESSAGES),
 
   version,
 };
