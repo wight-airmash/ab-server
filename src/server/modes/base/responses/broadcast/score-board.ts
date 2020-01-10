@@ -42,6 +42,7 @@ export default class ScoreBoardBroadcast extends System {
         x: player.position.lowX,
         y: player.position.lowY,
         isBlind,
+        hasFlag: player.planestate.flagspeed,
       });
 
       if (this.storage.playerMainConnectionList.has(player.id.current)) {
@@ -77,6 +78,14 @@ export default class ScoreBoardBroadcast extends System {
           id: playersData[i].id,
           x: playersData[i].alive === PLAYERS_ALIVE_STATUSES.ALIVE ? playersData[i].x : 0,
           y: playersData[i].alive === PLAYERS_ALIVE_STATUSES.ALIVE ? playersData[i].y : 0,
+        } as ServerPackets.ScoreBoardRanking);
+      }
+
+      if (playersData[i].hasFlag === true) {
+        blindRankings.push({
+          id: playersData[i].id,
+          x: playersData[i].x,
+          y: playersData[i].y,
         } as ServerPackets.ScoreBoardRanking);
       }
     }
