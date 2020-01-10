@@ -2,6 +2,8 @@ import { GAME_TYPES, PLAYER_LEVEL_UPDATE_TYPES } from '@airbattle/protocol';
 import { Polygon } from 'collisions';
 import cryptoRandomString from 'crypto-random-string';
 import {
+  CHAT_FIRST_MESSAGE_SAFE_DELAY_MS,
+  CHAT_USERNAME_PLACEHOLDER,
   COLLISIONS_OBJECT_TYPES,
   CONNECTIONS_PACKET_ACK_TIMEOUT_MS,
   CONNECTIONS_PACKET_BACKUP_TIMEOUT_MS,
@@ -364,9 +366,9 @@ export default class GamePlayersConnect extends System {
 
     this.emit(PLAYERS_CREATED, player.id.current);
 
-    if (isRecovered === true) {
-      const playerId = player.id.current;
+    const playerId = player.id.current;
 
+    if (isRecovered === true) {
       if (
         player.upgrades.amount !== 0 ||
         player.upgrades.speed !== 0 ||
@@ -385,11 +387,25 @@ export default class GamePlayersConnect extends System {
             playerId,
             `Take back your numbers, ${uniqueName}!`
           );
-        } catch (e) {
-          this.log.debug('Player is already gone.');
+        } catch (err) {
+          this.log.debug('Player is already gone.', err.stack);
         }
-      }, 2000);
+      }, CHAT_FIRST_MESSAGE_SAFE_DELAY_MS);
     }
+
+    setTimeout(() => {
+      try {
+        const reg = new RegExp(CHAT_USERNAME_PLACEHOLDER, 'g');
+
+        for (let msgIndex = 0; msgIndex < this.app.config.welcomeMessages.length; msgIndex += 1) {
+          const msg = this.app.config.welcomeMessages[msgIndex].replace(reg, uniqueName);
+
+          this.emit(BROADCAST_CHAT_SERVER_WHISPER, playerId, msg);
+        }
+      } catch (err) {
+        this.log.debug('Player is already gone.', err.stack);
+      }
+    }, CHAT_FIRST_MESSAGE_SAFE_DELAY_MS);
 
     /**
      * Wait for the next packets by protocol.
