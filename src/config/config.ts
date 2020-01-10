@@ -157,6 +157,10 @@ export interface GameServerConfigInterface {
     tls: boolean;
   };
 
+  ctf: {
+    capIfReturned: boolean;
+  };
+
   /**
    * Maxmind DB.
    */
@@ -355,6 +359,10 @@ const config: GameServerConfigInterface = {
     host: strValue(process.env.MASTER_HOST),
     secret: strValue(process.env.MASTER_SECRET),
     tls: boolValue(process.env.MASTER_TLS, false),
+  },
+
+  ctf: {
+    capIfReturned: boolValue(process.env.CAP_IF_RETURNED, false),
   },
 
   geoBasePath: resolvePath(SERVER_DEFAULT_GEO_DB_PATH),
