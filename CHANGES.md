@@ -1,5 +1,12 @@
 ## Future version (unversioned)
 
+## 4.14.0 (January 10, 2020)
+
+Features:
+
+- Server welcome messages. Use WELCOME_MESSAGES to add the messages players will receive after joining the game.
+  No messages by default. See more in .env.example.
+
 ## 4.13.0 (January 8, 2020)
 
 Features:
