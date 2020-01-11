@@ -1,5 +1,15 @@
 ## Future version (unversioned)
 
+## 4.15.0 (January 12, 2020)
+
+Improvements:
+
+- Configurable bans policy on packets flooding. Use PACKETS_FLOODING_AUTOBAN variable to enable or disable bans by server for repeated violations. Enabled by default.
+
+Bug fixes:
+
+- Send PACKET_FLOODING_BAN error instead of GLOBAL_BAN to the client.
+
 ## 4.14.0 (January 10, 2020)
 
 Features:
