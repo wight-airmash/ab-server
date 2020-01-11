@@ -97,5 +97,5 @@ If you run the server behind the proxy it is important to pass the real IP to th
 
 ## Contribution
 
-1. Server performance is important. Some bots (like https://github.com/username2234/airmash_bot) generate many packets espesially in `-follow me` mode, you can use them to test.
+1. Server performance is important. Some bots (like https://github.com/airmash-refugees/airmash_bot) generate many packets espesially in `-follow me` mode, you can use them to test.
 2. There are eslint rules here, please don't forget about this.
