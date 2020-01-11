@@ -211,6 +211,11 @@ export interface GameServerConfigInterface {
   welcomeMessages: string[];
 
   /**
+   * Permit automatic bans based on network events (i.e. packet flooding).
+   */
+  autoBan: boolean;
+
+  /**
    * Server version.
    */
   version: string;
@@ -392,6 +397,8 @@ const config: GameServerConfigInterface = {
   maxPlayersPerIP: intValue(process.env.MAX_PLAYERS_PER_IP, CONNECTIONS_DEFAULT_MAX_PLAYERS_PER_IP),
 
   welcomeMessages: parseWelcomeMessages(process.env.WELCOME_MESSAGES, SERVER_WELCOME_MESSAGES),
+
+  autoBan: boolValue(process.env.AUTOBAN_ENABLED, false),
 
   version,
 };
