@@ -21,6 +21,7 @@ import {
   CONNECTIONS_PACKET_RECEIVED,
   CONNECTIONS_UNBAN_IP,
   CTF_REMOVE_PLAYER_FROM_LEADER,
+  ERRORS_PACKET_FLOODING_DETECTED,
   PLAYERS_KICK,
   PLAYERS_UPGRADES_RESET,
   RESPONSE_PLAYER_BAN,
@@ -168,15 +169,19 @@ export default class WsEndpoint {
            * Ban check.
            */
           if (this.app.storage.ipBanList.has(connection.meta.ip)) {
-            if (
-              this.app.storage.ipBanList.get(connection.meta.ip).expire > connection.meta.createdAt
-            ) {
+            const ipBan = this.app.storage.ipBanList.get(connection.meta.ip);
+
+            if (ipBan.expire > connection.meta.createdAt) {
               this.log.info('IP is banned. Connection refused.', {
                 ip: connection.meta.ip,
                 connection: connectionId,
               });
 
-              this.app.events.emit(RESPONSE_PLAYER_BAN, connectionId);
+              this.app.events.emit(
+                RESPONSE_PLAYER_BAN,
+                connectionId,
+                ipBan.reason === ERRORS_PACKET_FLOODING_DETECTED
+              );
 
               setTimeout(() => {
                 this.app.events.emit(CONNECTIONS_BREAK, connectionId);

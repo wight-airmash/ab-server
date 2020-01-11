@@ -17,12 +17,12 @@ export default class PlayerBanResponse extends System {
    * @param connectionId
    * @param type
    */
-  onPlayerLevel(connectionId: ConnectionId): void {
+  onPlayerLevel(connectionId: ConnectionId, isPacketFloodingBan: boolean): void {
     this.emit(
       CONNECTIONS_SEND_PACKET,
       {
         c: SERVER_PACKETS.ERROR,
-        error: SERVER_ERRORS.GLOBAL_BAN,
+        error: isPacketFloodingBan ? SERVER_ERRORS.PACKET_FLOODING_BAN : SERVER_ERRORS.GLOBAL_BAN,
       } as ServerPackets.Error,
       connectionId
     );
