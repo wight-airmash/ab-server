@@ -1,4 +1,5 @@
 import Component from '@/server/component';
+import config from '@/config';
 
 export default class Match extends Component {
   public winnerTeam: number;
@@ -21,10 +22,13 @@ export default class Match extends Component {
 
   public current = 1;
 
+  public capIfReturned = false;
+
   constructor() {
     super();
 
     this.winnerTeam = 0;
     this.bounty = 0;
+    this.capIfReturned = config.ctf.capIfReturned;
   }
 }
