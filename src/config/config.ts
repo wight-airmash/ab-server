@@ -11,6 +11,7 @@ import {
   BOTS_SERVER_BOT_NAME,
   BOTS_WHITELIST_ENABLED,
   CONNECTIONS_DEFAULT_MAX_PLAYERS_PER_IP,
+  CONNECTIONS_FLOODING_AUTOBAN,
   METRICS_LOG_INTERVAL_SEC,
   METRICS_LOG_SAMPLES,
   PLAYERS_ALLOW_NON_ASCII_USERNAMES,
@@ -398,7 +399,7 @@ const config: GameServerConfigInterface = {
 
   welcomeMessages: parseWelcomeMessages(process.env.WELCOME_MESSAGES, SERVER_WELCOME_MESSAGES),
 
-  autoBan: boolValue(process.env.AUTOBAN_ENABLED, false),
+  autoBan: boolValue(process.env.PACKETS_FLOODING_AUTOBAN, CONNECTIONS_FLOODING_AUTOBAN),
 
   version,
 };
