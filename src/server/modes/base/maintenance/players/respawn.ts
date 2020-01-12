@@ -121,6 +121,7 @@ export default class GamePlayersRespawn extends System {
       player.keystate.SPECIAL = false;
       player.keystate.STRAFE = false;
       player.keystate.FIRE = false;
+      player.keystate.ABILITY = false;
 
       player.delayed.FIRE_ALTERNATE_MISSILE = false;
 
@@ -131,8 +132,15 @@ export default class GamePlayersRespawn extends System {
       player.planestate.stealthed = false;
       player.planestate.flagspeed = false;
 
+      player.stunned.current = false;
+      player.stunned.endTime = false;
       player.inferno.current = false;
       player.inferno.endTime = 0;
+
+      player.ability.chargingFire = 0;
+      player.ability.capacity = 0;
+      player.ability.fullDrainTime = 0;
+      player.ability.enabled = false;
 
       const hitbox = this.storage.shipHitboxesCache[shipType][player.rotation.low];
 

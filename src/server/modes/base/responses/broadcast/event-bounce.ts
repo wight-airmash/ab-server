@@ -59,7 +59,8 @@ export default class EventBounceBroadcast extends System {
           player.planestate.boost,
           player.planestate.strafe,
           player.planestate.stealthed,
-          player.planestate.flagspeed
+          player.planestate.flagspeed,
+          player.stunned.current
         ),
         posX: player.position.x,
         posY: player.position.y,

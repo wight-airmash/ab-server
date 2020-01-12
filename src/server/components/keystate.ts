@@ -13,6 +13,8 @@ export default class Keystate extends Component {
 
   public SPECIAL: boolean;
 
+  public ABILITY: boolean;
+
   public STRAFE: boolean;
 
   public seq: number;
@@ -37,6 +39,7 @@ export default class Keystate extends Component {
     this.LEFT = false;
     this.FIRE = false;
     this.SPECIAL = false;
+    this.ABILITY = false;
     this.STRAFE = false;
   }
 }

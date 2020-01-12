@@ -16,6 +16,7 @@ import {
   COMMAND_UPGRADE,
   COMMAND_USURP,
   ROUTE_COMMAND,
+  COMMAND_ABILITIES,
 } from '@/events';
 import { System } from '@/server/system';
 import { has } from '@/support/objects';
@@ -47,6 +48,7 @@ export default class CommandMessageHandler extends System {
       spectators: COMMAND_SPECTATORS,
       su: COMMAND_SU,
       upgrades: COMMAND_DROP_UPGRADE,
+      abilities: COMMAND_ABILITIES,
 
       // CTF only.
       elections: COMMAND_ELECTIONS,

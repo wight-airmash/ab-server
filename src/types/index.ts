@@ -179,7 +179,6 @@ export type AuthTokenData = {
 };
 
 export interface MissileTemplate {
-  type: MOB_TYPES;
   x: number;
   y: number;
   rot: number;

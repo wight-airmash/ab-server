@@ -71,6 +71,8 @@ import Repel from '@/server/components/repel';
 import Rotation from '@/server/components/rotation';
 import Score from '@/server/components/score';
 import Shield from '@/server/components/shield-powerup';
+import Ability from '@/server/components/ability';
+import Stunned from '@/server/components/stunned';
 import Spectate from '@/server/components/spectate';
 import Stats from '@/server/components/stats';
 import Su from '@/server/components/su';
@@ -185,6 +187,8 @@ export default class GamePlayersConnect extends System {
       new Captures(),
       new Recaptures(),
       new Shield(true, Date.now() + PLAYERS_SPAWN_SHIELD_DURATION_MS),
+      new Ability(),
+      new Stunned(),
       new Inferno(),
       new Keystate(),
       new Kills(),

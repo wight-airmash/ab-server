@@ -12,6 +12,7 @@ import SpectatorsCommandHandler from '@/server/modes/base/commands/spectators';
 import SuperuserCommandHandler from '@/server/modes/base/commands/su';
 import UpgradeCommandHandler from '@/server/modes/base/commands/upgrade';
 import UpgradesCommandHandler from '@/server/modes/base/commands/upgrades';
+import AbilitiesCommandHandler from '@/server/modes/base/commands/abilities';
 import AckMessageHandler from '@/server/modes/base/controllers/ack';
 import BackupMessageHandler from '@/server/modes/base/controllers/backup';
 import ChatMessageHandler from '@/server/modes/base/controllers/chat';
@@ -156,6 +157,7 @@ export default abstract class BaseGameManifest extends GameManifest {
       SuperuserCommandHandler,
       UpgradeCommandHandler,
       UpgradesCommandHandler,
+      AbilitiesCommandHandler,
 
       // Responses.
       ServerMessage,

@@ -39,3 +39,5 @@ export * from '@/constants/units';
 export * from '@/constants/upgrades';
 
 export * from '@/constants/user-stats';
+
+export * from '@/constants/abilities';

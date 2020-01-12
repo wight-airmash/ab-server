@@ -143,4 +143,26 @@ export const PROJECTILES_SPECS = {
 
     repelEnergy: 168,
   },
+  [MOB_TYPES.STUN_MISSILE]: {
+    maxSpeed: 9,
+    baseSpeed: 2.05,
+
+    speedFactor: 0.3,
+    infernoSpeedFactor: 1,
+
+    accel: 0.105,
+
+    /**
+     * Basic damage for speed in range [baseSpeed, maxSpeed].
+     */
+    damage: 0.0,
+    infernoDamageFactor: 1,
+
+    distance: 804,
+
+    shape: PROJECTILES_SHAPES.REGULAR,
+
+    repelEnergy: 197,
+    stunTime: 2000,
+  },
 };

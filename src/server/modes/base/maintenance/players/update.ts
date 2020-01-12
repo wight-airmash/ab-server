@@ -1,5 +1,6 @@
 import { CTF_TEAMS, FLAGS_ISO_TO_CODE } from '@airbattle/protocol';
 import { Polygon } from 'collisions';
+
 import {
   COLLISIONS_OBJECT_TYPES,
   LIMITS_ANY_DECREASE_WEIGHT,
@@ -24,6 +25,7 @@ import {
   SHIPS_SPECS,
   SHIPS_TYPES,
   UPGRADES_SPECS,
+  ABILITIES_SPECS,
 } from '@/constants';
 import {
   BROADCAST_EVENT_BOOST,
@@ -281,7 +283,8 @@ export default class GamePlayersUpdate extends System {
         player.keystate.RIGHT ||
         player.keystate.UP ||
         player.keystate.DOWN ||
-        player.planestate.fire
+        player.planestate.fire ||
+        player.keystate.ABILITY
       ) {
         // rounded tick time 16.6ms.
         player.times.activePlaying += 17;
@@ -432,46 +435,58 @@ export default class GamePlayersUpdate extends System {
       }
 
       /**
-       * Airplane movement direction.
+       * Stun expiry check.
        */
-      let flightDirection = -999;
 
-      if (player.planestate.strafe) {
-        /**
-         * Copter strafe.
-         */
-        if (player.keystate.LEFT) {
-          flightDirection = player.rotation.current - 0.5 * Math.PI;
-        }
-
-        if (player.keystate.RIGHT) {
-          flightDirection = player.rotation.current + 0.5 * Math.PI;
-        }
-      } else if (player.keystate.LEFT || player.keystate.RIGHT) {
-        isUpdateHitbox = true;
-
-        if (player.keystate.LEFT) {
-          player.rotation.current -= frameFactor * SHIP_SPECS.turnFactor;
-        }
-
-        if (player.keystate.RIGHT) {
-          player.rotation.current += frameFactor * SHIP_SPECS.turnFactor;
-        }
-
-        player.rotation.current = ((player.rotation.current % PI_X2) + PI_X2) % PI_X2;
+      if (player.stunned.current === true && player.stunned.endTime <= now) {
+        player.stunned.current = false;
+        player.delayed.BROADCAST_PLAYER_UPDATE = true;
       }
 
-      if (player.keystate.UP) {
-        if (flightDirection === -999) {
-          flightDirection = player.rotation.current;
-        } else {
-          flightDirection += Math.PI * (player.keystate.RIGHT ? -0.25 : 0.25);
+      /**
+       * Airplane movement direction.
+       */
+
+      let flightDirection = -999;
+
+      if (player.stunned.current === false) {
+        if (player.planestate.strafe) {
+          /**
+           * Copter strafe.
+           */
+          if (player.keystate.LEFT) {
+            flightDirection = player.rotation.current - 0.5 * Math.PI;
+          }
+
+          if (player.keystate.RIGHT) {
+            flightDirection = player.rotation.current + 0.5 * Math.PI;
+          }
+        } else if (player.keystate.LEFT || player.keystate.RIGHT) {
+          isUpdateHitbox = true;
+
+          if (player.keystate.LEFT) {
+            player.rotation.current -= frameFactor * SHIP_SPECS.turnFactor;
+          }
+
+          if (player.keystate.RIGHT) {
+            player.rotation.current += frameFactor * SHIP_SPECS.turnFactor;
+          }
+
+          player.rotation.current = ((player.rotation.current % PI_X2) + PI_X2) % PI_X2;
         }
-      } else if (player.keystate.DOWN) {
-        if (flightDirection === -999) {
-          flightDirection = player.rotation.current + Math.PI;
-        } else {
-          flightDirection += Math.PI * (player.keystate.RIGHT ? 0.25 : -0.25);
+
+        if (player.keystate.UP) {
+          if (flightDirection === -999) {
+            flightDirection = player.rotation.current;
+          } else {
+            flightDirection += Math.PI * (player.keystate.RIGHT ? -0.25 : 0.25);
+          }
+        } else if (player.keystate.DOWN) {
+          if (flightDirection === -999) {
+            flightDirection = player.rotation.current + Math.PI;
+          } else {
+            flightDirection += Math.PI * (player.keystate.RIGHT ? 0.25 : -0.25);
+          }
         }
       }
 
@@ -630,6 +645,8 @@ export default class GamePlayersUpdate extends System {
         );
       }
 
+      const useAbility = this.handleAbilities(player);
+
       /**
        * Fire projectiles.
        */
@@ -637,10 +654,24 @@ export default class GamePlayersUpdate extends System {
         const fireMode = player.inferno.current ? SHIPS_FIRE_MODES.INFERNO : SHIPS_FIRE_MODES.FIRE;
         let { fireEnergy } = SHIP_SPECS;
         let fireType = SHIPS_FIRE_TYPES.DEFAULT;
+        let { missileType } = SHIP_SPECS;
+        let FIRE_MODE_TEMPLATES = SHIP_SPECS[fireMode];
 
-        if (!player.keystate.FIRE) {
+        if (player.keystate.SPECIAL) {
           fireType = SHIPS_FIRE_TYPES.SPECIAL;
           fireEnergy = SHIP_SPECS.specialEnergy;
+          missileType = SHIP_SPECS.specialMissileType;
+        } else if (useAbility) {
+          const ABILITY_SPECS = ABILITIES_SPECS[player.ability.current];
+
+          fireEnergy = ABILITY_SPECS.abilityEnergy;
+          const specialMissileType = ABILITY_SPECS.missileType;
+
+          if (specialMissileType) missileType = specialMissileType;
+
+          if (ABILITY_SPECS.replaceFireTemplate) {
+            FIRE_MODE_TEMPLATES = ABILITY_SPECS[fireMode];
+          }
         }
 
         /**
@@ -657,10 +688,11 @@ export default class GamePlayersUpdate extends System {
             this.delay(BROADCAST_PLAYER_UPDATE, player.id.current);
           }
 
-          const FIRE_TEMPLATE = SHIP_SPECS[fireMode][fireType];
+          const FIRE_TEMPLATE = FIRE_MODE_TEMPLATES[fireType];
           const projectileIds = [];
 
           player.times.lastFire = now;
+
           player.energy.current -= fireEnergy;
           player.stats.fires += 1;
           player.stats.fireProjectiles += FIRE_TEMPLATE.length;
@@ -677,7 +709,8 @@ export default class GamePlayersUpdate extends System {
            */
           for (let index = 0; index < FIRE_TEMPLATE.length; index += 1) {
             const PROJECTILE_FIRE_TEMPLATE = FIRE_TEMPLATE[index];
-            const PROJECTILE_SPECS = PROJECTILES_SPECS[PROJECTILE_FIRE_TEMPLATE.type];
+
+            const PROJECTILE_SPECS = PROJECTILES_SPECS[missileType];
             const mobId = this.helpers.createMobId();
             const projectileRot =
               (((player.rotation.current + PROJECTILE_FIRE_TEMPLATE.rot) % PI_X2) + PI_X2) % PI_X2;
@@ -713,7 +746,7 @@ export default class GamePlayersUpdate extends System {
 
             const projectile = new Entity().attach(
               new Id(mobId),
-              new MobType(PROJECTILE_FIRE_TEMPLATE.type),
+              new MobType(missileType),
               new Position(posX, posY),
               new Velocity(
                 projectileRotSin *
@@ -822,5 +855,99 @@ export default class GamePlayersUpdate extends System {
     });
 
     this.isUpdatePerSecondLimits = false;
+  }
+
+  protected handleAbilities(player: Entity): boolean {
+    if (!player.ability.current) return false;
+
+    const now = Date.now();
+    const ABILITY_SPECS = ABILITIES_SPECS[player.ability.current];
+    let useAbility = player.keystate.ABILITY;
+
+    // check if ability was recharged
+    if (player.ability.capacity === 0) {
+      if (player.ability.fullDrainTime < now - ABILITY_SPECS.rechargeTime) {
+        player.ability.capacity = ABILITY_SPECS.maxCapacity;
+      } else {
+        useAbility = false;
+
+        // switch off persistent ability
+        if (player.ability.enabled) {
+          if (ABILITY_SPECS.onEnd) ABILITY_SPECS.onEnd(player, ABILITY_SPECS, now);
+
+          player.ability.enabled = false;
+        }
+      }
+    }
+
+    if (player.keystate.ABILITY && player.ability.enabled) {
+      // switch off persistent ability
+      player.keystate.ABILITY = false;
+      player.ability.enabled = false;
+
+      if (ABILITY_SPECS.onEnd) ABILITY_SPECS.onEnd(player, ABILITY_SPECS, now);
+    }
+
+    if (player.ability.enabled) {
+      // check of persistent ability conditions
+      if (ABILITY_SPECS.checkPersistentAbilityConditions) {
+        if (!ABILITY_SPECS.checkPersistentAbilityConditions(player, ABILITY_SPECS, now)) {
+          if (ABILITY_SPECS.onEnd) ABILITY_SPECS.onEnd(player, ABILITY_SPECS, now);
+
+          player.ability.enabled = false;
+        }
+      }
+    }
+
+    // handle charging attack
+    if (ABILITY_SPECS.chargingFire && player.ability.capacity) {
+      if (player.keystate.ABILITY) {
+        // when key is pressed we charge attack
+        player.ability.chargingFire += 1;
+        useAbility = false;
+      } else if (player.ability.chargingFire) useAbility = true;
+    }
+
+    // launch ability
+    if (useAbility && !player.ability.enabled) {
+      // check whether it can be launched
+
+      if (
+        player.ability.lastUse < now - ABILITY_SPECS.abilityDelay &&
+        ABILITY_SPECS.checkLaunchConditions(player, ABILITY_SPECS, now)
+      ) {
+        player.ability.lastUse = now;
+
+        // prepare for launch
+        if (ABILITY_SPECS.fire) {
+          player.planestate.fire = true;
+        } else if (ABILITY_SPECS.special || ABILITY_SPECS.specialPersistent) {
+          this.log.debug(`PLAYER LAUNCHED ABILITY... ${player.ability.capacity}`);
+
+          player.energy.current -= ABILITY_SPECS.abilityEnergy;
+
+          if (ABILITY_SPECS.specialPersistent) {
+            player.keystate.ABILITY = false;
+            player.ability.enabled = true;
+          }
+        }
+
+        if (ABILITY_SPECS.onLaunch) ABILITY_SPECS.onLaunch(player, ABILITY_SPECS, now);
+      } else {
+        useAbility = false;
+      }
+    }
+
+    // adjust capacity
+    if (useAbility || player.ability.enabled) {
+      if (player.ability.capacity - ABILITY_SPECS.capacityDrain <= 0) {
+        player.ability.capacity = 0;
+        player.ability.fullDrainTime = now;
+      } else {
+        player.ability.capacity -= ABILITY_SPECS.capacityDrain;
+      }
+    }
+
+    return useAbility;
   }
 }

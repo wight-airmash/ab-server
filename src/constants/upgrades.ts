@@ -18,7 +18,7 @@ export const UPGRADES_TYPES = {
   4: 'MISSILE',
 };
 
-export const UPGRADES_START_AMOUNT = 0;
+export const UPGRADES_START_AMOUNT = 100;
 
 export const UPGRADES_SPECS = {
   SPEED: {

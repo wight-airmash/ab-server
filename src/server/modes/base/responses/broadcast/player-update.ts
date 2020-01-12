@@ -108,7 +108,8 @@ export default class PlayerUpdateBroadcast extends System {
           player.planestate.boost,
           player.planestate.strafe,
           player.planestate.stealthed,
-          player.planestate.flagspeed
+          player.planestate.flagspeed,
+          player.stunned.current
         ),
         upgrades: encodeUpgrades(
           player.upgrades.speed,

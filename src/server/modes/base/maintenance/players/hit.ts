@@ -1,9 +1,11 @@
+import { MOB_TYPES } from '@airbattle/protocol';
 import {
   PLAYERS_HEALTH,
   PROJECTILES_EXTRA_SPEED_TO_DAMAGE_FACTOR,
   PROJECTILES_SPECS,
   SHIPS_SPECS,
   UPGRADES_SPECS,
+  ABILITIES_SPECS,
 } from '@/constants';
 import { BROADCAST_EVENT_STEALTH, BROADCAST_PLAYER_UPDATE, PLAYERS_HIT } from '@/events';
 import { System } from '@/server/system';
@@ -37,12 +39,29 @@ export default class GamePlayersHit extends System {
     const victim = this.storage.playerList.get(victimId);
     let damage: number;
 
+    if (victim.ability.current) {
+      const ABILITY_SPECS = ABILITIES_SPECS[victim.ability.current];
+
+      if (ABILITY_SPECS.onHit) ABILITY_SPECS.onHit(victim, projectileId, ABILITY_SPECS, now);
+    }
+
+    if (victim.delayed.BROADCAST_PLAYER_UPDATE) {
+      this.delay(BROADCAST_PLAYER_UPDATE, victim.id.current);
+    }
+
+    if (victim.delayed.BROADCAST_EVENT_STEALTH) {
+      this.delay(BROADCAST_EVENT_STEALTH, victim.id.current);
+    }
+
     if (victim.planestate.stealthed === true) {
       victim.planestate.stealthed = false;
       victim.times.lastStealth = now;
 
-      this.delay(BROADCAST_EVENT_STEALTH, victim.id.current);
-      this.delay(BROADCAST_PLAYER_UPDATE, victim.id.current);
+      if (!victim.delayed.BROADCAST_EVENT_STEALTH)
+        this.delay(BROADCAST_EVENT_STEALTH, victim.id.current);
+
+      if (!victim.delayed.BROADCAST_PLAYER_UPDATE)
+        this.delay(BROADCAST_PLAYER_UPDATE, victim.id.current);
     }
 
     if (projectileId === 0) {
@@ -59,6 +78,18 @@ export default class GamePlayersHit extends System {
       victim.damage.hitsReceived += 1;
 
       const projectile = this.storage.mobList.get(projectileId);
+
+      // Special projectiles
+      if (projectile.mobtype.current === MOB_TYPES.STUN_MISSILE) {
+        victim.stunned.current = true;
+        victim.stunned.endTime = now + PROJECTILES_SPECS[projectile.mobtype.current].stunTime;
+
+        if (!victim.delayed.BROADCAST_PLAYER_UPDATE)
+          this.delay(BROADCAST_PLAYER_UPDATE, victim.id.current);
+
+        return;
+      }
+
       const scalar =
         projectile.velocity.x * victim.velocity.x + projectile.velocity.y * victim.velocity.y;
       const { maxSpeed } = PROJECTILES_SPECS[projectile.mobtype.current];

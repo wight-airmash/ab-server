@@ -37,21 +37,13 @@ export const SHIPS_ENCLOSE_RADIUS = {
 
 /**
  *
- * @param type missile type
  * @param x missile start X coord relative to the player position
  * @param y missile start Y coord relative to the player position
  * @param rot missile start rotation angle relative to the player position
  * @param alt has or not alternative symmetrical starting place (like copter left/right fires)
  */
-const missileTemplate = (
-  type: number,
-  x: number,
-  y: number,
-  rot: number,
-  alt = false
-): MissileTemplate => {
+const missileTemplate = (x: number, y: number, rot: number, alt = false): MissileTemplate => {
   return {
-    type,
     x,
     y,
     rot,
@@ -107,14 +99,14 @@ export const SHIPS_SPECS = {
 
     repelEnergy: 2100,
 
-    [SHIPS_FIRE_MODES.FIRE]: missileFireTemplate([
-      missileTemplate(MOB_TYPES.PREDATOR_MISSILE, 0, 35, 0),
-    ]),
+    missileType: MOB_TYPES.PREDATOR_MISSILE,
+
+    [SHIPS_FIRE_MODES.FIRE]: missileFireTemplate([missileTemplate(0, 35, 0)]),
 
     [SHIPS_FIRE_MODES.INFERNO]: missileFireTemplate([
-      missileTemplate(MOB_TYPES.PREDATOR_MISSILE, -20, 5, -0.05),
-      missileTemplate(MOB_TYPES.PREDATOR_MISSILE, 0, 35, 0),
-      missileTemplate(MOB_TYPES.PREDATOR_MISSILE, 20, 5, 0.05),
+      missileTemplate(-20, 5, -0.05),
+      missileTemplate(0, 35, 0),
+      missileTemplate(20, 5, 0.05),
     ]),
   },
 
@@ -156,14 +148,14 @@ export const SHIPS_SPECS = {
 
     repelEnergy: 7500,
 
-    [SHIPS_FIRE_MODES.FIRE]: missileFireTemplate([
-      missileTemplate(MOB_TYPES.GOLIATH_MISSILE, 0, 35, 0),
-    ]),
+    missileType: MOB_TYPES.GOLIATH_MISSILE,
+
+    [SHIPS_FIRE_MODES.FIRE]: missileFireTemplate([missileTemplate(0, 35, 0)]),
 
     [SHIPS_FIRE_MODES.INFERNO]: missileFireTemplate([
-      missileTemplate(MOB_TYPES.GOLIATH_MISSILE, -30, 0, -0.05),
-      missileTemplate(MOB_TYPES.GOLIATH_MISSILE, 0, 35, 0),
-      missileTemplate(MOB_TYPES.GOLIATH_MISSILE, 30, 0, 0.05),
+      missileTemplate(-30, 0, -0.05),
+      missileTemplate(0, 35, 0),
+      missileTemplate(30, 0, 0.05),
     ]),
   },
 
@@ -200,14 +192,14 @@ export const SHIPS_SPECS = {
 
     repelEnergy: 1800,
 
-    [SHIPS_FIRE_MODES.FIRE]: missileFireTemplate([
-      missileTemplate(MOB_TYPES.COPTER_MISSILE, 15, 10, 0, true),
-    ]),
+    missileType: MOB_TYPES.COPTER_MISSILE,
+
+    [SHIPS_FIRE_MODES.FIRE]: missileFireTemplate([missileTemplate(15, 10, 0, true)]),
 
     [SHIPS_FIRE_MODES.INFERNO]: missileFireTemplate([
-      missileTemplate(MOB_TYPES.COPTER_MISSILE, -10, 5, -0.05),
-      missileTemplate(MOB_TYPES.COPTER_MISSILE, 0, 10, 0),
-      missileTemplate(MOB_TYPES.COPTER_MISSILE, 10, 5, 0.05),
+      missileTemplate(-10, 5, -0.05),
+      missileTemplate(0, 10, 0),
+      missileTemplate(10, 5, 0.05),
     ]),
   },
 
@@ -246,27 +238,23 @@ export const SHIPS_SPECS = {
 
     repelEnergy: 2400,
 
+    missileType: MOB_TYPES.TORNADO_MISSILE,
+    // TODO for SHIPS_FIRE_MODES.INFERNO special missile type should be MOB_TYPES.TORNADO_MISSILE
+    specialMissileType: MOB_TYPES.TORNADO_SMALL_MISSILE,
+
     [SHIPS_FIRE_MODES.FIRE]: missileFireTemplate(
-      [missileTemplate(MOB_TYPES.TORNADO_MISSILE, 0, 40, 0)],
-      [
-        missileTemplate(MOB_TYPES.TORNADO_SMALL_MISSILE, -15, 10, -0.05),
-        missileTemplate(MOB_TYPES.TORNADO_SMALL_MISSILE, 0, 40, 0),
-        missileTemplate(MOB_TYPES.TORNADO_SMALL_MISSILE, 15, 10, 0.05),
-      ]
+      [missileTemplate(0, 40, 0)],
+      [missileTemplate(-15, 10, -0.05), missileTemplate(0, 40, 0), missileTemplate(15, 10, 0.05)]
     ),
 
     [SHIPS_FIRE_MODES.INFERNO]: missileFireTemplate(
+      [missileTemplate(-15, 10, -0.05), missileTemplate(0, 40, 0), missileTemplate(15, 10, 0.05)],
       [
-        missileTemplate(MOB_TYPES.TORNADO_MISSILE, -15, 10, -0.05),
-        missileTemplate(MOB_TYPES.TORNADO_MISSILE, 0, 40, 0),
-        missileTemplate(MOB_TYPES.TORNADO_MISSILE, 15, 10, 0.05),
-      ],
-      [
-        missileTemplate(MOB_TYPES.TORNADO_MISSILE, -30, 20, -0.06),
-        missileTemplate(MOB_TYPES.TORNADO_MISSILE, -20, 15, -0.03),
-        missileTemplate(MOB_TYPES.TORNADO_MISSILE, 0, 40, 0),
-        missileTemplate(MOB_TYPES.TORNADO_MISSILE, 20, 15, 0.03),
-        missileTemplate(MOB_TYPES.TORNADO_MISSILE, 30, 20, 0.06),
+        missileTemplate(-30, 20, -0.06),
+        missileTemplate(-20, 15, -0.03),
+        missileTemplate(0, 40, 0),
+        missileTemplate(20, 15, 0.03),
+        missileTemplate(30, 20, 0.06),
       ]
     ),
   },
@@ -305,14 +293,14 @@ export const SHIPS_SPECS = {
 
     repelEnergy: 2600,
 
-    [SHIPS_FIRE_MODES.FIRE]: missileFireTemplate([
-      missileTemplate(MOB_TYPES.PROWLER_MISSILE, 0, 35, 0),
-    ]),
+    missileType: MOB_TYPES.PROWLER_MISSILE,
+
+    [SHIPS_FIRE_MODES.FIRE]: missileFireTemplate([missileTemplate(0, 35, 0)]),
 
     [SHIPS_FIRE_MODES.INFERNO]: missileFireTemplate([
-      missileTemplate(MOB_TYPES.PROWLER_MISSILE, -20, 0, -0.05),
-      missileTemplate(MOB_TYPES.PROWLER_MISSILE, 0, 35, 0),
-      missileTemplate(MOB_TYPES.PROWLER_MISSILE, 20, 0, 0.05),
+      missileTemplate(-20, 0, -0.05),
+      missileTemplate(0, 35, 0),
+      missileTemplate(20, 0, 0.05),
     ]),
   },
 };

@@ -13,6 +13,7 @@ import {
   REPEL_PROJECTILE_MAX_DISTANCE,
   REPEL_PROJECTILE_MIN_DISTANCE,
   SHIPS_SPECS,
+  ABILITIES_SPECS,
 } from '@/constants';
 import {
   BROADCAST_EVENT_STEALTH,
@@ -154,6 +155,20 @@ export default class GamePlayersRepel extends System {
 
       victim.velocity.x = speed * cos;
       victim.velocity.y = speed * sin;
+
+      if (victim.ability.current) {
+        const ABILITY_SPECS = ABILITIES_SPECS[victim.ability.current];
+
+        if (ABILITY_SPECS.onRepel) ABILITY_SPECS.onRepel(victim, ABILITY_SPECS, now);
+      }
+
+      if (victim.delayed.BROADCAST_PLAYER_UPDATE) {
+        this.delay(BROADCAST_PLAYER_UPDATE, victim.id.current);
+      }
+
+      if (victim.delayed.BROADCAST_EVENT_STEALTH) {
+        this.delay(BROADCAST_EVENT_STEALTH, victim.id.current);
+      }
 
       if (victim.planestate.stealthed) {
         victim.planestate.stealthed = false;
