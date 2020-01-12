@@ -42,7 +42,7 @@ npm run start
 
 ## Settings
 
-Please see .env.example.
+Available [environment variables](./docs/env-variables.md).
 
 ## User accounts
 
