@@ -2,7 +2,19 @@ import { ServerPackets, SERVER_PACKETS } from '@airbattle/protocol';
 import { PLAYERS_ALIVE_STATUSES, SHIPS_TYPES } from '@/constants';
 import { BROADCAST_SCORE_BOARD, CONNECTIONS_SEND_PACKET } from '@/events';
 import { System } from '@/server/system';
-import { MainConnectionId } from '@/types';
+import { MainConnectionId, PlayerId } from '@/types';
+
+interface PlayerRawData {
+  id: PlayerId;
+  x: number;
+  y: number;
+  alive: number;
+  score: number;
+  level: number;
+  isStealthed: boolean;
+  hasFlag: boolean;
+  connectionId: MainConnectionId;
+}
 
 export default class ScoreBoardBroadcast extends System {
   constructor({ app }) {
@@ -23,94 +35,119 @@ export default class ScoreBoardBroadcast extends System {
    * @param connectionId
    */
   onScoreBoard(connectionId: MainConnectionId = null): void {
-    const playersData = [];
-    const players = [];
-    const sightedRankings = [];
-    const blindRankings = [];
-    const sightedRecipients = [];
-    const blindRecipients = [];
+    const playersRawData: PlayerRawData[] = [];
+    const players: ServerPackets.ScoreBoardData[] = [];
+    let recipientsData: PlayerRawData[] = [];
 
     this.storage.playerList.forEach(player => {
-      const isBlind =
+      if (!this.storage.playerMainConnectionList.has(player.id.current)) {
+        return;
+      }
+
+      const playerConnectionId = this.storage.playerMainConnectionList.get(player.id.current);
+      const isStealthed =
         player.planetype.current === SHIPS_TYPES.PROWLER && player.planestate.stealthed === true;
 
-      playersData.push({
-        alive: player.alivestatus.current,
+      playersRawData.push({
         id: player.id.current,
-        score: player.score.current,
-        level: player.level.current,
         x: player.position.lowX,
         y: player.position.lowY,
-        isBlind,
+        alive: player.alivestatus.current,
+        score: player.score.current,
+        level: player.level.current,
+        isStealthed,
         hasFlag: player.planestate.flagspeed,
+        connectionId: playerConnectionId,
       });
 
-      if (this.storage.playerMainConnectionList.has(player.id.current)) {
-        const playerConnectionId = this.storage.playerMainConnectionList.get(player.id.current);
-
-        if (connectionId !== null && playerConnectionId !== connectionId) {
-          return;
-        }
-
-        if (isBlind === true) {
-          blindRecipients.push(playerConnectionId);
-        } else {
-          sightedRecipients.push(playerConnectionId);
-        }
+      if (connectionId !== null && playerConnectionId === connectionId) {
+        recipientsData.push(playersRawData[playersRawData.length - 1]);
       }
     });
 
-    if (blindRecipients.length === 0 && sightedRecipients.length === 0) {
-      return;
+    if (recipientsData.length === 0) {
+      recipientsData = playersRawData;
     }
 
-    playersData.sort((p1, p2) => p2.score - p1.score);
+    playersRawData.sort((p1, p2) => p2.score - p1.score);
 
-    for (let i = 0; i < playersData.length; i += 1) {
+    for (let i = 0; i < playersRawData.length; i += 1) {
       players.push({
-        id: playersData[i].id,
-        score: playersData[i].score,
-        level: playersData[i].level,
+        id: playersRawData[i].id,
+        score: playersRawData[i].score,
+        level: playersRawData[i].level,
       } as ServerPackets.ScoreBoardData);
-
-      if (playersData[i].isBlind === false) {
-        sightedRankings.push({
-          id: playersData[i].id,
-          x: playersData[i].alive === PLAYERS_ALIVE_STATUSES.ALIVE ? playersData[i].x : 0,
-          y: playersData[i].alive === PLAYERS_ALIVE_STATUSES.ALIVE ? playersData[i].y : 0,
-        } as ServerPackets.ScoreBoardRanking);
-      }
-
-      if (playersData[i].hasFlag === true) {
-        blindRankings.push({
-          id: playersData[i].id,
-          x: playersData[i].x,
-          y: playersData[i].y,
-        } as ServerPackets.ScoreBoardRanking);
-      }
     }
 
-    if (sightedRecipients.length !== 0) {
+    for (let recipientIndex = 0; recipientIndex < recipientsData.length; recipientIndex += 1) {
+      const rankings: ServerPackets.ScoreBoardRanking[] = [];
+      const {
+        id: recipientId,
+        isStealthed: isRecipientStealthed,
+        connectionId: recipientConnectionId,
+      } = recipientsData[recipientIndex];
+
+      for (let playerIndex = 0; playerIndex < playersRawData.length; playerIndex += 1) {
+        const {
+          id,
+          alive,
+          x,
+          y,
+          connectionId: playerConnectionId,
+          isStealthed,
+          hasFlag,
+        } = playersRawData[playerIndex];
+        const isWithinViewport = this.storage.broadcast.has(recipientId)
+          ? this.storage.broadcast.get(recipientId).has(playerConnectionId)
+          : false;
+
+        if (recipientConnectionId === playerConnectionId) {
+          rankings.push({
+            id,
+            x: alive === PLAYERS_ALIVE_STATUSES.ALIVE ? x : 0,
+            y: alive === PLAYERS_ALIVE_STATUSES.ALIVE ? y : 0,
+          });
+        } else if (isRecipientStealthed === false) {
+          rankings.push({
+            id,
+            x:
+              alive !== PLAYERS_ALIVE_STATUSES.ALIVE ||
+              (isStealthed === true && isWithinViewport === false)
+                ? 0
+                : x,
+            y:
+              alive !== PLAYERS_ALIVE_STATUSES.ALIVE ||
+              (isStealthed === true && isWithinViewport === false)
+                ? 0
+                : y,
+          });
+        } else {
+          const hasCoords =
+            (alive === PLAYERS_ALIVE_STATUSES.ALIVE && isWithinViewport === true) ||
+            hasFlag === true;
+
+          rankings.push({
+            id,
+            x: hasCoords ? x : 0,
+            y: hasCoords ? y : 0,
+          });
+        }
+      }
+
+      this.log.debug('SCORE_BOARD', {
+        c: SERVER_PACKETS.SCORE_BOARD,
+        data: players,
+        rankings,
+      });
+
       this.emit(
         CONNECTIONS_SEND_PACKET,
         {
           c: SERVER_PACKETS.SCORE_BOARD,
           data: players,
-          rankings: sightedRankings,
+          rankings,
         } as ServerPackets.ScoreBoard,
-        sightedRecipients
-      );
-    }
-
-    if (blindRecipients.length !== 0) {
-      this.emit(
-        CONNECTIONS_SEND_PACKET,
-        {
-          c: SERVER_PACKETS.SCORE_BOARD,
-          data: players,
-          rankings: blindRankings,
-        } as ServerPackets.ScoreBoard,
-        blindRecipients
+        recipientConnectionId
       );
     }
   }
