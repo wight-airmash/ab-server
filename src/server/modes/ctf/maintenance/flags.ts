@@ -310,6 +310,18 @@ export default class GameFlags extends System {
     const zone = this.storage.mobList.get(zoneId);
 
     if (zone.team.current === player.team.current) {
+      if (this.storage.gameEntity.match.capIfReturned) {
+        const teamFlag = this.storage.mobList.get(
+          player.team.current === CTF_TEAMS.BLUE
+            ? this.storage.ctfFlagBlueId
+            : this.storage.ctfFlagRedId
+        );
+
+        if (!teamFlag.flagstate.returned) {
+          return;
+        }
+      }
+
       const flag = this.storage.mobList.get(
         player.team.current === CTF_TEAMS.BLUE
           ? this.storage.ctfFlagRedId
