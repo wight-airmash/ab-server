@@ -5,6 +5,7 @@
 Improvements:
 
 - Players are sorted by type (human/bot) and by score in moderator panel. Features specific to the game type are displayed depending on the type of server running ("Dismiss" is available only for CTF).
+- Described available [environment variables](./docs/env-variables.md).
 
 Bug fixes:
 
