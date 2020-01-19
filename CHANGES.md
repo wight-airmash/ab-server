@@ -1,5 +1,19 @@
 ## Future version (unversioned)
 
+## 4.16.0 (January 20, 2020)
+
+Improvements:
+
+- Players are sorted by type (human/bot) and by score in moderator panel. Features specific to the game type are displayed depending on the type of server running ("Dismiss" is available only for CTF).
+
+Bug fixes:
+
+- Dismiss sometimes didn't work (#67).
+
+Breaking changes:
+
+- Remove "Sanction" feature from moderator panel (#71).
+
 ## 4.15.0 (January 12, 2020)
 
 Improvements:
