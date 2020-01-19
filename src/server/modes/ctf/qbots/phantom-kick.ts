@@ -1,7 +1,7 @@
 import { encodeUpgrades, ServerPackets, SERVER_PACKETS } from '@airbattle/protocol';
 import { CONNECTIONS_SEND_PACKET, CTF_REMOVE_PLAYER_FROM_LEADER } from '@/events';
 import { System } from '@/server/system';
-import { MainConnectionId, PlayerId } from '@/types';
+import { PlayerId } from '@/types';
 
 /**
  * This implementation is only applicable to Q-bots.
@@ -20,17 +20,23 @@ export default class PhantomPlayerKick extends System {
 
   onKickPlayer(playerId: PlayerId): void {
     if (!this.helpers.isPlayerConnected(playerId) || this.storage.botConnectionIdList.size === 0) {
+      this.log.debug('Player not found.', {
+        playerId,
+        botsConnected: this.storage.botConnectionIdList.size,
+      });
+
       return;
     }
 
     const player = this.storage.playerList.get(playerId);
 
     if (player.planestate.flagspeed === true) {
+      this.log.debug('Player is capturing the flag, phantom kick rejected.');
+
       return;
     }
 
-    const botConnectionId: MainConnectionId = this.storage.botConnectionIdList.values().next()
-      .value;
+    const recipients = [...this.storage.botConnectionIdList];
 
     this.emit(
       CONNECTIONS_SEND_PACKET,
@@ -38,7 +44,7 @@ export default class PhantomPlayerKick extends System {
         c: SERVER_PACKETS.PLAYER_LEAVE,
         id: playerId,
       } as ServerPackets.PlayerLeave,
-      botConnectionId
+      recipients
     );
 
     this.emit(
@@ -60,7 +66,7 @@ export default class PhantomPlayerKick extends System {
           ~~player.inferno.current
         ),
       } as ServerPackets.PlayerNew,
-      botConnectionId
+      recipients
     );
   }
 }
