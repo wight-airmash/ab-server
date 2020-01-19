@@ -23,9 +23,7 @@ import {
   CTF_REMOVE_PLAYER_FROM_LEADER,
   ERRORS_PACKET_FLOODING_DETECTED,
   PLAYERS_KICK,
-  PLAYERS_UPGRADES_RESET,
   RESPONSE_PLAYER_BAN,
-  RESPONSE_SCORE_UPDATE,
   TIMEOUT_LOGIN,
 } from '@/events';
 import Logger from '@/logger';
@@ -396,13 +394,6 @@ export default class WsEndpoint {
       case 'Unmute':
         this.log.info(`Unmuting IP: ${player.ip.current}`);
         this.app.events.emit(CHAT_UNMUTE_BY_IP, player.ip.current);
-        break;
-
-      case 'Sanction':
-        this.log.info(`Sanctioning player ${playerId}`);
-        this.app.events.emit(PLAYERS_UPGRADES_RESET, playerId);
-        player.score.current = 0;
-        this.app.events.emit(RESPONSE_SCORE_UPDATE, playerId);
         break;
 
       case 'Dismiss':
