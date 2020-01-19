@@ -278,6 +278,11 @@ export default class WsEndpoint {
 
     if (this.app.config.admin.active === true) {
       this.uws
+        .get(`${this.app.config.admin.route}/server`, res => {
+          res.writeHeader('Content-type', 'application/json');
+          res.end(`{"type":${this.app.config.server.typeId}}`);
+        })
+
         .get(`${this.app.config.admin.route}/actions`, res => {
           res.writeHeader('Content-type', 'application/json');
           res.end(`[${this.moderatorActions.join(',\n')}]`);
@@ -312,6 +317,7 @@ export default class WsEndpoint {
               ping: player.ping.current,
               flag: player.flag.current,
               isMuted: player.times.unmuteTime > now,
+              isBot: this.app.storage.botIdList.has(player.id.current),
             })
           );
 
