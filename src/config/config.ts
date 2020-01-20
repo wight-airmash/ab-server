@@ -11,6 +11,7 @@ import {
   BOTS_SERVER_BOT_NAME,
   BOTS_WHITELIST_ENABLED,
   CONNECTIONS_DEFAULT_MAX_PLAYERS_PER_IP,
+  CONNECTIONS_FLOODING_AUTOBAN,
   METRICS_LOG_INTERVAL_SEC,
   METRICS_LOG_SAMPLES,
   PLAYERS_ALLOW_NON_ASCII_USERNAMES,
@@ -215,6 +216,11 @@ export interface GameServerConfigInterface {
   welcomeMessages: string[];
 
   /**
+   * Permit automatic bans based on network events (i.e. packet flooding).
+   */
+  autoBan: boolean;
+
+  /**
    * Server version.
    */
   version: string;
@@ -400,6 +406,8 @@ const config: GameServerConfigInterface = {
   maxPlayersPerIP: intValue(process.env.MAX_PLAYERS_PER_IP, CONNECTIONS_DEFAULT_MAX_PLAYERS_PER_IP),
 
   welcomeMessages: parseWelcomeMessages(process.env.WELCOME_MESSAGES, SERVER_WELCOME_MESSAGES),
+
+  autoBan: boolValue(process.env.PACKETS_FLOODING_AUTOBAN, CONNECTIONS_FLOODING_AUTOBAN),
 
   version,
 };

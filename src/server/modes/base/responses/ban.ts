@@ -1,4 +1,4 @@
-import { ServerPackets, SERVER_PACKETS, SERVER_ERRORS } from '@airbattle/protocol';
+import { ServerPackets, SERVER_ERRORS, SERVER_PACKETS } from '@airbattle/protocol';
 import { CONNECTIONS_SEND_PACKET, RESPONSE_PLAYER_BAN } from '@/events';
 import { System } from '@/server/system';
 import { ConnectionId } from '@/types';
@@ -8,7 +8,7 @@ export default class PlayerBanResponse extends System {
     super({ app });
 
     this.listeners = {
-      [RESPONSE_PLAYER_BAN]: this.onPlayerLevel,
+      [RESPONSE_PLAYER_BAN]: this.onPlayerBan,
     };
   }
 
@@ -17,12 +17,15 @@ export default class PlayerBanResponse extends System {
    * @param connectionId
    * @param type
    */
-  onPlayerLevel(connectionId: ConnectionId): void {
+  onPlayerBan(connectionId: ConnectionId, isPacketFloodingBan = false): void {
     this.emit(
       CONNECTIONS_SEND_PACKET,
       {
         c: SERVER_PACKETS.ERROR,
-        error: SERVER_ERRORS.GLOBAL_BAN,
+        error:
+          isPacketFloodingBan === true
+            ? SERVER_ERRORS.PACKET_FLOODING_BAN
+            : SERVER_ERRORS.GLOBAL_BAN,
       } as ServerPackets.Error,
       connectionId
     );

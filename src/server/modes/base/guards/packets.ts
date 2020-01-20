@@ -82,7 +82,7 @@ export default class PacketsGuard extends System {
       connection: connection.meta.id,
     });
 
-    if (floodCounter >= CONNECTIONS_FLOOD_DETECTS_TO_BAN) {
+    if (this.app.config.autoBan === true && floodCounter >= CONNECTIONS_FLOOD_DETECTS_TO_BAN) {
       this.log.info('Packet flooding ban.', {
         ip: connection.meta.ip,
         connection: connection.meta.id,

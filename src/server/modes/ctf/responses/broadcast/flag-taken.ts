@@ -18,7 +18,7 @@ export default class FlagTakenBroadcast extends System {
       BROADCAST_SERVER_MESSAGE,
       `<span class="info inline"><span class="${
         flagType === CTF_TEAMS.BLUE ? 'blueflag' : 'redflag'
-      }"></span></span>Taken by ${playerName}`,
+      }"></span></span>Taken by ${this.helpers.escapeHTML(playerName)}`,
       SERVER_MESSAGE_TYPES.INFO,
       3 * MS_PER_SEC
     );

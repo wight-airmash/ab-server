@@ -1,211 +1,250 @@
 <!doctype html>
-<meta charset="utf-8">
+<html lang="en">
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js">
-</script>
+<head>
+    <meta charset="utf-8">
+    <title>Moderator Panel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<style>
-    body {
-        background: black;
-        color: #c0c0c0;
-        font-size: smaller;
-        font-family: sans-serif;
-    }
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js">
+    </script>
 
-    input,
-    button {
-        padding: 2px;
-        border: none;
-        background: none;
-
-        background: #2f2f2f;
-        color: red;
-        border: 1px solid #4f4f4f;
-    }
-
-    button:hover {
-        cursor: pointer;
-    }
-
-    button[disabled] {
-        color: #4f4f4f;
-
-        cursor: not-allowed;
-    }
-
-    #response {
-        color: red;
-    }
-
-    table {
-        border-collapse: collapse;
-    }
-
-    td,
-    th {
-        text-align: left;
-        padding: 5px;
-        border: 1px solid #4f4f4f;
-    }
-</style>
-
-<form>
-    <center>
-        <h1>Airbattle Moderator</h1>
-
-        <p>
-            Password: <input type="password" name="password" id="password"> &nbsp; &nbsp;
-            Reason: <input id="reason" value="disruptive">
-
-            <p>
-                Server Response: <span id="response">-</span>
-
-                <h2>Players</h2>
-
-                <p>
-                    <strong>Mute</strong>: mute player IP,
-                    <strong>Sanction</strong>: zero score/ups,
-                    <strong>Dismiss</strong>: remove from the leader position,
-                    <strong>Ban</strong>: ban IP
-                </p>
-
-                <table id="players">
-                    <thead>
-                        <tr>
-                            <th>ID
-                            <th>Caps
-                            <th>Spec
-                            <th>K / D
-                            <th>Score
-                            <th>Idle
-                            <th>Ping
-                            <th>Flag
-                            <th>Name
-                            <th>
-                            <th>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-
-                <h2>History</h2>
-
-                <table id="actions">
-                    <thead>
-                        <tr>
-                            <th>Date
-                            <th>Who
-                            <th>Action
-                            <th>Victim
-                            <th>Reason
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-    </center>
-</form>
-
-<script>
-    if (window.location.pathname.endsWith('/') === false) {
-        window.history.replaceState(null, 'Airbattle Moderator', `${window.location.pathname}/`);
-    }
-
-    const dtFormat = new Intl.DateTimeFormat('default', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        timeZoneName: 'short'
-    });
-    const REFRESH_INTERVAL_MS = 10000;
-    const persistantStorageKey = 'persistantFormValues';
-    const $password = document.querySelector('#password');
-    const $reason = document.querySelector('#reason');
-    var disableButtonsTimerId;
-
-    function date(ms) {
-        return dtFormat.format(new Date(ms));
-    }
-
-    function safe(s) {
-        return $('<span>').text(s).html();
-    }
-
-    function onPlayersRefreshComplete(response) {
-        var table = $('#players tbody');
-        table.empty();
-
-        if (!(response && response.length)) {
-            $(`<tr><td colspan=11><em>(no players online)</em></td></tr>`)
-                .appendTo(table);
-            return;
+    <style>
+        body {
+            background: black;
+            color: #c0c0c0;
+            font-size: smaller;
+            font-family: sans-serif;
         }
 
-        response.sort(function (a, b) {
-            if (a.id < b.id) {
-                return -1;
-            } else if (a.id > b.id) {
-                return 1;
-            }
-            return 0;
-        });
+        input,
+        button {
+            padding: 2px;
+            border: none;
+            background: none;
 
-        for (let player of response) {
-            var tr = $(`<tr data-playerid=${player.id}>`);
-            tr.append(`
+            background: #2f2f2f;
+            color: red;
+            border: 1px solid #4f4f4f;
+        }
+
+        button:hover {
+            cursor: pointer;
+        }
+
+        button[disabled] {
+            color: #4f4f4f;
+
+            cursor: not-allowed;
+        }
+
+        #response {
+            color: red;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        td,
+        th {
+            text-align: left;
+            padding: 5px;
+            border: 1px solid #4f4f4f;
+        }
+
+        .player_bot {
+            opacity: 0.5;
+        }
+
+        .player_bot:hover {
+            opacity: 1;
+        }
+
+        .game-type-ffa .ctf-only,
+        .game-type-ffa .btr-only,
+        .game-type-ctf .ffa-only,
+        .game-type-ctf .btr-only,
+        .game-type-btr .ffa-only,
+        .game-type-btr .ctf-only {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <form>
+        <center>
+            <h1>Airbattle Moderator</h1>
+
+            <p>
+                Password: <input type="password" name="password" id="password"> &nbsp; &nbsp;
+                Reason: <input id="reason" value="disruptive">
+
+                <p>
+                    Server Response: <span id="response">-</span>
+
+                    <h2>Players</h2>
+
+                    <p>
+                        <strong>Mute</strong>: mute player IP,
+                        <span class="ctf-only"><strong>Dismiss</strong>: remove from the bots leader position,</span>
+                        <strong>Ban</strong>: ban IP
+                    </p>
+
+                    <table id="players">
+                        <thead>
+                            <tr>
+                                <th>ID
+                                <th class="ctf-only">Caps
+                                <th>Spec
+                                <th>K / D
+                                <th>Score
+                                <th>Idle
+                                <th>Ping
+                                <th>Flag
+                                <th>Name
+                                <th>
+                                <th>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+
+                    <h2>History</h2>
+
+                    <table id="actions">
+                        <thead>
+                            <tr>
+                                <th>Date
+                                <th>Who
+                                <th>Action
+                                <th>Victim
+                                <th>Reason
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+        </center>
+    </form>
+
+    <script>
+        if (window.location.pathname.endsWith('/') === false) {
+            window.history.replaceState(null, 'Airbattle Moderator', `${window.location.pathname}/`);
+        }
+
+        const GAME_TYPES = {
+            FFA: 1,
+            CTF: 2,
+            BTR: 3
+        };
+        const dtFormat = new Intl.DateTimeFormat('default', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            timeZoneName: 'short'
+        });
+        const REFRESH_INTERVAL_MS = 10000;
+        const persistantStorageKey = 'persistantFormValues';
+        const $body = document.body;
+        const $password = document.querySelector('#password');
+        const $reason = document.querySelector('#reason');
+        let disableButtonsTimerId;
+        let gameType = GAME_TYPES.FFA;
+
+        function date(ms) {
+            return dtFormat.format(new Date(ms));
+        }
+
+        function safe(s) {
+            return $('<span>').text(s).html();
+        }
+
+        function onPlayersRefreshComplete(response) {
+            var table = $('#players tbody');
+            table.empty();
+
+            if (!(response && response.length)) {
+                $(`<tr><td colspan=11><em>(no players online)</em></td></tr>`)
+                    .appendTo(table);
+                return;
+            }
+
+            response.sort(function (a, b) {
+                if (a.isBot && !b.isBot) {
+                    return 1;
+                } else if (!a.isBot && b.isBot) {
+                    return -1;
+                }
+
+                if (a.score > b.score) {
+                    return -1;
+                } else if (a.score < b.score) {
+                    return 1;
+                }
+
+                return 0;
+            });
+
+            for (let player of response) {
+                const playerClass = `player player_${player.isBot ? 'bot' : 'human'}`;
+                const playerTypeTitle = player.isBot ? 'bot' : 'human';
+
+                var tr = $(`<tr class="${playerClass}" data-playerid="${player.id}">`);
+                tr.append(`
                 <td>${player.id}
-                <td>${player.captures}
+                <td class="ctf-only">${player.captures}
                 <td>${player.spectate ? "✔️" : "❌"}
                 <td>${player.kills} / ${player.deaths}
                 <td>${player.score}
                 <td>${Math.round((Date.now() - player.lastMove) / (1000.0 * 60))} min
                 <td>${player.ping}
                 <td>${player.flag}
-                <td>${safe(player.name)}
+                <td title="${playerTypeTitle}">${safe(player.name)}
             `);
 
-            if (player.isMuted) {
-                tr.append(`<td><button>Unmute</button>`);
-            } else {
-                tr.append(`<td><button>Mute</button>`);
-            }
+                if (player.isMuted) {
+                    tr.append(`<td><button>Unmute</button>`);
+                } else {
+                    tr.append(`<td><button>Mute</button>`);
+                }
 
-            tr.append(`<td>
-                <button>Sanction</button>
-                <button>Dismiss</button>
+                tr.append(`<td>
+                <button class="ctf-only">Dismiss</button>
                 <button>Ban</button>
             `);
-            table.append(tr);
+                table.append(tr);
+            }
+
+            clearTimeout(disableButtonsTimerId);
+            disableButtonsTimerId = setTimeout(
+                disableActionButtons,
+                REFRESH_INTERVAL_MS - 1000
+            );
         }
 
-        clearTimeout(disableButtonsTimerId);
-        disableButtonsTimerId = setTimeout(
-            disableActionButtons,
-            REFRESH_INTERVAL_MS - 1000
-        );
-    }
-
-    /* Disable action buttons 1 second before refresh, to reduce chance of
-       accidentally banning wrong player. */
-    function disableActionButtons() {
-        $('#players tbody button').attr('disabled', 'disabled');
-    }
-
-    function onActionsRefreshComplete(response) {
-        var table = $('#actions tbody');
-        table.empty();
-
-        if (!(response && response.length)) {
-            $(`<tr><td colspan=6><em>(no actions since restart)</em></td></tr>`)
-                .appendTo(table);
-            return;
+        /* Disable action buttons 1 second before refresh, to reduce chance of
+            accidentally banning wrong player. */
+        function disableActionButtons() {
+            $('#players tbody button').attr('disabled', 'disabled');
         }
 
-        response.reverse();
-        for (let action of response) {
-            $(`
+        function onActionsRefreshComplete(response) {
+            var table = $('#actions tbody');
+            table.empty();
+
+            if (!(response && response.length)) {
+                $(`<tr><td colspan=6><em>(no actions since restart)</em></td></tr>`)
+                    .appendTo(table);
+                return;
+            }
+
+            response.reverse();
+            for (let action of response) {
+                $(`
                 <tr>
                 <td>${date(action.date)}
                 <td>${safe(action.who)}
@@ -213,67 +252,103 @@
                 <td>${safe(action.victim)}
                 <td>${safe(action.reason)}</td>
             `).appendTo(table);
-        }
-    }
-
-    function onApplyComplete(response) {
-        $('#response').text(response || "(no response)");
-        refresh();
-    }
-
-    function onButtonClick(event) {
-        event.preventDefault();
-        var params = {
-            playerid: $(event.target).parents('tr').data('playerid'),
-            action: $(event.target).html(),
-            reason: $('#reason').val(),
-            password: $('#password').val()
-        };
-        $.post('actions', params, onApplyComplete);
-    }
-
-    function refresh() {
-        $.get('players', onPlayersRefreshComplete);
-        $.get('actions', onActionsRefreshComplete);
-    }
-
-    const storePersistantValue = (key, value) => {
-        let storage = {};
-
-        if (localStorage.getItem(persistantStorageKey) !== null) {
-            storage = JSON.parse(localStorage.getItem(persistantStorageKey));
+            }
         }
 
-        storage[key] = value;
-        localStorage.setItem(persistantStorageKey, JSON.stringify(storage));
-    }
+        function onApplyComplete(response) {
+            $('#response').text(response || "(no response)");
+            refresh();
+        }
 
-    const restorePersistantValues = () => {
-        if (localStorage.getItem(persistantStorageKey) !== null) {
-            storage = JSON.parse(localStorage.getItem(persistantStorageKey));
+        function onButtonClick(event) {
+            event.preventDefault();
+            var params = {
+                playerid: $(event.target).parents('tr').data('playerid'),
+                action: $(event.target).html(),
+                reason: $('#reason').val(),
+                password: $('#password').val()
+            };
+            $.post('actions', params, onApplyComplete);
+        }
 
-            Object.entries(storage).forEach(([id, value]) => {
-                const field = document.querySelector(`#${id}`);
+        function updateGameType() {
+            fetch('server').then(response => {
+                return response.json();
+            }).then((server) => {
+                const { type } = server;
 
-                if (field !== null) {
-                    field.value = value
+                gameType = type;
+
+                let bodyClass = 'game-type-';
+
+                switch (type) {
+                    case GAME_TYPES.FFA:
+                        bodyClass += 'ffa';
+
+                        break;
+                    case GAME_TYPES.CTF:
+                        bodyClass += 'ctf';
+
+                        break;
+                    case GAME_TYPES.BTR:
+                        bodyClass += 'btr';
+
+                        break;
+
+                    default:
+                        break;
                 }
+
+                $body.classList.add(bodyClass);
             });
         }
-    }
 
-    $(function () {
-        setInterval(refresh, REFRESH_INTERVAL_MS);
-        refresh();
-        restorePersistantValues();
-        $(document).on('click', 'button', onButtonClick);
+        function refresh() {
+            $.get('players', onPlayersRefreshComplete);
+            $.get('actions', onActionsRefreshComplete);
+        }
 
-        $password.addEventListener('input', () => {
-            storePersistantValue('password', $password.value)
+        const storePersistantValue = (key, value) => {
+            let storage = {};
+
+            if (localStorage.getItem(persistantStorageKey) !== null) {
+                storage = JSON.parse(localStorage.getItem(persistantStorageKey));
+            }
+
+            storage[key] = value;
+            localStorage.setItem(persistantStorageKey, JSON.stringify(storage));
+        }
+
+        const restorePersistantValues = () => {
+            if (localStorage.getItem(persistantStorageKey) !== null) {
+                storage = JSON.parse(localStorage.getItem(persistantStorageKey));
+
+                Object.entries(storage).forEach(([id, value]) => {
+                    const field = document.querySelector(`#${id}`);
+
+                    if (field !== null) {
+                        field.value = value
+                    }
+                });
+            }
+        }
+
+        $(function () {
+            updateGameType();
+            setInterval(refresh, REFRESH_INTERVAL_MS);
+            refresh();
+            restorePersistantValues();
+            $(document).on('click', 'button', onButtonClick);
+
+            $password.addEventListener('input', () => {
+                storePersistantValue('password', $password.value)
+            });
+
+            $reason.addEventListener('input', () => {
+                storePersistantValue('reason', $reason.value)
+            });
         });
+    </script>
+</body>
 
-        $reason.addEventListener('input', () => {
-            storePersistantValue('reason', $reason.value)
-        });
-    });
-</script>
+</html>

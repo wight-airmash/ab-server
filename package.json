@@ -1,6 +1,6 @@
 {
   "name": "@airbattle/server",
-  "version": "4.14.0",
+  "version": "4.16.1",
   "description": "ab-server.",
   "main": "./dist/app.js",
   "author": "wight",
@@ -45,12 +45,12 @@
     "eventemitter3": "^4.0.0",
     "maxmind": "^4.1.0",
     "module-alias": "^2.2.2",
-    "pino": "^5.15.0",
+    "pino": "^5.16.0",
     "uWebSockets.js": "github:uNetworking/uWebSockets.js#v16.5.0"
   },
   "devDependencies": {
     "@types/dotenv": "^8.2.0",
-    "@types/node": "^12.12.22",
+    "@types/node": "^12.12.24",
     "@types/pino": "^5.15.1",
     "@typescript-eslint/eslint-plugin": "^2.15.0",
     "@typescript-eslint/parser": "^2.15.0",
@@ -59,7 +59,7 @@
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-config-prettier": "^6.9.0",
     "eslint-import-resolver-alias": "^1.1.2",
-    "eslint-plugin-import": "^2.19.1",
+    "eslint-plugin-import": "^2.20.0",
     "eslint-plugin-prettier": "^3.1.2",
     "lint-staged": "^9.5.0",
     "pino-pretty": "^3.5.0",
@@ -128,9 +128,7 @@
         "ignorePackages",
         {
           "js": "never",
-          "jsx": "never",
-          "ts": "never",
-          "tsx": "never"
+          "ts": "never"
         }
       ],
       "@typescript-eslint/adjacent-overload-signatures": [

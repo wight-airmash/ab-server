@@ -1,5 +1,36 @@
 ## Future version (unversioned)
 
+## 4.16.1 (January 21, 2020)
+
+Bug fixes:
+
+- Escape untrusted HTML in server CTF message broadcasts.
+
+## 4.16.0 (January 20, 2020)
+
+Improvements:
+
+- Players are sorted by type (human/bot) and by score in moderator panel. Features specific to the game type are displayed depending on the type of server running ("Dismiss" is available only for CTF).
+- Described available [environment variables](./docs/env-variables.md).
+
+Bug fixes:
+
+- Dismiss sometimes didn't work (#67).
+
+Breaking changes:
+
+- Remove "Sanction" feature from moderator panel (#71).
+
+## 4.15.0 (January 12, 2020)
+
+Improvements:
+
+- Configurable bans policy on packets flooding. Use PACKETS_FLOODING_AUTOBAN variable to enable or disable bans by server for repeated violations. Enabled by default.
+
+Bug fixes:
+
+- Send PACKET_FLOODING_BAN error instead of GLOBAL_BAN to the client.
+
 ## 4.14.0 (January 10, 2020)
 
 Features:

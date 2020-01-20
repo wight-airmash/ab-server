@@ -21,10 +21,9 @@ import {
   CONNECTIONS_PACKET_RECEIVED,
   CONNECTIONS_UNBAN_IP,
   CTF_REMOVE_PLAYER_FROM_LEADER,
+  ERRORS_PACKET_FLOODING_DETECTED,
   PLAYERS_KICK,
-  PLAYERS_UPGRADES_RESET,
   RESPONSE_PLAYER_BAN,
-  RESPONSE_SCORE_UPDATE,
   TIMEOUT_LOGIN,
 } from '@/events';
 import Logger from '@/logger';
@@ -168,15 +167,19 @@ export default class WsEndpoint {
            * Ban check.
            */
           if (this.app.storage.ipBanList.has(connection.meta.ip)) {
-            if (
-              this.app.storage.ipBanList.get(connection.meta.ip).expire > connection.meta.createdAt
-            ) {
+            const ipBan = this.app.storage.ipBanList.get(connection.meta.ip);
+
+            if (ipBan.expire > connection.meta.createdAt) {
               this.log.info('IP is banned. Connection refused.', {
                 ip: connection.meta.ip,
                 connection: connectionId,
               });
 
-              this.app.events.emit(RESPONSE_PLAYER_BAN, connectionId);
+              this.app.events.emit(
+                RESPONSE_PLAYER_BAN,
+                connectionId,
+                ipBan.reason === ERRORS_PACKET_FLOODING_DETECTED
+              );
 
               setTimeout(() => {
                 this.app.events.emit(CONNECTIONS_BREAK, connectionId);
@@ -273,6 +276,11 @@ export default class WsEndpoint {
 
     if (this.app.config.admin.active === true) {
       this.uws
+        .get(`${this.app.config.admin.route}/server`, res => {
+          res.writeHeader('Content-type', 'application/json');
+          res.end(`{"type":${this.app.config.server.typeId}}`);
+        })
+
         .get(`${this.app.config.admin.route}/actions`, res => {
           res.writeHeader('Content-type', 'application/json');
           res.end(`[${this.moderatorActions.join(',\n')}]`);
@@ -307,6 +315,7 @@ export default class WsEndpoint {
               ping: player.ping.current,
               flag: player.flag.current,
               isMuted: player.times.unmuteTime > now,
+              isBot: this.app.storage.botIdList.has(player.id.current),
             })
           );
 
@@ -385,13 +394,6 @@ export default class WsEndpoint {
       case 'Unmute':
         this.log.info(`Unmuting IP: ${player.ip.current}`);
         this.app.events.emit(CHAT_UNMUTE_BY_IP, player.ip.current);
-        break;
-
-      case 'Sanction':
-        this.log.info(`Sanctioning player ${playerId}`);
-        this.app.events.emit(PLAYERS_UPGRADES_RESET, playerId);
-        player.score.current = 0;
-        this.app.events.emit(RESPONSE_SCORE_UPDATE, playerId);
         break;
 
       case 'Dismiss':
