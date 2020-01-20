@@ -1,5 +1,11 @@
 ## Future version (unversioned)
 
+## 4.16.1 (January 21, 2020)
+
+Bug fixes:
+
+- Escape untrusted HTML in server CTF message broadcasts.
+
 ## 4.16.0 (January 20, 2020)
 
 Improvements:
