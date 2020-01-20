@@ -18,7 +18,7 @@ export default class FlagReturnedBroadcast extends System {
       BROADCAST_SERVER_MESSAGE,
       `<span class="info inline"><span class="${
         flagType === CTF_TEAMS.BLUE ? 'blueflag' : 'redflag'
-      }"></span></span>Returned by ${playerName}`,
+      }"></span></span>Returned by ${this.helpers.escapeHTML(playerName)}`,
       SERVER_MESSAGE_TYPES.INFO,
       3 * MS_PER_SEC
     );
