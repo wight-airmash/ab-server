@@ -5,6 +5,7 @@ import RespawnCommandHandler from '../base/commands/respawn';
 import BTRRespawnCommandHandler from './maintenance/respawn';
 import GameFirewallBroadcast from './responses/broadcast/game-firewall';
 import GameMatches from './maintenance/matches';
+import GamePlayers from './maintenance/players';
 import InfernosPeriodic from './periodic/infernos';
 
 export default class BTRGameManifest extends BaseGameManifest {
@@ -30,6 +31,7 @@ export default class BTRGameManifest extends BaseGameManifest {
 
       // Maintenance.
       GameMatches,
+      GamePlayers,
     ];
 
     this.startSystems();
