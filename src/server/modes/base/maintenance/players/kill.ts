@@ -1,4 +1,4 @@
-import { MOB_TYPES } from '@airbattle/protocol';
+import { MOB_TYPES, GAME_TYPES } from '@airbattle/protocol';
 import {
   COLLISIONS_MAP_COORDS,
   PLAYERS_ALIVE_STATUSES,
@@ -176,19 +176,21 @@ export default class GamePlayersKill extends System {
     /**
      * Delay respawn.
      */
-    if (this.storage.connectionList.has(this.storage.playerMainConnectionList.get(victimId))) {
-      const connection = this.storage.connectionList.get(
-        this.storage.playerMainConnectionList.get(victimId)
-      );
+    if (this.app.config.server.typeId !== GAME_TYPES.BTR) {
+      if (this.storage.connectionList.has(this.storage.playerMainConnectionList.get(victimId))) {
+        const connection = this.storage.connectionList.get(
+          this.storage.playerMainConnectionList.get(victimId)
+        );
 
-      connection.meta.pending.respawn = true;
+        connection.meta.pending.respawn = true;
 
-      /**
-       * TODO: it's a temporary fix, inspect.
-       */
-      connection.meta.timeouts.respawn = setTimeout(() => {
-        this.channel(CHANNEL_RESPAWN_PLAYER).delay(PLAYERS_RESPAWN, victimId);
-      }, PLAYERS_DEATH_INACTIVITY_MS + 100);
+        /**
+         * TODO: it's a temporary fix, inspect.
+         */
+        connection.meta.timeouts.respawn = setTimeout(() => {
+          this.channel(CHANNEL_RESPAWN_PLAYER).delay(PLAYERS_RESPAWN, victimId);
+        }, PLAYERS_DEATH_INACTIVITY_MS + 100);
+      }
     }
 
     /**
