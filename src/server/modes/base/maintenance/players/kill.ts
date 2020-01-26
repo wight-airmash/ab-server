@@ -37,31 +37,39 @@ export default class GamePlayersKill extends System {
    * @param victimId
    */
   onKillPlayer(victimId: PlayerId, projectileId: MobId): void {
-    const projectile = this.storage.mobList.get(projectileId);
+    let killer: Entity = null;
+    let projectileOwner: PlayerId = 0;
     const victim = this.storage.playerList.get(victimId);
 
-    let killer: Entity = null;
+    if (projectileId !== 0) {
+      const projectile = this.storage.mobList.get(projectileId);
 
-    this.log.debug(`Player id${victimId} was killed by player id${projectile.owner.current}.`);
+      projectileOwner = projectile.owner.current;
 
-    /**
-     * Tracking killer kills and score.
-     * Damage was already updated on hit event.
-     */
-    if (this.storage.playerList.has(projectile.owner.current)) {
-      killer = this.storage.playerList.get(projectile.owner.current);
+      this.log.debug(`Player id${victimId} was killed by player id${projectile.owner.current}.`);
 
-      killer.kills.current += 1;
-      const earnedScore = Math.round(victim.score.current * 0.2) + 25;
+      /**
+       * Tracking killer kills and score.
+       * Damage was already updated on hit event.
+       */
+      if (this.storage.playerList.has(projectile.owner.current)) {
+        killer = this.storage.playerList.get(projectile.owner.current);
 
-      killer.score.current += earnedScore;
+        killer.kills.current += 1;
+        killer.kills.currentmatch += 1;
+        const earnedScore = Math.round(victim.score.current * 0.2) + 25;
 
-      if (has(killer, 'user')) {
-        const user = this.storage.userList.get(killer.user.id);
+        killer.score.current += earnedScore;
 
-        user.lifetimestats.totalkills += 1;
-        user.lifetimestats.earnings += earnedScore;
+        if (has(killer, 'user')) {
+          const user = this.storage.userList.get(killer.user.id);
+
+          user.lifetimestats.totalkills += 1;
+          user.lifetimestats.earnings += earnedScore;
+        }
       }
+    } else {
+      this.log.debug(`Player id${victimId} was killed by the firewall.`);
     }
 
     /**
@@ -196,7 +204,7 @@ export default class GamePlayersKill extends System {
     this.delay(
       BROADCAST_PLAYER_KILL,
       victimId,
-      projectile.owner.current,
+      projectileOwner,
       victim.position.x,
       victim.position.y
     );

@@ -1,5 +1,15 @@
 export const BTR_WIN_ALERT_DURATION_SEC = 13;
 
+export const BTR_FIREWALL_POSITION = {
+  MIN_X: 0,
+  MIN_Y: -2800,
+  MAX_X: 1200,
+  MAX_Y: -1800,
+};
+
+export const BTR_FIREWALL_INITIAL_RADIUS = 17000;
+export const BTR_FIREWALL_SPEED = -70;
+
 export const BTR_SPAWN_WAITING = {
   MIN_X: -120,
   MIN_Y: -4500,
