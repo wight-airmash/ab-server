@@ -18,6 +18,7 @@ import { CHANNEL_SPECTATE } from '@/server/channels';
 import Entity from '@/server/entity';
 import { System } from '@/server/system';
 import { PlayerId, Viewports } from '@/types';
+import { getRandomInt } from '@/support/numbers';
 
 export default class GameSpectating extends System {
   protected now = 0;
@@ -125,7 +126,6 @@ export default class GameSpectating extends System {
 
       spectator.spectate.isActive = true;
       spectator.alivestatus.current = PLAYERS_ALIVE_STATUSES.SPECTATE;
-      spectator.spectate.current = spectatorId;
 
       /**
        * Remove all subscribers-spectators.
@@ -139,13 +139,26 @@ export default class GameSpectating extends System {
       viewport.subs.clear();
 
       /**
+       * Choose a random player to spectate
+       */
+      const playerId =
+        this.playerIds.length > 0 ? this.playerIds[getRandomInt(0, this.playerIds.length - 1)] : 0;
+
+      spectator.spectate.current = playerId;
+      this.subscribeToViewport(playerId, spectatorId);
+
+      /**
        * Move player hitbox outside of the map.
        */
       spectator.hitbox.current.x = COLLISIONS_MAP_COORDS.MAX_X + 1000;
       spectator.hitbox.current.y = COLLISIONS_MAP_COORDS.MAX_Y + 1000;
 
       this.emit(RESPONSE_SPECTATE_KILL, connectionId, spectatorId);
-      this.emit(RESPONSE_GAME_SPECTATE, connectionId, spectatorId);
+      this.emit(RESPONSE_GAME_SPECTATE, connectionId, playerId);
+
+      this.log.debug(
+        `Player id${spectatorId} switched to spectator mode, and is watching player id${playerId}.`
+      );
 
       this.log.debug(`Player id${spectatorId} switched to spectator mode.`);
     }
