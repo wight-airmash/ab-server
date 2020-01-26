@@ -57,4 +57,8 @@ export const UPGRADES_DEFAULT_DROP_CHANCE = {
     min: 0.5,
     max: 0.8,
   },
+  [GAME_TYPES.BTR]: {
+    min: 1.0,
+    max: 1.0,
+  },
 };
