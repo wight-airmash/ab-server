@@ -45,6 +45,7 @@ import {
 import { Channels } from '@/server/channels/channels';
 import { Helpers } from '@/server/helpers';
 import { GameManifest } from '@/server/manifest';
+import BTRGameManifest from '@/server/modes/btr/manifest';
 import CTFGameManifest from '@/server/modes/ctf/manifest';
 import FFAGameManifest from '@/server/modes/ffa/manifest';
 import { GameStorage } from '@/server/storage';
@@ -158,6 +159,8 @@ export default class GameServer {
       this.gameMode = new FFAGameManifest({ app: this });
     } else if (this.config.server.typeId === GAME_TYPES.CTF) {
       this.gameMode = new CTFGameManifest({ app: this });
+    } else if (this.config.server.typeId === GAME_TYPES.BTR) {
+      this.gameMode = new BTRGameManifest({ app: this });
     } else {
       this.log.fatal(`Unsupported game type ${this.config.server.type}!`);
       process.exit(1);
