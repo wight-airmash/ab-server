@@ -115,7 +115,7 @@ export default class GamePlayers extends System {
     }
   }
 
-  onRemovePlayer(playerId: PlayerId): void {
+  onRemovePlayer(/* playerId: PlayerId */): void {
     this.delay(PLAYERS_ALIVE_UPDATE);
   }
 }

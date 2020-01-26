@@ -8,7 +8,7 @@ import GameMatches from './maintenance/matches';
 import GamePlayers from './maintenance/players';
 import PlayersAliveBroadcast from './responses/broadcast/players-alive';
 import InfernosPeriodic from './periodic/infernos';
-import { SHIPS_TYPES, BTR_SHIPS_TYPES_ORDER } from '@/constants';
+import { BTR_SHIPS_TYPES_ORDER } from '@/constants';
 
 export default class BTRGameManifest extends BaseGameManifest {
   constructor({ app }) {

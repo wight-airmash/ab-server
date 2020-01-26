@@ -88,7 +88,7 @@ export default class GameMatches extends System {
     }
   }
 
-  broadcastServerMessageAlert(message: string, displayTime: number) {
+  broadcastServerMessageAlert(message: string, displayTime: number): void {
     this.emit(
       BROADCAST_SERVER_MESSAGE,
       message,

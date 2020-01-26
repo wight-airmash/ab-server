@@ -1,4 +1,4 @@
-import { BTR_FIREWALL_STATUS, ServerPackets, SERVER_PACKETS } from '@airbattle/protocol';
+import { ServerPackets, SERVER_PACKETS } from '@airbattle/protocol';
 import { CONNECTIONS_SEND_PACKET, BROADCAST_GAME_FIREWALL } from '@/events';
 import { System } from '@/server/system';
 import { PlayerId } from '@/types';
