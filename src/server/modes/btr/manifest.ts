@@ -7,6 +7,7 @@ import GameFirewallBroadcast from './responses/broadcast/game-firewall';
 import GameMatches from './maintenance/matches';
 import GamePlayers from './maintenance/players';
 import InfernosPeriodic from './periodic/infernos';
+import { SHIPS_TYPES } from '@/constants';
 
 export default class BTRGameManifest extends BaseGameManifest {
   constructor({ app }) {
@@ -37,6 +38,8 @@ export default class BTRGameManifest extends BaseGameManifest {
     this.startSystems();
 
     this.app.storage.gameEntity.attach(new Match());
+
     this.app.storage.gameEntity.match.isActive = false;
+    this.app.storage.gameEntity.match.shipType = SHIPS_TYPES.COPTER;
   }
 }

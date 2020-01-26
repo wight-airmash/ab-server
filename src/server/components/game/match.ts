@@ -37,6 +37,8 @@ export default class Match extends Component {
     posY;
   };
 
+  public shipType: number;
+
   constructor() {
     super();
 

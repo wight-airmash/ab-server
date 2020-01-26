@@ -25,6 +25,13 @@ export default class GamePlayers extends System {
   }
 
   onAssignPlayerSpawnPosition(player: Entity): void {
+    /**
+     * Player ship type is controlled by BTR match state
+     */
+    const { shipType } = this.storage.gameEntity.match;
+
+    player.planetype.current = shipType;
+
     if (this.storage.gameEntity.match.isActive === false) {
       /**
        * Match not started yet, have players wait around Europe
@@ -33,7 +40,7 @@ export default class GamePlayers extends System {
       let y = 0;
       let r = 0;
 
-      const spawnZones = this.storage.spawnZoneSet.get(0).get(player.planetype.current);
+      const spawnZones = this.storage.spawnZoneSet.get(0).get(shipType);
 
       [x, y] = spawnZones.get(getRandomInt(0, spawnZones.size - 1));
       r = SHIPS_ENCLOSE_RADIUS[player.planetype.current] / 2;
