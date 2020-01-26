@@ -9,6 +9,7 @@ import GamePlayers from './maintenance/players';
 import PlayersAliveBroadcast from './responses/broadcast/players-alive';
 import InfernosPeriodic from './periodic/infernos';
 import { BTR_SHIPS_TYPES_ORDER } from '@/constants';
+import ScoreDetailed from './responses/score-detailed';
 
 export default class BTRGameManifest extends BaseGameManifest {
   constructor({ app }) {
@@ -28,6 +29,9 @@ export default class BTRGameManifest extends BaseGameManifest {
 
       // Commands.
       BTRRespawnCommandHandler,
+
+      // Responses.
+      ScoreDetailed,
 
       // Periodic.
       InfernosPeriodic,

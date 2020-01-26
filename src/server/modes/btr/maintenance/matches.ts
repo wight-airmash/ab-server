@@ -265,6 +265,7 @@ export default class GameMatches extends System {
          * Award bounty
          */
         winner.score.current += match.bounty;
+        winner.wins.current += 1;
 
         if (has(winner, 'user')) {
           const user = this.storage.userList.get(winner.user.id);

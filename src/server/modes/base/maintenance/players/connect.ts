@@ -78,6 +78,7 @@ import Token from '@/server/components/token';
 import Upgrades from '@/server/components/upgrades';
 import User from '@/server/components/user';
 import Velocity from '@/server/components/velocity';
+import Wins from '@/server/components/wins';
 import Entity from '@/server/entity';
 import { System } from '@/server/system';
 import { getRandomInt } from '@/support/numbers';
@@ -163,6 +164,7 @@ export default class GamePlayersConnect extends System {
       new Keystate(),
       new Kills(),
       new Deaths(),
+      new Wins(),
       new Score(),
       new Ping(),
       new Times(),
