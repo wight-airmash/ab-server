@@ -1,5 +1,6 @@
 import { NS_PER_MS } from '@/constants';
 import {
+  TIMELINE_CLOCK_HALFSECOND,
   TIMELINE_CLOCK_SECOND,
   TIMELINE_LOOP_TICK,
   TIMELINE_CLOCK_HOUR,
@@ -20,6 +21,8 @@ export default class GameClock extends System {
   protected milliseconds = 0;
 
   protected lastTickTime = 0;
+
+  protected emitHalfsecondEvent = true;
 
   constructor({ app }) {
     super({ app });
@@ -46,33 +49,42 @@ export default class GameClock extends System {
 
     this.milliseconds += ms;
 
-    if (this.milliseconds >= 1000) {
-      this.seconds += 1;
-      this.app.metrics.uptime.seconds += 1;
-      this.milliseconds -= 1000;
-
-      if (this.seconds >= 60) {
-        this.minutes += 1;
-        this.seconds -= 60;
-
-        if (this.minutes >= 60) {
-          this.hours += 1;
-          this.minutes -= 60;
-
-          if (this.hours >= 24) {
-            this.days += 1;
-            this.hours -= 24;
-
-            this.emit(TIMELINE_CLOCK_DAY, this.days, frame);
-          }
-
-          this.emit(TIMELINE_CLOCK_HOUR, this.hours, frame);
-        }
-
-        this.emit(TIMELINE_CLOCK_MINUTE, this.minutes, frame);
+    if (this.milliseconds >= 500) {
+      if (this.emitHalfsecondEvent) {
+        this.emit(TIMELINE_CLOCK_HALFSECOND, this.milliseconds / 500, frame);
+        this.emitHalfsecondEvent = false;
       }
 
-      this.emit(TIMELINE_CLOCK_SECOND, this.seconds, frame);
+      if (this.milliseconds >= 1000) {
+        this.seconds += 1;
+        this.app.metrics.uptime.seconds += 1;
+        this.milliseconds -= 1000;
+
+        if (this.seconds >= 60) {
+          this.minutes += 1;
+          this.seconds -= 60;
+
+          if (this.minutes >= 60) {
+            this.hours += 1;
+            this.minutes -= 60;
+
+            if (this.hours >= 24) {
+              this.days += 1;
+              this.hours -= 24;
+
+              this.emit(TIMELINE_CLOCK_DAY, this.days, frame);
+            }
+
+            this.emit(TIMELINE_CLOCK_HOUR, this.hours, frame);
+          }
+
+          this.emit(TIMELINE_CLOCK_MINUTE, this.minutes, frame);
+        }
+
+        this.emit(TIMELINE_CLOCK_SECOND, this.seconds, frame);
+        this.emit(TIMELINE_CLOCK_HALFSECOND, this.milliseconds, frame);
+        this.emitHalfsecondEvent = true;
+      }
     }
   }
 
