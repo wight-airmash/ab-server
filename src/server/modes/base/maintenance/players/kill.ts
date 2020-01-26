@@ -132,7 +132,7 @@ export default class GamePlayersKill extends System {
      * The chance to drop increases with victim upgrades amount.
      * The maximum increase at a value greater than 99.
      */
-    if (victim.score.current >= UPGRADES_MIN_VICTIM_SCORE_TO_DROP) {
+    if (victim.score.current >= UPGRADES_MIN_VICTIM_SCORE_TO_DROP[this.app.config.server.typeId]) {
       const amountExtraChance = victim.upgrades.amount > 100 ? 1 : victim.upgrades.amount / 100;
       const kills = victim.kills.current > 0 ? victim.kills.current : 1;
       const deaths = victim.deaths.current > 0 ? victim.deaths.current : 1;

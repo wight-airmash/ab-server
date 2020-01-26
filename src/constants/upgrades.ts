@@ -5,7 +5,11 @@ export const UPGRADES_DEFAULT_MIN_CHANCE = 0.3;
 
 export const UPGRADES_DEFAULT_MAX_CHANCE = 0.8;
 
-export const UPGRADES_MIN_VICTIM_SCORE_TO_DROP = 26;
+export const UPGRADES_MIN_VICTIM_SCORE_TO_DROP = {
+  [GAME_TYPES.FFA]: 26,
+  [GAME_TYPES.CTF]: 26,
+  [GAME_TYPES.BTR]: 0,
+};
 
 export const UPGRADES_TYPES = {
   1: 'SPEED',
