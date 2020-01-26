@@ -4,8 +4,6 @@ import {
   MAP_SIZE,
   CTF_FLAGS_SPAWN_ZONE_COLLISIONS,
   CTF_FLAG_COLLISIONS,
-  FFA_MAP_REGIONS,
-  FFA_PLAYERS_SPAWN_ZONES,
   MOUNTAIN_OBJECTS,
   PI_X2,
   POWERUPS_COLLISIONS,
@@ -20,6 +18,7 @@ import {
 import { TIMELINE_BEFORE_GAME_START } from '@/events';
 import { System } from '@/server/system';
 import { SpawnZones, PowerupSpawnChunk } from '@/types';
+import { PLAYERS_SPAWN_ZONES } from '@/constants/spawn';
 
 /**
  * TODO: combine data from the constants. Now the code is duplicated.
@@ -110,9 +109,9 @@ const isCollide = (x: number, y: number, r: number): boolean => {
  *
  * @param storage
  * @param radius enclose circle radius
+ * @param spawnZone bounds of spawn zone
  */
-const generateSpawnZones = (storage: SpawnZones, radius: number): void => {
-  const spawnZone = FFA_PLAYERS_SPAWN_ZONES[FFA_MAP_REGIONS.EUROPE];
+const generateSpawnZones = (storage: SpawnZones, radius: number, spawnZone: any): void => {
   let index = 0;
 
   for (let y = MAP_COORDS.MIN_Y + radius; y < MAP_COORDS.MAX_Y; y += radius * 2) {
@@ -298,11 +297,21 @@ export default class GameWarming extends System {
 
     this.log.debug('Mobs hitboxes pre calculated.');
 
-    generateSpawnZones(this.storage.predatorSpawnZones, SHIPS_ENCLOSE_RADIUS.PREDATOR);
-    generateSpawnZones(this.storage.goliathSpawnZones, SHIPS_ENCLOSE_RADIUS.GOLIATH);
-    generateSpawnZones(this.storage.copterSpawnZones, SHIPS_ENCLOSE_RADIUS.COPTER);
-    generateSpawnZones(this.storage.tornadoSpawnZones, SHIPS_ENCLOSE_RADIUS.TORNADO);
-    generateSpawnZones(this.storage.prowlerSpawnZones, SHIPS_ENCLOSE_RADIUS.PROWLER);
+    const gameSpawnZones = PLAYERS_SPAWN_ZONES[this.app.config.server.typeId];
+
+    for (let index = 0; index < gameSpawnZones.length; index += 1) {
+      const spawnZoneSetIndex = new Map<number, SpawnZones>();
+
+      this.storage.spawnZoneSet.set(index, spawnZoneSetIndex);
+
+      Object.values(SHIPS_TYPES).forEach(shipType => {
+        const planeSpawnZones = new Map<number, [number, number]>();
+
+        spawnZoneSetIndex.set(shipType, planeSpawnZones);
+        generateSpawnZones(planeSpawnZones, SHIPS_ENCLOSE_RADIUS[shipType], gameSpawnZones[index]);
+      });
+    }
+
     this.log.debug('Planes spawn zones pre calculated.');
 
     generatePowerupSpawns(this.storage.powerupSpawns);
