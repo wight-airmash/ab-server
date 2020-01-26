@@ -8,6 +8,14 @@ export const SHIPS_TYPES = {
   PROWLER: 5,
 };
 
+export const SHIPS_NAMES = {
+  1: 'Predator',
+  2: 'Goliath',
+  3: 'Mohawk',
+  4: 'Tornado',
+  5: 'Prowler',
+};
+
 export const SHIPS_FIRE_MODES = {
   FIRE: 'fire',
   INFERNO: 'infernoFire',
