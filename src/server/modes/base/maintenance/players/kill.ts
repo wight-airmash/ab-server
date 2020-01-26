@@ -13,6 +13,7 @@ import {
   POWERUPS_SPAWN,
   PLAYERS_RESPAWN,
   RESPONSE_PLAYER_UPGRADE,
+  PLAYERS_ALIVE_UPDATE,
 } from '@/events';
 import { CHANNEL_RESPAWN_PLAYER } from '@/server/channels';
 import Entity from '@/server/entity';
@@ -210,5 +211,7 @@ export default class GamePlayersKill extends System {
       victim.position.x,
       victim.position.y
     );
+
+    this.delay(PLAYERS_ALIVE_UPDATE);
   }
 }

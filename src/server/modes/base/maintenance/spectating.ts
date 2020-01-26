@@ -13,6 +13,7 @@ import {
   SPECTATE_PLAYER,
   SPECTATE_PREV,
   SPECTATE_ENTER_MODE,
+  PLAYERS_ALIVE_UPDATE,
 } from '@/events';
 import { CHANNEL_SPECTATE } from '@/server/channels';
 import Entity from '@/server/entity';
@@ -160,7 +161,7 @@ export default class GameSpectating extends System {
         `Player id${spectatorId} switched to spectator mode, and is watching player id${playerId}.`
       );
 
-      this.log.debug(`Player id${spectatorId} switched to spectator mode.`);
+      this.delay(PLAYERS_ALIVE_UPDATE);
     }
   }
 

@@ -6,8 +6,9 @@ import BTRRespawnCommandHandler from './maintenance/respawn';
 import GameFirewallBroadcast from './responses/broadcast/game-firewall';
 import GameMatches from './maintenance/matches';
 import GamePlayers from './maintenance/players';
+import PlayersAliveBroadcast from './responses/broadcast/players-alive';
 import InfernosPeriodic from './periodic/infernos';
-import { SHIPS_TYPES } from '@/constants';
+import { SHIPS_TYPES, BTR_SHIPS_TYPES_ORDER } from '@/constants';
 
 export default class BTRGameManifest extends BaseGameManifest {
   constructor({ app }) {
@@ -23,6 +24,7 @@ export default class BTRGameManifest extends BaseGameManifest {
       // Broadcast.
       ServerCustomBroadcast,
       GameFirewallBroadcast,
+      PlayersAliveBroadcast,
 
       // Commands.
       BTRRespawnCommandHandler,
@@ -40,6 +42,9 @@ export default class BTRGameManifest extends BaseGameManifest {
     this.app.storage.gameEntity.attach(new Match());
 
     this.app.storage.gameEntity.match.isActive = false;
-    this.app.storage.gameEntity.match.shipType = SHIPS_TYPES.COPTER;
+
+    const [shipType] = BTR_SHIPS_TYPES_ORDER;
+
+    this.app.storage.gameEntity.match.shipType = shipType;
   }
 }

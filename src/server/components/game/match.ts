@@ -39,6 +39,8 @@ export default class Match extends Component {
 
   public shipType: number;
 
+  public playersAlive: number;
+
   constructor() {
     super();
 
