@@ -5,6 +5,7 @@ import RespawnCommandHandler from '../base/commands/respawn';
 import BTRRespawnCommandHandler from './maintenance/respawn';
 import GameFirewallBroadcast from './responses/broadcast/game-firewall';
 import GameMatches from './maintenance/matches';
+import InfernosPeriodic from './periodic/infernos';
 
 export default class BTRGameManifest extends BaseGameManifest {
   constructor({ app }) {
@@ -23,6 +24,9 @@ export default class BTRGameManifest extends BaseGameManifest {
 
       // Commands.
       BTRRespawnCommandHandler,
+
+      // Periodic.
+      InfernosPeriodic,
 
       // Maintenance.
       GameMatches,
