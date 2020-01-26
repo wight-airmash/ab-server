@@ -206,15 +206,11 @@ export default class GameSpectating extends System {
       this.onSwitchToSpectate(spectatorId);
     }
 
-    this.log.debug(spectator.spectate.isActive);
-
     connection.meta.pending.spectate = false;
 
     if (this.playerIds.length === 0 || spectator.spectate.isActive === false) {
       return;
     }
-
-    this.log.debug('playerIds', this.playerIds);
 
     const currentIndex = this.playerIds.indexOf(spectator.spectate.current);
     let playerId = spectatorId;
