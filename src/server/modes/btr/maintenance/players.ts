@@ -70,7 +70,28 @@ export default class GamePlayers extends System {
       this.channel(CHANNEL_SPECTATE).delay(SPECTATE_ENTER_MODE, playerId);
     }
 
-    if (this.storage.gameEntity.match.isActive === true) {
+    if (this.storage.gameEntity.match.isActive === false) {
+      /**
+       * Waiting for game to start
+       */
+      if (this.storage.playerList.size >= 2) {
+        this.emit(
+          RESPONSE_SERVER_MESSAGE,
+          connectionId,
+          'New game starting soon',
+          SERVER_MESSAGE_TYPES.ALERT,
+          5 * MS_PER_SEC
+        );
+      } else {
+        this.emit(
+          RESPONSE_SERVER_MESSAGE,
+          connectionId,
+          'Game will start when 2 or more players are present',
+          SERVER_MESSAGE_TYPES.ALERT,
+          60 * MS_PER_SEC
+        );
+      }
+    } else {
       /**
        * Game in progress
        */
