@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { Circle } from 'collisions';
-import { MOB_DESPAWN_TYPES, MOB_TYPES } from '@airbattle/protocol';
+import { MOB_DESPAWN_TYPES, MOB_TYPES, GAME_TYPES } from '@airbattle/protocol';
 import {
   COLLISIONS_OBJECT_TYPES,
   MAP_SIZE,
@@ -96,9 +96,17 @@ export default class GamePowerups extends System {
       const [x, y] = chunk.zones.get(zoneIndex);
       const r = 32 - 22;
 
+      let type;
+
+      if (this.app.config.server.typeId === GAME_TYPES.BTR) {
+        type = MOB_TYPES.INFERNO;
+      } else {
+        type = getRandomInt(1, 10) <= 5 ? MOB_TYPES.INFERNO : MOB_TYPES.SHIELD;
+      }
+
       this.onSpawnPowerup({
         mobId: this.helpers.createMobId(),
-        type: getRandomInt(1, 10) <= 5 ? MOB_TYPES.INFERNO : MOB_TYPES.SHIELD,
+        type,
         posX: x + getRandomInt(-r, r),
         posY: y + getRandomInt(-r, r),
       });
