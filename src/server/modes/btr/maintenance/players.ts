@@ -29,16 +29,16 @@ export default class GamePlayers extends System {
   }
 
   onAssignPlayerSpawnPosition(player: Entity): void {
-    if (!this.helpers.isPlayerConnected(player.id.current)) {
-      /**
-       * Assign new players a ship type based on BTR match state
-       */
-      const { shipType } = this.storage.gameEntity.match;
-
-      player.planetype.current = shipType;
-    }
-
     if (this.storage.gameEntity.match.isActive === false) {
+      if (!this.helpers.isPlayerConnected(player.id.current)) {
+        /**
+         * Assign new players a ship type based on BTR match state
+         */
+        const { shipType } = this.storage.gameEntity.match;
+
+        player.planetype.current = shipType;
+      }
+
       /**
        * Match not started yet, have players wait around Europe
        */
