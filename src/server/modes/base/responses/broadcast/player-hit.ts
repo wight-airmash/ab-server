@@ -1,4 +1,4 @@
-import { SERVER_PACKETS, ServerPackets } from '@airbattle/protocol';
+import { SERVER_PACKETS, ServerPackets, MOB_TYPES } from '@airbattle/protocol';
 import { System } from '@/server/system';
 import { CONNECTIONS_SEND_PACKET, BROADCAST_PLAYER_HIT } from '@/events';
 import { SHIPS_SPECS } from '@/constants';
@@ -87,7 +87,7 @@ export default class PlayerHitBroadcast extends System {
         {
           c: SERVER_PACKETS.PLAYER_HIT,
           id: projectileId,
-          type: 200,
+          type: MOB_TYPES.FIREWALL,
           posX: player.position.x,
           posY: player.position.y,
           owner: 0,
