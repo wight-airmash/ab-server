@@ -1,5 +1,6 @@
+/* eslint-disable no-param-reassign */
 import { GAME_TYPES, PLAYER_LEVEL_UPDATE_TYPES } from '@airbattle/protocol';
-import { Polygon } from 'collisions';
+import { Polygon, Circle } from 'collisions';
 import cryptoRandomString from 'crypto-random-string';
 import {
   CHAT_FIRST_MESSAGE_SAFE_DELAY_MS,
@@ -14,6 +15,8 @@ import {
   SHIPS_SPECS,
   UPGRADES_ACTION_TYPE,
   UPGRADES_START_AMOUNT,
+  SHIPS_TYPES,
+  REPEL_COLLISIONS,
 } from '@/constants';
 import {
   BROADCAST_CHAT_SERVER_WHISPER,
@@ -258,7 +261,48 @@ export default class GamePlayersConnect extends System {
       this.emit(PLAYERS_ASSIGN_TEAM, player);
     }
 
+    /**
+     * In BTR's event handler, this also assigns a ship type to player entity
+     */
     this.emit(PLAYERS_ASSIGN_SPAWN_POSITION, player);
+
+    if (shipType !== player.planetype.current) {
+      shipType = player.planetype.current;
+
+      player.hitcircles.current = [...SHIPS_SPECS[shipType].collisions];
+
+      /**
+       * Add repel zone
+       */
+      if (shipType === SHIPS_TYPES.GOLIATH) {
+        this.log.debug(`Adding goliath repel zone for player id${player.id.current}.`);
+        const radius = REPEL_COLLISIONS[0][2];
+        const repel = new Entity().attach(
+          new Id(player.id.current),
+          new Position(player.position.x, player.position.y),
+          new Team(player.team.current),
+          new Rotation(),
+          new Hitbox(),
+          new HitCircles([...REPEL_COLLISIONS])
+        );
+
+        repel.hitbox.x = ~~player.position.x + MAP_SIZE.HALF_WIDTH - radius;
+        repel.hitbox.y = ~~player.position.y + MAP_SIZE.HALF_HEIGHT - radius;
+        repel.hitbox.height = radius * 2;
+        repel.hitbox.width = radius * 2;
+
+        const hitbox = new Circle(repel.hitbox.x + radius, repel.hitbox.y + radius, radius);
+
+        hitbox.id = repel.id.current;
+        hitbox.type = COLLISIONS_OBJECT_TYPES.REPEL;
+        repel.hitbox.current = hitbox;
+
+        this.emit(COLLISIONS_ADD_OBJECT, repel.hitbox.current);
+        this.storage.repelList.set(player.id.current, repel);
+      }
+    }
+
+    this.log.debug(`Player id${player.id.current} ship type is ${shipType}.`);
 
     /**
      * Players storage filling.
