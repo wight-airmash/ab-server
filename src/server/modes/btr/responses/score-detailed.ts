@@ -2,6 +2,7 @@ import { ServerPackets, SERVER_PACKETS } from '@airbattle/protocol';
 import { RESPONSE_SCORE_DETAILED, CONNECTIONS_SEND_PACKET } from '@/events';
 import { System } from '@/server/system';
 import { MainConnectionId } from '@/types';
+import { PLAYERS_ALIVE_STATUSES } from '@/constants';
 
 export default class ScoreDetailed extends System {
   constructor({ app }) {
@@ -25,7 +26,7 @@ export default class ScoreDetailed extends System {
       scores.push({
         id: player.id.current,
         level: player.level.current,
-        alive: player.alive.current,
+        alive: player.alivestatus.current === PLAYERS_ALIVE_STATUSES.ALIVE,
         wins: player.wins.current,
         score: player.score.current,
         kills: player.kills.current,

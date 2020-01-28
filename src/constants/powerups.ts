@@ -14,6 +14,7 @@ export const POWERUPS_SPAWN_CHANCE = 0.02;
 export const POWERUPS_DEFAULT_SPAWN_CHANCE = {
   [GAME_TYPES.FFA]: 0.5,
   [GAME_TYPES.CTF]: 0.03,
+  [GAME_TYPES.BTR]: 0.5,
 };
 
 export const POWERUPS_COLLISIONS = {

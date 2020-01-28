@@ -1,4 +1,4 @@
-import { MOB_TYPES } from '@airbattle/protocol';
+import { MOB_TYPES, GAME_TYPES } from '@airbattle/protocol';
 import {
   COLLISIONS_MAP_COORDS,
   PLAYERS_ALIVE_STATUSES,
@@ -13,6 +13,7 @@ import {
   POWERUPS_SPAWN,
   PLAYERS_RESPAWN,
   RESPONSE_PLAYER_UPGRADE,
+  PLAYERS_ALIVE_UPDATE,
 } from '@/events';
 import { CHANNEL_RESPAWN_PLAYER } from '@/server/channels';
 import Entity from '@/server/entity';
@@ -37,31 +38,39 @@ export default class GamePlayersKill extends System {
    * @param victimId
    */
   onKillPlayer(victimId: PlayerId, projectileId: MobId): void {
-    const projectile = this.storage.mobList.get(projectileId);
+    let killer: Entity = null;
+    let projectileOwner: PlayerId = 0;
     const victim = this.storage.playerList.get(victimId);
 
-    let killer: Entity = null;
+    if (projectileId !== 0) {
+      const projectile = this.storage.mobList.get(projectileId);
 
-    this.log.debug(`Player id${victimId} was killed by player id${projectile.owner.current}.`);
+      projectileOwner = projectile.owner.current;
 
-    /**
-     * Tracking killer kills and score.
-     * Damage was already updated on hit event.
-     */
-    if (this.storage.playerList.has(projectile.owner.current)) {
-      killer = this.storage.playerList.get(projectile.owner.current);
+      this.log.debug(`Player id${victimId} was killed by player id${projectile.owner.current}.`);
 
-      killer.kills.current += 1;
-      const earnedScore = Math.round(victim.score.current * 0.2) + 25;
+      /**
+       * Tracking killer kills and score.
+       * Damage was already updated on hit event.
+       */
+      if (this.storage.playerList.has(projectile.owner.current)) {
+        killer = this.storage.playerList.get(projectile.owner.current);
 
-      killer.score.current += earnedScore;
+        killer.kills.current += 1;
+        killer.kills.currentmatch += 1;
+        const earnedScore = Math.round(victim.score.current * 0.2) + 25;
 
-      if (has(killer, 'user')) {
-        const user = this.storage.userList.get(killer.user.id);
+        killer.score.current += earnedScore;
 
-        user.lifetimestats.totalkills += 1;
-        user.lifetimestats.earnings += earnedScore;
+        if (has(killer, 'user')) {
+          const user = this.storage.userList.get(killer.user.id);
+
+          user.lifetimestats.totalkills += 1;
+          user.lifetimestats.earnings += earnedScore;
+        }
       }
+    } else {
+      this.log.debug(`Player id${victimId} was killed by the firewall.`);
     }
 
     /**
@@ -123,7 +132,7 @@ export default class GamePlayersKill extends System {
      * The chance to drop increases with victim upgrades amount.
      * The maximum increase at a value greater than 99.
      */
-    if (victim.score.current >= UPGRADES_MIN_VICTIM_SCORE_TO_DROP) {
+    if (victim.score.current >= UPGRADES_MIN_VICTIM_SCORE_TO_DROP[this.app.config.server.typeId]) {
       const amountExtraChance = victim.upgrades.amount > 100 ? 1 : victim.upgrades.amount / 100;
       const kills = victim.kills.current > 0 ? victim.kills.current : 1;
       const deaths = victim.deaths.current > 0 ? victim.deaths.current : 1;
@@ -168,19 +177,21 @@ export default class GamePlayersKill extends System {
     /**
      * Delay respawn.
      */
-    if (this.storage.connectionList.has(this.storage.playerMainConnectionList.get(victimId))) {
-      const connection = this.storage.connectionList.get(
-        this.storage.playerMainConnectionList.get(victimId)
-      );
+    if (this.app.config.server.typeId !== GAME_TYPES.BTR) {
+      if (this.storage.connectionList.has(this.storage.playerMainConnectionList.get(victimId))) {
+        const connection = this.storage.connectionList.get(
+          this.storage.playerMainConnectionList.get(victimId)
+        );
 
-      connection.meta.pending.respawn = true;
+        connection.meta.pending.respawn = true;
 
-      /**
-       * TODO: it's a temporary fix, inspect.
-       */
-      connection.meta.timeouts.respawn = setTimeout(() => {
-        this.channel(CHANNEL_RESPAWN_PLAYER).delay(PLAYERS_RESPAWN, victimId);
-      }, PLAYERS_DEATH_INACTIVITY_MS + 100);
+        /**
+         * TODO: it's a temporary fix, inspect.
+         */
+        connection.meta.timeouts.respawn = setTimeout(() => {
+          this.channel(CHANNEL_RESPAWN_PLAYER).delay(PLAYERS_RESPAWN, victimId);
+        }, PLAYERS_DEATH_INACTIVITY_MS + 100);
+      }
     }
 
     /**
@@ -196,9 +207,11 @@ export default class GamePlayersKill extends System {
     this.delay(
       BROADCAST_PLAYER_KILL,
       victimId,
-      projectile.owner.current,
+      projectileOwner,
       victim.position.x,
       victim.position.y
     );
+
+    this.delay(PLAYERS_ALIVE_UPDATE);
   }
 }

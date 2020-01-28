@@ -8,6 +8,14 @@ export const SHIPS_TYPES = {
   PROWLER: 5,
 };
 
+export const SHIPS_NAMES = {
+  1: 'Predator',
+  2: 'Goliath',
+  3: 'Mohawk',
+  4: 'Tornado',
+  5: 'Prowler',
+};
+
 export const SHIPS_FIRE_MODES = {
   FIRE: 'fire',
   INFERNO: 'infernoFire',
@@ -19,11 +27,11 @@ export const SHIPS_FIRE_TYPES = {
 };
 
 export const SHIPS_ENCLOSE_RADIUS = {
-  PREDATOR: 32,
-  GOLIATH: 88,
-  COPTER: 34,
-  TORNADO: 38,
-  PROWLER: 36,
+  [SHIPS_TYPES.PREDATOR]: 32,
+  [SHIPS_TYPES.GOLIATH]: 88,
+  [SHIPS_TYPES.COPTER]: 34,
+  [SHIPS_TYPES.TORNADO]: 38,
+  [SHIPS_TYPES.PROWLER]: 36,
 };
 
 const missileTemplate = (type: number, x: number, y: number, rot: number, alt = false): object => {

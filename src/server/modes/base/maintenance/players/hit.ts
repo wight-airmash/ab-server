@@ -23,8 +23,9 @@ export default class GamePlayersHit extends System {
    *
    * @param victimId
    * @param projectileId
+   * @param damage used if projectileId is zero
    */
-  onHitPlayer(victimId: PlayerId, projectileId: MobId): void {
+  onHitPlayer(victimId: PlayerId, projectileId: MobId, firewallDamage: number): void {
     /**
      * Check current game status.
      */
@@ -34,6 +35,7 @@ export default class GamePlayersHit extends System {
 
     const now = Date.now();
     const victim = this.storage.playerList.get(victimId);
+    let damage: number;
 
     if (victim.planestate.stealthed === true) {
       victim.planestate.stealthed = false;
@@ -43,63 +45,82 @@ export default class GamePlayersHit extends System {
       this.delay(BROADCAST_PLAYER_UPDATE, victim.id.current);
     }
 
-    if (victim.shield.current === true) {
-      return;
-    }
-
-    victim.times.lastHit = now;
-
-    const projectile = this.storage.mobList.get(projectileId);
-    const scalar =
-      projectile.velocity.x * victim.velocity.x + projectile.velocity.y * victim.velocity.y;
-    const { maxSpeed } = PROJECTILES_SPECS[projectile.mobtype.current];
-    let { damage } = PROJECTILES_SPECS[projectile.mobtype.current];
-    let extraDamageFactor = 1;
-
-    /**
-     * Projectile upgrades increase the damage.
-     */
-    if (projectile.velocity.length > maxSpeed) {
-      const extraSpeed = projectile.velocity.length - maxSpeed;
-
-      extraDamageFactor += extraSpeed * PROJECTILES_EXTRA_SPEED_TO_DAMAGE_FACTOR;
-
-      this.log.debug(`Extra damage by upgrades: ${extraDamageFactor - 1}`);
-    }
-
-    /**
-     * Damage increases or decreases depending on the collision speed.
-     */
-    {
+    if (projectileId === 0) {
       /**
-       * 0.25 — max upgrade factor.
+       * Projectile zero is the BTR firewall
        */
-      const maxExtraSpeed = maxSpeed * 0.25 * 2;
-      let extraSpeed = -scalar / projectile.velocity.length;
-
-      if (Math.abs(extraSpeed) > maxExtraSpeed) {
-        extraSpeed = Math.sign(extraSpeed) * maxExtraSpeed;
+      damage = firewallDamage;
+    } else {
+      if (victim.shield.current === true) {
+        return;
       }
 
-      extraDamageFactor += extraSpeed * PROJECTILES_EXTRA_SPEED_TO_DAMAGE_FACTOR;
+      victim.times.lastHit = now;
 
-      this.log.debug(
-        `Extra damage by direction: ${extraSpeed * PROJECTILES_EXTRA_SPEED_TO_DAMAGE_FACTOR}`
-      );
-    }
+      const projectile = this.storage.mobList.get(projectileId);
+      const scalar =
+        projectile.velocity.x * victim.velocity.x + projectile.velocity.y * victim.velocity.y;
+      const { maxSpeed } = PROJECTILES_SPECS[projectile.mobtype.current];
 
-    this.log.debug(`Extra damage factor: ${extraDamageFactor}`);
-    this.log.debug(`Projectile damage before extra: ${damage}`);
+      damage = PROJECTILES_SPECS[projectile.mobtype.current].damage;
+      let extraDamageFactor = 1;
 
-    damage *= extraDamageFactor;
+      /**
+       * Projectile upgrades increase the damage.
+       */
+      if (projectile.velocity.length > maxSpeed) {
+        const extraSpeed = projectile.velocity.length - maxSpeed;
 
-    this.log.debug(`Projectile damage after extra: ${damage}`);
+        extraDamageFactor += extraSpeed * PROJECTILES_EXTRA_SPEED_TO_DAMAGE_FACTOR;
 
-    /**
-     * Extra damage by repel.
-     */
-    if (projectile.damage.double === true) {
-      damage *= 2;
+        this.log.debug(`Extra damage by upgrades: ${extraDamageFactor - 1}`);
+      }
+
+      /**
+       * Damage increases or decreases depending on the collision speed.
+       */
+      {
+        /**
+         * 0.25 — max upgrade factor.
+         */
+        const maxExtraSpeed = maxSpeed * 0.25 * 2;
+        let extraSpeed = -scalar / projectile.velocity.length;
+
+        if (Math.abs(extraSpeed) > maxExtraSpeed) {
+          extraSpeed = Math.sign(extraSpeed) * maxExtraSpeed;
+        }
+
+        extraDamageFactor += extraSpeed * PROJECTILES_EXTRA_SPEED_TO_DAMAGE_FACTOR;
+
+        this.log.debug(
+          `Extra damage by direction: ${extraSpeed * PROJECTILES_EXTRA_SPEED_TO_DAMAGE_FACTOR}`
+        );
+      }
+
+      this.log.debug(`Extra damage factor: ${extraDamageFactor}`);
+      this.log.debug(`Projectile damage before extra: ${damage}`);
+
+      damage *= extraDamageFactor;
+
+      this.log.debug(`Projectile damage after extra: ${damage}`);
+
+      /**
+       * Extra damage by repel.
+       */
+      if (projectile.damage.double === true) {
+        damage *= 2;
+      }
+
+      /**
+       * Tracking projectile owner damage.
+       */
+      if (this.helpers.isPlayerConnected(projectile.owner.current)) {
+        const owner = this.storage.playerList.get(projectile.owner.current);
+
+        owner.damage.current += Math.round(
+          PROJECTILES_SPECS[projectile.mobtype.current].damage * 100
+        );
+      }
     }
 
     /**
@@ -126,17 +147,6 @@ export default class GamePlayersHit extends System {
        * % of the full health.
        */
       victim.health.current /= fullAirplaneHealth;
-    }
-
-    /**
-     * Tracking projectile owner damage.
-     */
-    if (this.helpers.isPlayerConnected(projectile.owner.current)) {
-      const owner = this.storage.playerList.get(projectile.owner.current);
-
-      owner.damage.current += Math.round(
-        PROJECTILES_SPECS[projectile.mobtype.current].damage * 100
-      );
     }
   }
 }

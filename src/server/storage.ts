@@ -230,18 +230,14 @@ export class GameStorage {
   public ipWhiteList: Set<IPv4> = new Set();
 
   /**
-   * Pre-generated planes spawn-zones.
-   * [x, y]
+   * Spawn zone set maps an index and ship type to a collection of pre-generated spawn zones.
+   *
+   * Index is needed for BTR, which has separate spawn zone boundaries for in match and waiting for match to start.
    */
-  public predatorSpawnZones: SpawnZones = new Map();
-
-  public goliathSpawnZones: SpawnZones = new Map();
-
-  public copterSpawnZones: SpawnZones = new Map();
-
-  public tornadoSpawnZones: SpawnZones = new Map();
-
-  public prowlerSpawnZones: SpawnZones = new Map();
+  public spawnZoneSet: Map<number, Map<number, SpawnZones>> = new Map<
+    number,
+    Map<number, SpawnZones>
+  >();
 
   /**
    * Pre-generated powerups spawn-zones.

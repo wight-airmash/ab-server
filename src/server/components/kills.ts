@@ -5,6 +5,8 @@ export default class Kills extends Component {
 
   public carriers = 0;
 
+  public currentmatch = 0;
+
   constructor(kills = 0) {
     super();
 
