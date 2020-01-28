@@ -185,12 +185,25 @@ export default class GameMatches extends System {
       /**
        * Waiting for game to start
        */
-      if (this.storage.playerList.size >= 2) {
-        this.gameStartTimeout += 1;
+      this.gameStartTimeout += 1;
 
-        if (this.gameStartTimeout === 0) {
-          this.prepareNewMatch();
-        } else if (this.gameStartTimeout === 10) {
+      if (this.gameStartTimeout === 0) {
+        /**
+         * After five second waiting period, new match is prepared regardless of number of players present
+         */
+        this.prepareNewMatch();
+      }
+
+      if (this.gameStartTimeout >= 0 && this.storage.playerList.size < 2) {
+        /**
+         * Matches started from joining a single waiting player start more quickly (within ~5 seconds)
+         */
+        this.gameStartTimeout = 63;
+      } else if (this.storage.playerList.size >= 2) {
+        /**
+         * Post-match countdown to next match if two or more players are still present
+         */
+        if (this.gameStartTimeout === 10) {
           const shipName = SHIPS_NAMES[this.storage.gameEntity.match.shipType];
 
           this.broadcastServerMessageAlert(`${shipName} round starting in 1 minute`, 12);
@@ -293,7 +306,7 @@ export default class GameMatches extends System {
          */
         match.isActive = false;
         this.gameStartTimeout = -5;
-        this.broadcastServerMessageAlert('Game ended!', 3);
+        this.broadcastServerMessageAlert('Game ended!', 5);
       }
     }
   }

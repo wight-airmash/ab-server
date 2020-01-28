@@ -9,6 +9,7 @@ import {
   PLAYERS_REMOVED,
   PLAYERS_ALIVE_UPDATE,
   BROADCAST_PLAYERS_ALIVE,
+  BROADCAST_SERVER_MESSAGE,
 } from '@/events';
 import { PLAYERS_ALIVE_STATUSES, MS_PER_SEC, SHIPS_ENCLOSE_RADIUS } from '@/constants';
 import { System } from '@/server/system';
@@ -116,6 +117,15 @@ export default class GamePlayers extends System {
   }
 
   onRemovePlayer(/* playerId: PlayerId */): void {
+    if (this.storage.playerList.size === 1) {
+      this.emit(
+        BROADCAST_SERVER_MESSAGE,
+        'Not enough players',
+        SERVER_MESSAGE_TYPES.ALERT,
+        5 * MS_PER_SEC
+      );
+    }
+
     this.delay(PLAYERS_ALIVE_UPDATE);
   }
 }
