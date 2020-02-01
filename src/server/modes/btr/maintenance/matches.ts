@@ -1,35 +1,34 @@
-import { SERVER_MESSAGE_TYPES, BTR_FIREWALL_STATUS } from '@airbattle/protocol';
+import { BTR_FIREWALL_STATUS, SERVER_MESSAGE_TYPES } from '@airbattle/protocol';
 import {
-  MS_PER_SEC,
   BTR_FIREWALL_INITIAL_RADIUS,
   BTR_FIREWALL_POSITION,
   BTR_FIREWALL_SPEED,
+  BTR_SHIPS_TYPES_ORDER,
+  MS_PER_SEC,
   PLAYERS_ALIVE_STATUSES,
   PLAYERS_HEALTH,
-  SHIPS_ENCLOSE_RADIUS,
   SHIPS_NAMES,
-  BTR_SHIPS_TYPES_ORDER,
 } from '@/constants';
 import {
   BROADCAST_GAME_FIREWALL,
-  BROADCAST_SERVER_MESSAGE,
-  TIMELINE_CLOCK_SECOND,
-  TIMELINE_CLOCK_HALFSECOND,
-  PLAYERS_HIT,
-  BROADCAST_PLAYER_HIT,
-  PLAYERS_KILL,
-  RESPONSE_SCORE_UPDATE,
-  TIMELINE_GAME_MATCH_START,
-  PLAYERS_RESPAWN,
   BROADCAST_PLAYERS_ALIVE,
-  PLAYERS_ALIVE_UPDATE,
+  BROADCAST_PLAYER_HIT,
   BROADCAST_SERVER_CUSTOM,
+  BROADCAST_SERVER_MESSAGE,
+  PLAYERS_ALIVE_UPDATE,
+  PLAYERS_HIT,
+  PLAYERS_KILL,
+  PLAYERS_RESPAWN,
+  RESPONSE_SCORE_UPDATE,
+  TIMELINE_CLOCK_HALFSECOND,
+  TIMELINE_CLOCK_SECOND,
+  TIMELINE_GAME_MATCH_START,
 } from '@/events';
-import { System } from '@/server/system';
-import { PlayerId } from '@/types';
-import { getRandomNumber, getRandomInt } from '@/support/numbers';
 import Entity from '@/server/entity';
+import { System } from '@/server/system';
+import { getRandomNumber } from '@/support/numbers';
 import { has } from '@/support/objects';
+import { PlayerId } from '@/types';
 
 export default class GameMatches extends System {
   private gameStartTimeout = 0;
@@ -112,19 +111,6 @@ export default class GameMatches extends System {
 
     this.storage.playerList.forEach(player => {
       player.delayed.RESPAWN = true;
-
-      let x = 0;
-      let y = 0;
-      let r = 0;
-
-      const spawnZones = this.storage.spawnZoneSet.get(1).get(match.shipType);
-
-      [x, y] = spawnZones.get(getRandomInt(0, spawnZones.size - 1));
-      r = SHIPS_ENCLOSE_RADIUS[match.shipType] / 2;
-
-      player.position.x = x + getRandomInt(-r, r);
-      player.position.y = y + getRandomInt(-r, r);
-
       this.emit(PLAYERS_RESPAWN, player.id.current, match.shipType);
     });
 
