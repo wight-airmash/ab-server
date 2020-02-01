@@ -96,7 +96,7 @@ export default class GamePowerups extends System {
       const [x, y] = chunk.zones.get(zoneIndex);
       const r = 32 - 22;
 
-      let type;
+      let type: MOB_TYPES;
 
       if (this.app.config.server.typeId === GAME_TYPES.BTR) {
         type = MOB_TYPES.INFERNO;
