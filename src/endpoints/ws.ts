@@ -401,6 +401,11 @@ export default class WsEndpoint {
         this.app.events.emit(CTF_REMOVE_PLAYER_FROM_LEADER, playerId);
         break;
 
+      case 'Kick':
+        this.log.info(`Kicking player ${playerId}`);
+        this.app.events.emit(PLAYERS_KICK, playerId);
+        break;
+
       case 'Ban':
         this.log.info(`Banning IP: ${player.ip.current}`);
         this.app.events.emit(
