@@ -32,29 +32,32 @@ export default class UpgradeCommandHandler extends System {
         return;
       }
 
-      if (player.upgrades.amount > 0) {
-        const upgradeTypeName = UPGRADES_TYPES[upgradeType].toLowerCase();
+      const upgradeTypeName = UPGRADES_TYPES[upgradeType];
+      const upgradeTypePropName = upgradeTypeName.toLowerCase();
 
-        if (player.upgrades[upgradeTypeName] < 5) {
-          player.upgrades[upgradeTypeName] += 1;
-          player.upgrades.amount -= 1;
+      if (player.upgrades[upgradeTypePropName] < 5) {
+        if (player.upgrades.amount === 0) {
+          this.emit(ERRORS_NOT_ENOUGH_UPGRADES, connectionId);
 
-          this.emit(
-            RESPONSE_PLAYER_UPGRADE,
-            connection.meta.playerId,
-            UPGRADES_ACTION_TYPE[UPGRADES_TYPES[upgradeType]]
-          );
-
-          this.log.debug(
-            `Player id${connection.meta.playerId} applied an upgrade type ${upgradeType}.`
-          );
-
-          if (upgradeTypeName === 'speed') {
-            player.delayed.BROADCAST_PLAYER_UPDATE = true;
-          }
+          return;
         }
-      } else {
-        this.emit(ERRORS_NOT_ENOUGH_UPGRADES, connectionId);
+
+        player.upgrades[upgradeTypePropName] += 1;
+        player.upgrades.amount -= 1;
+
+        this.emit(
+          RESPONSE_PLAYER_UPGRADE,
+          connection.meta.playerId,
+          UPGRADES_ACTION_TYPE[upgradeTypeName]
+        );
+
+        this.log.debug(
+          `Player id${connection.meta.playerId} applied an upgrade type ${upgradeType}.`
+        );
+
+        if (upgradeTypeName === 'speed') {
+          player.delayed.BROADCAST_PLAYER_UPDATE = true;
+        }
       }
     }
   }
