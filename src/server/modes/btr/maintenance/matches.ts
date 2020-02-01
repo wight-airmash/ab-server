@@ -222,25 +222,27 @@ export default class GameMatches extends System {
        * Count number of alive players
        */
       let playersAlive = 0;
+      /**
+       * Potential winner. If there's only one survivor, it's definitely a winner.
+       */
+      let winner: Entity;
 
       this.storage.playerList.forEach(player => {
-        playersAlive += player.alivestatus.current === PLAYERS_ALIVE_STATUSES.ALIVE ? 1 : 0;
+        if (player.alivestatus.current === PLAYERS_ALIVE_STATUSES.ALIVE) {
+          playersAlive += 1;
+          winner = player;
+        }
       });
 
       match.playersAlive = playersAlive;
 
+      /**
+       * Check is potential winner a real winner.
+       */
       if (playersAlive === 1) {
         /**
          * Celebrate the BTR winner
          */
-        let winner: Entity;
-
-        this.storage.playerList.forEach(player => {
-          if (player.alivestatus.current === PLAYERS_ALIVE_STATUSES.ALIVE) {
-            winner = player;
-          }
-        });
-
         match.winnerName = winner.name.current;
         match.winnerFlag = winner.flag.code;
         match.winnerKills = winner.kills.currentmatch;
