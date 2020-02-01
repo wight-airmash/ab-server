@@ -1,9 +1,9 @@
 import { CTF_TEAMS } from '@airbattle/protocol';
 import {
-  MAP_COORDS,
-  MAP_SIZE,
   CTF_FLAGS_SPAWN_ZONE_COLLISIONS,
   CTF_FLAG_COLLISIONS,
+  MAP_COORDS,
+  MAP_SIZE,
   MOUNTAIN_OBJECTS,
   PI_X2,
   POWERUPS_COLLISIONS,
@@ -14,11 +14,11 @@ import {
   SHIPS_SPECS,
   SHIPS_TYPES,
 } from '@/constants';
-
+import { PLAYERS_SPAWN_ZONES } from '@/constants/spawn';
 import { TIMELINE_BEFORE_GAME_START } from '@/events';
 import { System } from '@/server/system';
-import { SpawnZones, PowerupSpawnChunk } from '@/types';
-import { PLAYERS_SPAWN_ZONES } from '@/constants/spawn';
+import { has } from '@/support/objects';
+import { PowerupSpawnChunk, SpawnZones } from '@/types';
 
 /**
  * TODO: combine data from the constants. Now the code is duplicated.
@@ -297,22 +297,30 @@ export default class GameWarming extends System {
 
     this.log.debug('Mobs hitboxes pre calculated.');
 
-    const gameSpawnZones = PLAYERS_SPAWN_ZONES[this.app.config.server.typeId];
+    if (has(PLAYERS_SPAWN_ZONES, `${this.app.config.server.typeId}`)) {
+      const gameSpawnZones = PLAYERS_SPAWN_ZONES[this.app.config.server.typeId];
 
-    for (let index = 0; index < gameSpawnZones.length; index += 1) {
-      const spawnZoneSetIndex = new Map<number, SpawnZones>();
+      for (let index = 0; index < gameSpawnZones.length; index += 1) {
+        const spawnZoneSetIndex = new Map<number, SpawnZones>();
 
-      this.storage.spawnZoneSet.set(index, spawnZoneSetIndex);
+        this.storage.spawnZoneSet.set(index, spawnZoneSetIndex);
 
-      Object.values(SHIPS_TYPES).forEach(shipType => {
-        const planeSpawnZones = new Map<number, [number, number]>();
+        Object.values(SHIPS_TYPES).forEach(shipType => {
+          const planeSpawnZones = new Map<number, [number, number]>();
 
-        spawnZoneSetIndex.set(shipType, planeSpawnZones);
-        generateSpawnZones(planeSpawnZones, SHIPS_ENCLOSE_RADIUS[shipType], gameSpawnZones[index]);
-      });
+          spawnZoneSetIndex.set(shipType, planeSpawnZones);
+          generateSpawnZones(
+            planeSpawnZones,
+            SHIPS_ENCLOSE_RADIUS[shipType],
+            gameSpawnZones[index]
+          );
+        });
+      }
+
+      this.log.debug('Planes spawn zones pre calculated.');
+    } else {
+      this.log.debug('There are no planes spawn zones to cache.');
     }
-
-    this.log.debug('Planes spawn zones pre calculated.');
 
     generatePowerupSpawns(this.storage.powerupSpawns);
     this.log.debug('Power-ups spawn zones pre calculated.');
