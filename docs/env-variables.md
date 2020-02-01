@@ -128,6 +128,8 @@ Default FFA: `0.5`
 
 Default CTF: `0.03`
 
+Default BTR: `0.5`
+
 Probability of shields and inferno boxes spawn. Valid value: `[0..1]`. Set `0` to disable shields and inferno boxes spawn.
 
 The map is split into 32 chunks. Each chunk can hold no more than 1 powerup at a time (periodicals powerups aren't counted). One by one, one per second, the chunks are checked for spawning possibilities. If powerup was picked up or despawned, the chunk will have a timeout to spawn of 5 minutes. After 5 minutes, considering the probability value, a powerup may be spawned (per chunk probability automatically increases with time if no powerups were spawned).
@@ -172,7 +174,7 @@ Server room name.
 
 Default: `FFA`
 
-Types: FFA, CTF. BTR isn't ready.
+Types: FFA, CTF or BTR.
 
 ### STATS_PATH
 
