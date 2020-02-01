@@ -31,15 +31,6 @@ export default class GamePlayers extends System {
 
   onAssignPlayerSpawnPosition(player: Entity): void {
     if (this.storage.gameEntity.match.isActive === false) {
-      if (!this.helpers.isPlayerConnected(player.id.current)) {
-        /**
-         * Assign new players a ship type based on BTR match state
-         */
-        const { shipType } = this.storage.gameEntity.match;
-
-        player.planetype.current = shipType;
-      }
-
       /**
        * Match not started yet, have players wait around Europe
        */
@@ -47,6 +38,9 @@ export default class GamePlayers extends System {
       let y = 0;
       let r = 0;
 
+      /**
+       * BTR has two spawn zones. The zone at index 0 is a waiting mode zone.
+       */
       const spawnZones = this.storage.spawnZoneSet.get(0).get(player.planetype.current);
 
       [x, y] = spawnZones.get(getRandomInt(0, spawnZones.size - 1));
@@ -116,7 +110,7 @@ export default class GamePlayers extends System {
     }
   }
 
-  onRemovePlayer(/* playerId: PlayerId */): void {
+  onRemovePlayer(): void {
     if (this.storage.playerList.size === 1) {
       this.emit(
         BROADCAST_SERVER_MESSAGE,

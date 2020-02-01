@@ -110,6 +110,7 @@ import PacketRouter from '@/server/router';
 import SpectatorsCommandHandler from '@/server/modes/base/commands/spectators';
 import LoginPublicKeyDownloader from '@/server/modes/base/support/auth';
 import AlreadyLoggedInResponse from '@/server/modes/base/responses/already-logged-in';
+import GamePlayersShipType from '@/server/modes/base/maintenance/players/ship-type';
 
 export default abstract class BaseGameManifest extends GameManifest {
   constructor({ app }) {
@@ -234,6 +235,7 @@ export default abstract class BaseGameManifest extends GameManifest {
       GamePlayersKill,
       GamePlayersPowerup,
       GamePlayersBounce,
+      GamePlayersShipType,
       GameCollisions,
       GameProjectiles,
       GamePlayersRepel,

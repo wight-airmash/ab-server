@@ -1,6 +1,5 @@
-/* eslint-disable no-param-reassign */
 import { GAME_TYPES, PLAYER_LEVEL_UPDATE_TYPES } from '@airbattle/protocol';
-import { Polygon, Circle } from 'collisions';
+import { Polygon } from 'collisions';
 import cryptoRandomString from 'crypto-random-string';
 import {
   CHAT_FIRST_MESSAGE_SAFE_DELAY_MS,
@@ -13,10 +12,9 @@ import {
   PLAYERS_SPAWN_SHIELD_DURATION_MS,
   SERVER_MAX_PLAYERS_LIMIT,
   SHIPS_SPECS,
+  SHIPS_TYPES,
   UPGRADES_ACTION_TYPE,
   UPGRADES_START_AMOUNT,
-  SHIPS_TYPES,
-  REPEL_COLLISIONS,
 } from '@/constants';
 import {
   BROADCAST_CHAT_SERVER_WHISPER,
@@ -33,6 +31,7 @@ import {
   PLAYERS_CREATED,
   PLAYERS_EMIT_CHANNEL_CONNECT,
   PLAYERS_LIMIT_REACHED,
+  PLAYERS_SET_SHIP_TYPE,
   PLAYERS_UPDATE_HORIZON,
   RESPONSE_LOGIN,
   RESPONSE_PLAYER_UPGRADE,
@@ -119,7 +118,7 @@ export default class GamePlayersConnect extends System {
   /**
    * Create player.
    */
-  onCreatePlayer({ connectionId, name, flag, horizon, shipType, userId }): void {
+  onCreatePlayer({ connectionId, name, flag, horizon, userId }): void {
     if (this.storage.playerList.size > SERVER_MAX_PLAYERS_LIMIT) {
       this.emit(PLAYERS_LIMIT_REACHED, connectionId);
 
@@ -142,6 +141,14 @@ export default class GamePlayersConnect extends System {
     while (this.storage.playerNameList.has(uniqueName)) {
       uniqueName = `${name}#${getRandomInt(101, 999)}`;
     }
+
+    /**
+     * FFA and CTF have default type "Predator".
+     */
+    const shipType =
+      this.app.config.server.typeId === GAME_TYPES.BTR
+        ? this.storage.gameEntity.match.shipType
+        : SHIPS_TYPES.PREDATOR;
 
     const player = new Entity().attach(
       new Id(this.helpers.createMobId(uniqueName)),
@@ -261,46 +268,8 @@ export default class GamePlayersConnect extends System {
       this.emit(PLAYERS_ASSIGN_TEAM, player);
     }
 
-    /**
-     * In BTR's event handler, this also assigns a ship type to player entity
-     */
+    this.emit(PLAYERS_SET_SHIP_TYPE, player, shipType);
     this.emit(PLAYERS_ASSIGN_SPAWN_POSITION, player);
-
-    if (shipType !== player.planetype.current) {
-      shipType = player.planetype.current;
-
-      player.hitcircles.current = [...SHIPS_SPECS[shipType].collisions];
-
-      /**
-       * Add repel zone
-       */
-      if (shipType === SHIPS_TYPES.GOLIATH) {
-        this.log.debug(`Adding goliath repel zone for player id${player.id.current}.`);
-        const radius = REPEL_COLLISIONS[0][2];
-        const repel = new Entity().attach(
-          new Id(player.id.current),
-          new Position(player.position.x, player.position.y),
-          new Team(player.team.current),
-          new Rotation(),
-          new Hitbox(),
-          new HitCircles([...REPEL_COLLISIONS])
-        );
-
-        repel.hitbox.x = ~~player.position.x + MAP_SIZE.HALF_WIDTH - radius;
-        repel.hitbox.y = ~~player.position.y + MAP_SIZE.HALF_HEIGHT - radius;
-        repel.hitbox.height = radius * 2;
-        repel.hitbox.width = radius * 2;
-
-        const hitbox = new Circle(repel.hitbox.x + radius, repel.hitbox.y + radius, radius);
-
-        hitbox.id = repel.id.current;
-        hitbox.type = COLLISIONS_OBJECT_TYPES.REPEL;
-        repel.hitbox.current = hitbox;
-
-        this.emit(COLLISIONS_ADD_OBJECT, repel.hitbox.current);
-        this.storage.repelList.set(player.id.current, repel);
-      }
-    }
 
     this.log.debug(`Player id${player.id.current} ship type is ${shipType}.`);
 
@@ -439,6 +408,9 @@ export default class GamePlayersConnect extends System {
       }, CHAT_FIRST_MESSAGE_SAFE_DELAY_MS);
     }
 
+    /**
+     * Welcome messages.
+     */
     setTimeout(() => {
       try {
         const reg = new RegExp(CHAT_USERNAME_PLACEHOLDER, 'g');

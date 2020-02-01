@@ -1,13 +1,13 @@
 import { ClientPackets, FLAGS_ISO_TO_CODE } from '@airbattle/protocol';
-import { PLAYERS_DEFAULT_FLAG, SHIPS_TYPES } from '@/constants';
-import { CHANNEL_CONNECT_PLAYER } from '@/server/channels';
+import { PLAYERS_DEFAULT_FLAG } from '@/constants';
 import {
-  PLAYERS_CREATE,
   ERRORS_INCORRECT_PROTOCOL,
   ERRORS_INVALID_LOGIN_DATA,
+  PLAYERS_CREATE,
   PLAYERS_KICK,
   ROUTE_LOGIN,
 } from '@/events';
+import { CHANNEL_CONNECT_PLAYER } from '@/server/channels';
 import { System } from '@/server/system';
 import { has } from '@/support/objects';
 import { MainConnectionId } from '@/types';
@@ -135,7 +135,6 @@ export default class LoginMessageHandler extends System {
         y: msg.horizonY,
       },
       userId,
-      shipType: SHIPS_TYPES.PREDATOR,
     });
   }
 }
