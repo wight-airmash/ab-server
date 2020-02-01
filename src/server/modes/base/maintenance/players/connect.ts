@@ -1,6 +1,5 @@
 import { GAME_TYPES, PLAYER_LEVEL_UPDATE_TYPES } from '@airbattle/protocol';
 import { Polygon } from 'collisions';
-import cryptoRandomString from 'crypto-random-string';
 import {
   CHAT_FIRST_MESSAGE_SAFE_DELAY_MS,
   CHAT_USERNAME_PLACEHOLDER,
@@ -86,6 +85,7 @@ import Entity from '@/server/entity';
 import { System } from '@/server/system';
 import { getRandomInt } from '@/support/numbers';
 import { has } from '@/support/objects';
+import { generateBackupToken } from '@/support/strings';
 
 export default class GamePlayersConnect extends System {
   constructor({ app }) {
@@ -96,8 +96,8 @@ export default class GamePlayersConnect extends System {
       [PLAYERS_EMIT_CHANNEL_CONNECT]: this.onEmitDelayedConnectEvents,
 
       // Events.
-      [TIMELINE_BEFORE_GAME_START]: this.createServerPlayer,
       [PLAYERS_CREATE]: this.onCreatePlayer,
+      [TIMELINE_BEFORE_GAME_START]: this.createServerPlayer,
     };
   }
 
@@ -160,7 +160,7 @@ export default class GamePlayersConnect extends System {
       new PlaneType(shipType),
       new PlaneState(),
       new AliveStatus(PLAYERS_ALIVE_STATUSES.DEFAULT),
-      new Token(cryptoRandomString({ length: 16 })),
+      new Token(generateBackupToken()),
       new Position(0, 0),
       new Velocity(0, 0),
       new Health(),

@@ -40,7 +40,6 @@
   "dependencies": {
     "@airbattle/protocol": "github:wight-airmash/ab-protocol#v5.11.1",
     "collisions": "github:wight-airmash/ab-collisions",
-    "crypto-random-string": "^3.0.1",
     "dotenv": "^8.2.0",
     "eventemitter3": "^4.0.0",
     "maxmind": "^4.1.0",
