@@ -11,18 +11,18 @@ import {
   BROADCAST_PLAYER_UPDATE,
   BROADCAST_SERVER_CUSTOM,
   BROADCAST_SERVER_MESSAGE,
-  PLAYERS_CREATED,
-  PLAYERS_RESPAWN,
   CTF_RESET_FLAGS,
-  RESPONSE_SCORE_UPDATE,
   CTF_SHUFFLE_PLAYERS,
   CTF_TEAM_CAPTURED_FLAG,
+  PLAYERS_CREATED,
+  PLAYERS_RESPAWN,
+  RESPONSE_SCORE_UPDATE,
   TIMELINE_CLOCK_SECOND,
   TIMELINE_GAME_MATCH_START,
 } from '@/events';
 import { System } from '@/server/system';
-import { PlayerId, TeamId } from '@/types';
 import { has } from '@/support/objects';
+import { PlayerId, TeamId } from '@/types';
 
 export default class GameMatches extends System {
   private timeout = 0;
@@ -42,7 +42,6 @@ export default class GameMatches extends System {
       this.timeout += 1;
 
       if (this.timeout === 15) {
-        // TODO: not sure about message type.
         this.emit(
           BROADCAST_SERVER_MESSAGE,
           'New game starting in 1 minute',
@@ -50,7 +49,6 @@ export default class GameMatches extends System {
           CTF_NEW_GAME_ALERT_DURATION_MS
         );
       } else if (this.timeout === 30) {
-        // TODO: not sure about message type.
         this.emit(
           BROADCAST_SERVER_MESSAGE,
           'Game starting in 30 seconds - shuffling teams',
@@ -60,7 +58,6 @@ export default class GameMatches extends System {
 
         this.emit(CTF_SHUFFLE_PLAYERS);
       } else if (this.timeout === 50) {
-        // TODO: not sure about message type.
         this.emit(
           BROADCAST_SERVER_MESSAGE,
           'Game starting in 10 seconds',
@@ -75,7 +72,6 @@ export default class GameMatches extends System {
           text = `Game starting in ${60 - this.timeout} seconds`;
         }
 
-        // Message type is from StarMash, should be like original.
         this.emit(
           BROADCAST_SERVER_MESSAGE,
           text,
@@ -86,7 +82,6 @@ export default class GameMatches extends System {
         this.timeout >= 60 ||
         (this.storage.gameEntity.match.blue === 0 && this.storage.gameEntity.match.red === 0)
       ) {
-        // TODO: not sure about message type.
         this.emit(
           BROADCAST_SERVER_MESSAGE,
           'Game starting!',
@@ -108,6 +103,8 @@ export default class GameMatches extends System {
           player.delayed.RESPAWN = true;
           player.times.activePlayingBlue = 0;
           player.times.activePlayingRed = 0;
+          player.kills.currentmatch = 0;
+
           this.emit(PLAYERS_RESPAWN, player.id.current);
         });
 
