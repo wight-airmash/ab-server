@@ -161,19 +161,6 @@ export default class GameMatches extends System {
      */
     this.storage.playerList.forEach(player => {
       player.delayed.RESPAWN = true;
-
-      let x = 0;
-      let y = 0;
-      let r = 0;
-
-      const spawnZones = this.storage.spawnZoneSet.get(0).get(shipType);
-
-      [x, y] = spawnZones.get(getRandomInt(0, spawnZones.size - 1));
-      r = SHIPS_ENCLOSE_RADIUS[shipType] / 2;
-
-      player.position.x = x + getRandomInt(-r, r);
-      player.position.y = y + getRandomInt(-r, r);
-
       player.kills.currentmatch = 0;
 
       this.emit(PLAYERS_RESPAWN, player.id.current, shipType);
@@ -260,7 +247,7 @@ export default class GameMatches extends System {
         /**
          * Celebrate the BTR winner
          */
-        let winner;
+        let winner: Entity;
 
         this.storage.playerList.forEach(player => {
           if (player.alivestatus.current === PLAYERS_ALIVE_STATUSES.ALIVE) {

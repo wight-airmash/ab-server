@@ -25,6 +25,7 @@ import {
   COLLISIONS_ADD_OBJECT,
   ERRORS_ALREADY_LOGGED_IN,
   PLAYERS_APPLY_SHIELD,
+  PLAYERS_ASSIGN_ALIVE_STATUS,
   PLAYERS_ASSIGN_SPAWN_POSITION,
   PLAYERS_ASSIGN_TEAM,
   PLAYERS_CREATE,
@@ -189,6 +190,9 @@ export default class GamePlayersConnect extends System {
 
     player.attach(new Team(player.id.current));
 
+    /**
+     * Retrieve or init user account stats.
+     */
     if (userId.length > 0) {
       this.storage.onlineUserIdList.add(userId);
       player.attach(new User(userId));
@@ -214,6 +218,7 @@ export default class GamePlayersConnect extends System {
 
     /**
      * Player stats recovering after disconnection.
+     * CTF only.
      */
     let isAssignTeamNeeded = true;
     let isRecovered = false;
@@ -268,10 +273,9 @@ export default class GamePlayersConnect extends System {
       this.emit(PLAYERS_ASSIGN_TEAM, player);
     }
 
+    this.emit(PLAYERS_ASSIGN_ALIVE_STATUS, player);
     this.emit(PLAYERS_SET_SHIP_TYPE, player, shipType);
     this.emit(PLAYERS_ASSIGN_SPAWN_POSITION, player);
-
-    this.log.debug(`Player id${player.id.current} ship type is ${shipType}.`);
 
     /**
      * Players storage filling.

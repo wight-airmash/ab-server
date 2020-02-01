@@ -1,61 +1,62 @@
 /* eslint-disable no-lonely-if */
 import { SERVER_MESSAGE_TYPES } from '@airbattle/protocol';
+import { MS_PER_SEC, PLAYERS_ALIVE_STATUSES, SHIPS_ENCLOSE_RADIUS } from '@/constants';
 import {
-  PLAYERS_ASSIGN_SPAWN_POSITION,
-  SPECTATE_ENTER_MODE,
-  PLAYERS_CREATED,
-  RESPONSE_SERVER_MESSAGE,
   BROADCAST_GAME_FIREWALL,
-  PLAYERS_REMOVED,
-  PLAYERS_ALIVE_UPDATE,
   BROADCAST_PLAYERS_ALIVE,
   BROADCAST_SERVER_MESSAGE,
+  PLAYERS_ALIVE_UPDATE,
+  PLAYERS_ASSIGN_ALIVE_STATUS,
+  PLAYERS_ASSIGN_SPAWN_POSITION,
+  PLAYERS_CREATED,
+  PLAYERS_REMOVED,
+  RESPONSE_SERVER_MESSAGE,
+  SPECTATE_ENTER_MODE,
 } from '@/events';
-import { PLAYERS_ALIVE_STATUSES, MS_PER_SEC, SHIPS_ENCLOSE_RADIUS } from '@/constants';
+import { CHANNEL_SPECTATE } from '@/server/channels';
+import Entity from '@/server/entity';
 import { System } from '@/server/system';
 import { getRandomInt } from '@/support/numbers';
-import Entity from '@/server/entity';
 import { PlayerId } from '@/types';
-import { CHANNEL_SPECTATE } from '@/server/channels';
 
 export default class GamePlayers extends System {
   constructor({ app }) {
     super({ app });
 
     this.listeners = {
+      [PLAYERS_ASSIGN_ALIVE_STATUS]: this.onAssignPlayerAliveStatus,
       [PLAYERS_ASSIGN_SPAWN_POSITION]: this.onAssignPlayerSpawnPosition,
       [PLAYERS_CREATED]: this.onCreatePlayer,
       [PLAYERS_REMOVED]: this.onRemovePlayer,
     };
   }
 
-  onAssignPlayerSpawnPosition(player: Entity): void {
-    if (this.storage.gameEntity.match.isActive === false) {
-      /**
-       * Match not started yet, have players wait around Europe
-       */
-      let x = 0;
-      let y = 0;
-      let r = 0;
-
-      /**
-       * BTR has two spawn zones. The zone at index 0 is a waiting mode zone.
-       */
-      const spawnZones = this.storage.spawnZoneSet.get(0).get(player.planetype.current);
-
-      [x, y] = spawnZones.get(getRandomInt(0, spawnZones.size - 1));
-      r = SHIPS_ENCLOSE_RADIUS[player.planetype.current] / 2;
-
-      player.position.x = x + getRandomInt(-r, r);
-      player.position.y = y + getRandomInt(-r, r);
-    } else {
-      /**
-       * Match already started, indicate any new players must spectate; onCreatePlayer makes this happen
-       */
-      if (!this.helpers.isPlayerConnected(player.id.current)) {
-        player.alivestatus.current = PLAYERS_ALIVE_STATUSES.SPECTATE;
-      }
+  onAssignPlayerAliveStatus(player: Entity): void {
+    if (this.storage.gameEntity.match.isActive === true) {
+      player.alivestatus.current = PLAYERS_ALIVE_STATUSES.SPECTATE;
     }
+  }
+
+  onAssignPlayerSpawnPosition(player: Entity): void {
+    /**
+     * Match not started yet, have players wait around Europe
+     */
+    let x = 0;
+    let y = 0;
+    let r = 0;
+
+    /**
+     * BTR has two spawn zones. The zone at index 0 is a waiting mode zone,
+     * at index 1 is the active game mode zone.
+     */
+    const zoneSetIndex = this.storage.gameEntity.match.isActive === false ? 0 : 1;
+    const spawnZones = this.storage.spawnZoneSet.get(zoneSetIndex).get(player.planetype.current);
+
+    [x, y] = spawnZones.get(getRandomInt(0, spawnZones.size - 1));
+    r = SHIPS_ENCLOSE_RADIUS[player.planetype.current] / 2;
+
+    player.position.x = x + getRandomInt(-r, r);
+    player.position.y = y + getRandomInt(-r, r);
   }
 
   /**
