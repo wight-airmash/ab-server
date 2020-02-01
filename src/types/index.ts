@@ -1,6 +1,6 @@
-import { WebSocket } from 'uWebSockets.js';
+import { GAME_TYPES, MOB_TYPES } from '@airbattle/protocol';
 import { Polygon } from 'collisions';
-import { MOB_TYPES } from '@airbattle/protocol';
+import { WebSocket } from 'uWebSockets.js';
 import { CONNECTIONS_STATUS } from '@/constants';
 
 export interface HitboxCacheItem {
@@ -188,4 +188,15 @@ export interface MissileTemplate {
 
 export interface FireTemplate {
   [key: string]: MissileTemplate[];
+}
+
+export interface SpawnZone {
+  MIN_X: number;
+  MIN_Y: number;
+  MAX_X: number;
+  MAX_Y: number;
+}
+
+export interface SpawnZonesTemplate {
+  [key: number]: SpawnZone[];
 }
