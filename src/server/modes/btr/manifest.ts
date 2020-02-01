@@ -1,14 +1,14 @@
-import BaseGameManifest from '@/server/modes/base/mainfest';
-import ServerCustomBroadcast from '@/server/modes/btr/responses/broadcast/server-custom';
-import Match from '@/server/components/game/match';
-import RespawnCommandHandler from '../base/commands/respawn';
-import BTRRespawnCommandHandler from './maintenance/respawn';
-import GameFirewallBroadcast from './responses/broadcast/game-firewall';
-import GameMatches from './maintenance/matches';
-import GamePlayers from './maintenance/players';
-import PlayersAliveBroadcast from './responses/broadcast/players-alive';
 import { BTR_SHIPS_TYPES_ORDER } from '@/constants';
-import ScoreDetailed from './responses/score-detailed';
+import Match from '@/server/components/game/match';
+import RespawnCommandHandler from '@/server/modes/base/commands/respawn';
+import BaseGameManifest from '@/server/modes/base/mainfest';
+import BTRRespawnCommandHandler from '@/server/modes/btr/commands/respawn';
+import GameMatches from '@/server/modes/btr/maintenance/matches';
+import GamePlayers from '@/server/modes/btr/maintenance/players';
+import GameFirewallBroadcast from '@/server/modes/btr/responses/broadcast/game-firewall';
+import PlayersAliveBroadcast from '@/server/modes/btr/responses/broadcast/players-alive';
+import ServerCustomBroadcast from '@/server/modes/btr/responses/broadcast/server-custom';
+import ScoreDetailed from '@/server/modes/btr/responses/score-detailed';
 
 export default class BTRGameManifest extends BaseGameManifest {
   constructor({ app }) {

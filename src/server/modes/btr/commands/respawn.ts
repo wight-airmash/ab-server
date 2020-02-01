@@ -12,7 +12,7 @@ export default class BTRRespawnCommandHandler extends System {
     };
   }
 
-  onCommandReceived(connectionId: MainConnectionId /* , commandArguments: string */): void {
+  onCommandReceived(connectionId: MainConnectionId): void {
     /**
      * Displays "Cannot respawn or change aircraft in a Battle Royale game" error in client
      */
