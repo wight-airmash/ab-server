@@ -1,5 +1,9 @@
 ## Future version (unversioned)
 
+Features:
+
+- Battle Royale mode.
+
 ## 4.16.1 (January 21, 2020)
 
 Bug fixes:
