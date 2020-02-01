@@ -1,5 +1,6 @@
 import { SHIPS_ENCLOSE_RADIUS } from '@/constants';
 import { PLAYERS_ASSIGN_SPAWN_POSITION } from '@/events';
+import Entity from '@/server/entity';
 import { System } from '@/server/system';
 import { getRandomInt } from '@/support/numbers';
 
@@ -12,11 +13,14 @@ export default class GamePlayers extends System {
     };
   }
 
-  onAssignPlayerSpawnPosition(player: any): void {
+  onAssignPlayerSpawnPosition(player: Entity): void {
     let x = 0;
     let y = 0;
     let r = 0;
 
+    /**
+     * FFA has only one spawn zone at index 0.
+     */
     const spawnZones = this.storage.spawnZoneSet.get(0).get(player.planetype.current);
 
     [x, y] = spawnZones.get(getRandomInt(0, spawnZones.size - 1));
