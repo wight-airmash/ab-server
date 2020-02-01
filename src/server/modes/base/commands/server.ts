@@ -39,6 +39,10 @@ export default class ServerCommandHandler extends System {
    * @param command
    */
   onCommandReceived(connectionId: MainConnectionId, command = ''): void {
+    if (!this.storage.connectionList.has(connectionId)) {
+      return;
+    }
+
     const connection = this.storage.connectionList.get(connectionId);
     const player = this.storage.playerList.get(connection.meta.playerId);
 

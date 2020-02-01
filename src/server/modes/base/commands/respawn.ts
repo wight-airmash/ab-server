@@ -14,6 +14,10 @@ export default class RespawnCommandHandler extends System {
   }
 
   onCommandReceived(connectionId: MainConnectionId, commandArguments: string): void {
+    if (!this.storage.connectionList.has(connectionId)) {
+      return;
+    }
+
     const connection = this.storage.connectionList.get(connectionId);
     const shipType = ~~commandArguments;
 
