@@ -1,4 +1,4 @@
-import { GAME_TYPES, MOB_TYPES } from '@airbattle/protocol';
+import { MOB_TYPES } from '@airbattle/protocol';
 import { Polygon } from 'collisions';
 import { WebSocket } from 'uWebSockets.js';
 import { CONNECTIONS_STATUS } from '@/constants';
