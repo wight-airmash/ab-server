@@ -1,4 +1,4 @@
-import { SHIPS_TYPES } from './ships';
+import { SHIPS_TYPES } from '@/constants/ships';
 
 export const BTR_WIN_ALERT_DURATION_SEC = 13;
 
@@ -10,6 +10,7 @@ export const BTR_FIREWALL_POSITION = {
 };
 
 export const BTR_FIREWALL_INITIAL_RADIUS = 17000;
+
 export const BTR_FIREWALL_SPEED = -70;
 
 export const BTR_SHIPS_TYPES_ORDER = [
