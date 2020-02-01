@@ -115,7 +115,7 @@ export class Helpers {
     }
 
     if (this.storage.nextMobId >= SERVER_MAX_MOB_ID) {
-      this.log.info('Mob ID reached the limit. Reseting.');
+      this.log.debug('Mob ID reached the limit. Reseting.');
 
       this.storage.nextMobId = SERVER_MIN_MOB_ID;
     }
