@@ -23,7 +23,7 @@ export default class GamePlayersHit extends System {
    *
    * @param victimId
    * @param projectileId
-   * @param damage used if projectileId is zero
+   * @param firewallDamage used if projectileId is zero
    */
   onHitPlayer(victimId: PlayerId, projectileId: MobId, firewallDamage: number): void {
     /**
