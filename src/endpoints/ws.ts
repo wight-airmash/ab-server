@@ -276,17 +276,17 @@ export default class WsEndpoint {
 
     if (this.app.config.admin.active === true) {
       this.uws
-        .get(`${this.app.config.admin.route}/server`, res => {
+        .get(`/${this.app.config.admin.route}/server`, res => {
           res.writeHeader('Content-type', 'application/json');
           res.end(`{"type":${this.app.config.server.typeId}}`);
         })
 
-        .get(`${this.app.config.admin.route}/actions`, res => {
+        .get(`/${this.app.config.admin.route}/actions`, res => {
           res.writeHeader('Content-type', 'application/json');
           res.end(`[${this.moderatorActions.join(',\n')}]`);
         })
 
-        .post(`${this.app.config.admin.route}/actions`, res => {
+        .post(`/${this.app.config.admin.route}/actions`, res => {
           readRequest(
             res,
             (requestData: string) => {
@@ -298,7 +298,7 @@ export default class WsEndpoint {
           );
         })
 
-        .get(`${this.app.config.admin.route}/players`, res => {
+        .get(`/${this.app.config.admin.route}/players`, res => {
           const now = Date.now();
           const list = [];
 
@@ -323,7 +323,7 @@ export default class WsEndpoint {
           res.end(JSON.stringify(list, null, 2));
         })
 
-        .get(`${this.app.config.admin.route}/`, async res => {
+        .get(`/${this.app.config.admin.route}/`, async res => {
           res.onAborted(() => {
             // Do nothing.
           });
