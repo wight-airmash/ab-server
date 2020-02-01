@@ -177,3 +177,15 @@ export type AuthTokenData = {
   ts: number;
   for: string;
 };
+
+export interface MissileTemplate {
+  type: MOB_TYPES;
+  x: number;
+  y: number;
+  rot: number;
+  alt: boolean;
+}
+
+export interface FireTemplate {
+  [key: string]: MissileTemplate[];
+}

@@ -1,3 +1,4 @@
+import { BTR_FIREWALL_STATUS } from '@airbattle/protocol';
 import Component from '@/server/component';
 
 export default class Match extends Component {
@@ -31,10 +32,10 @@ export default class Match extends Component {
   public winnerKills: string;
 
   public firewall: {
-    status;
-    radius;
-    posX;
-    posY;
+    status: BTR_FIREWALL_STATUS;
+    radius: number;
+    posX: number;
+    posY: number;
   };
 
   public shipType: number;

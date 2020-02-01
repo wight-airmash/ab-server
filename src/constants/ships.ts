@@ -1,4 +1,5 @@
 import { MOB_TYPES } from '@airbattle/protocol';
+import { MissileTemplate, FireTemplate } from '@/types';
 
 export const SHIPS_TYPES = {
   PREDATOR: 1,
@@ -34,7 +35,21 @@ export const SHIPS_ENCLOSE_RADIUS = {
   [SHIPS_TYPES.PROWLER]: 36,
 };
 
-const missileTemplate = (type: number, x: number, y: number, rot: number, alt = false): object => {
+/**
+ *
+ * @param type missile type
+ * @param x missile start X coord relative to the player position
+ * @param y missile start Y coord relative to the player position
+ * @param rot missile start rotation angle relative to the player position
+ * @param alt has or not alternative symmetrical starting place (like copter left/right fires)
+ */
+const missileTemplate = (
+  type: number,
+  x: number,
+  y: number,
+  rot: number,
+  alt = false
+): MissileTemplate => {
   return {
     type,
     x,
@@ -44,7 +59,15 @@ const missileTemplate = (type: number, x: number, y: number, rot: number, alt = 
   };
 };
 
-const missileFireTemplate = (def: any = [], special: any = []): any => {
+/**
+ *
+ * @param def default fire template using fire key
+ * @param special fire template using special key
+ */
+const missileFireTemplate = (
+  def: MissileTemplate[] = [],
+  special: MissileTemplate[] = []
+): FireTemplate => {
   return {
     [SHIPS_FIRE_TYPES.DEFAULT]: def,
     [SHIPS_FIRE_TYPES.SPECIAL]: special,
