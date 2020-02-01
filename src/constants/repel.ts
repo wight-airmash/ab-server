@@ -1,3 +1,6 @@
+/**
+ * [x, y, radius][]
+ */
 export const REPEL_COLLISIONS = [[0, 0, 226]];
 
 /**

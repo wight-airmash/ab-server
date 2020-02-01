@@ -1,5 +1,7 @@
 /* eslint-disable no-continue */
+import { Circle } from 'collisions';
 import {
+  COLLISIONS_OBJECT_TYPES,
   MAP_SIZE,
   PI_X2,
   PROJECTILES_SPECS,
@@ -15,9 +17,19 @@ import {
 import {
   BROADCAST_EVENT_STEALTH,
   BROADCAST_PLAYER_UPDATE,
+  COLLISIONS_ADD_OBJECT,
+  COLLISIONS_REMOVE_OBJECT,
+  PLAYERS_REPEL_ADD,
+  PLAYERS_REPEL_DELETE,
   PLAYERS_REPEL_MOBS,
   PLAYERS_REPEL_UPDATE,
 } from '@/events';
+import HitCircles from '@/server/components/hit-circles';
+import Hitbox from '@/server/components/hitbox';
+import Id from '@/server/components/mob-id';
+import Position from '@/server/components/position';
+import Rotation from '@/server/components/rotation';
+import Team from '@/server/components/team';
 import Entity from '@/server/entity';
 import { System } from '@/server/system';
 import { MobId, PlayerId } from '@/types';
@@ -29,6 +41,8 @@ export default class GamePlayersRepel extends System {
     this.listeners = {
       [PLAYERS_REPEL_MOBS]: this.onRepelMobs,
       [PLAYERS_REPEL_UPDATE]: this.onRepelUpdate,
+      [PLAYERS_REPEL_ADD]: this.onAddRepel,
+      [PLAYERS_REPEL_DELETE]: this.onDeleteRepel,
     };
   }
 
@@ -38,6 +52,50 @@ export default class GamePlayersRepel extends System {
 
   protected static repelProjectileEnergy(distance: number): number {
     return 0.0479 * distance * distance - 18.84 * distance + 2007;
+  }
+
+  onAddRepel(player: Entity): void {
+    const radius = REPEL_COLLISIONS[0][2];
+    const repel = new Entity().attach(
+      new Id(player.id.current),
+      new Position(player.position.x, player.position.y),
+      new Team(player.team.current),
+      new Rotation(),
+      new Hitbox(),
+      new HitCircles([...REPEL_COLLISIONS])
+    );
+
+    repel.hitbox.x = ~~player.position.x + MAP_SIZE.HALF_WIDTH - radius;
+    repel.hitbox.y = ~~player.position.y + MAP_SIZE.HALF_HEIGHT - radius;
+    repel.hitbox.height = radius * 2;
+    repel.hitbox.width = radius * 2;
+
+    const hitbox = new Circle(repel.hitbox.x + radius, repel.hitbox.y + radius, radius);
+
+    hitbox.id = repel.id.current;
+    hitbox.type = COLLISIONS_OBJECT_TYPES.REPEL;
+    repel.hitbox.current = hitbox;
+
+    this.emit(COLLISIONS_ADD_OBJECT, repel.hitbox.current);
+
+    this.storage.repelList.set(player.id.current, repel);
+
+    this.log.debug(`Added goliath repel zone for player id${player.id.current}.`);
+  }
+
+  onDeleteRepel(player: Entity): void {
+    if (this.storage.repelList.has(player.id.current) !== true) {
+      return;
+    }
+
+    const repel = this.storage.repelList.get(player.id.current);
+
+    this.emit(COLLISIONS_REMOVE_OBJECT, repel.hitbox.current);
+
+    repel.destroy();
+    this.storage.repelList.delete(player.id.current);
+
+    this.log.debug(`Deleted goliath repel zone for player id${player.id.current}.`);
   }
 
   onRepelUpdate(repelId: MobId, playerX: number, playerY: number): void {
