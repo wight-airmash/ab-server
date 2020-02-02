@@ -2,27 +2,27 @@
 
 Commands are executed via the chat interface.
 
-### /flag [ISO code]
+### /flag \<ISO code\>
 
 Update player country flag.
 
-### /votemute [player name]
+### /votemute \<player name\>
 
 Vote to mute player.
 
-### /t [message]
+### /t \<message\>
 
 Send a message to the team chat.
 
-### /s [message]
+### /s \<message\>
 
 Say a message in the bubble.
 
-### /w [player name][message]
+### /w \<player name\> \<message\>
 
 Send a private message to the player.
 
-### /upgrade [type]
+### /upgrade \<type\>
 
 Apply an upgrade. Types from 1 to 4.
 
@@ -34,7 +34,7 @@ Drop upgrades.
 
 Reset applied upgrades. Empty type = reset all at once.
 
-### /respawn [type]
+### /respawn \<type\>
 
 Respawn from spectator mode. Types from 1 to 5.
 
@@ -50,13 +50,17 @@ Spectate the next players.
 
 Spectate the previous players.
 
-### /spectate [id]
+### /spectate \<id\>
 
 Spectate player by ID.
 
 ### /spectators
 
 How many players are spectating you.
+
+### /profile
+
+Your stats.
 
 ### /drop
 
@@ -84,13 +88,13 @@ Server powerups spawn chance.
 
 ### /server debug
 
-Server powerups spawn chance.
+Server debug info.
 
 ### /server limits
 
 Values of the player limits.
 
-### /su [password]
+### /su \<password\>
 
 Become a superuser.
 
@@ -102,19 +106,19 @@ You need to be a superuser to run these commands.
 
 Announce the result of the last performance check in public chat.
 
-### /server say [message]
+### /server say \<message\>
 
 Send a message to public chat from the Server bot.
 
-### /server upgrades min [value]
+### /server upgrades min \<value\>
 
 Set the min value of the upgrades drop chance.
 
-### /server upgrades max [value]
+### /server upgrades max \<value\>
 
 Set the max value of the upgrades drop chance.
 
-### /server powerups [value]
+### /server powerups \<value\>
 
 Set the chance value of the powerups spawn.
 
@@ -130,54 +134,54 @@ Turn whitelist on. Only affects new players.
 
 Turn whitelist off. Only affects new players.
 
-### /server bot add [IP]
+### /server bot add \<IP\>
 
 Add a bot IP. Only affects new players.
 
-### /server bot remove [IP]
+### /server bot remove \<IP\>
 
 Remove a bot IP. Only affects new players.
 
-### /server mute id [PlayerId]
+### /server mute id \<PlayerId\>
 
 Mute the player by ID (60 minutes by default).
 
-### /server mute name [PlayerName]
+### /server mute name \<PlayerName\>
 
 Mute the player by name (60 minutes by default).
 
-### /server mute ip [IP]
+### /server mute ip \<IP\>
 
 Mute the IP (60 minutes by default). Only affects new players.
 
-### /server unmute id [PlayerId]
+### /server unmute id \<PlayerId\>
 
 Unmute the player by ID.
 
-### /server unmute name [PlayerName]
+### /server unmute name \<PlayerName\>
 
 Unmute the player by name.
 
-### /server unmute ip [IP]
+### /server unmute ip \<IP\>
 
 Unmute the IP. Only affects new players.
 
-### /server kick id [PlayerId]
+### /server kick id \<PlayerId\>
 
 Kick the player by ID.
 
-### /server kick name [PlayerName]
+### /server kick name \<PlayerName\>
 
 Kick the player by name.
 
-### /server ban add [IP]
+### /server ban add \<IP\>
 
 Add an IP into the ban list. Only affects new players.
 
-### /server ban remove [IP]
+### /server ban remove \<IP\>
 
 Remove an IP from the ban list. Only affects new players.
 
-### /server ban has [IP]
+### /server ban has \<IP\>
 
 Check an IP ban status.

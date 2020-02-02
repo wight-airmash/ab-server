@@ -4,14 +4,15 @@ import {
   COMMAND_DROP_UPGRADE,
   COMMAND_FLAG,
   COMMAND_MATCH,
+  COMMAND_PROFILE,
   COMMAND_RESPAWN,
   COMMAND_SERVER,
   COMMAND_SPECTATE,
+  COMMAND_SPECTATORS,
   COMMAND_SU,
   COMMAND_SWITCH,
   COMMAND_UPGRADE,
   ROUTE_COMMAND,
-  COMMAND_SPECTATORS,
 } from '@/events';
 import { System } from '@/server/system';
 import { has } from '@/support/objects';
@@ -31,21 +32,22 @@ export default class CommandMessageHandler extends System {
     super({ app });
 
     this.commands = Object.freeze({
+      drop: COMMAND_DROP_FLAG,
+      flag: COMMAND_FLAG,
       respawn: COMMAND_RESPAWN,
       spectate: COMMAND_SPECTATE,
       upgrade: COMMAND_UPGRADE,
-      flag: COMMAND_FLAG,
-      drop: COMMAND_DROP_FLAG,
 
       // Custom commands.
-      spectators: COMMAND_SPECTATORS,
-      upgrades: COMMAND_DROP_UPGRADE,
+      profile: COMMAND_PROFILE,
       server: COMMAND_SERVER,
+      spectators: COMMAND_SPECTATORS,
       su: COMMAND_SU,
+      upgrades: COMMAND_DROP_UPGRADE,
 
       // CTF only.
-      switch: COMMAND_SWITCH,
       match: COMMAND_MATCH,
+      switch: COMMAND_SWITCH,
     });
 
     this.listeners = {

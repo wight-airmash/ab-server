@@ -2,11 +2,12 @@ import Times from '@/server/components/game/times';
 import Connections from '@/server/connections';
 import Entity from '@/server/entity';
 import { GameManifest } from '@/server/manifest';
-import GamePlayersBounce from '@/server/modes/base/maintenance/players/bounce';
 import FlagCommandHandler from '@/server/modes/base/commands/flag';
+import ProfileCommandHandler from '@/server/modes/base/commands/profile';
 import RespawnCommandHandler from '@/server/modes/base/commands/respawn';
 import ServerCommandHandler from '@/server/modes/base/commands/server';
 import SpectateCommandHandler from '@/server/modes/base/commands/spectate';
+import SpectatorsCommandHandler from '@/server/modes/base/commands/spectators';
 import SuperuserCommandHandler from '@/server/modes/base/commands/su';
 import UpgradeCommandHandler from '@/server/modes/base/commands/upgrade';
 import UpgradesCommandHandler from '@/server/modes/base/commands/upgrades';
@@ -24,24 +25,28 @@ import ScoredetailedMessageHandler from '@/server/modes/base/controllers/scorede
 import TeamchatMessageHandler from '@/server/modes/base/controllers/teamchat';
 import VotemuteMessageHandler from '@/server/modes/base/controllers/votemute';
 import WhisperMessageHandler from '@/server/modes/base/controllers/whisper';
+import BansGuard from '@/server/modes/base/guards/bans';
+import ChatGuard from '@/server/modes/base/guards/chat';
 import PacketsGuard from '@/server/modes/base/guards/packets';
 import GameChat from '@/server/modes/base/maintenance/chat';
 import GameClock from '@/server/modes/base/maintenance/clock';
 import GameCollisions from '@/server/modes/base/maintenance/collisions';
 import GameMetrics from '@/server/modes/base/maintenance/metrics';
-import GameProjectiles from '@/server/modes/base/maintenance/projectiles';
 import GameMountains from '@/server/modes/base/maintenance/mountains';
 import GameMute from '@/server/modes/base/maintenance/mute';
+import GamePlayersBounce from '@/server/modes/base/maintenance/players/bounce';
 import GamePlayersConnect from '@/server/modes/base/maintenance/players/connect';
 import GamePlayersDisconnect from '@/server/modes/base/maintenance/players/disconnect';
 import GamePlayersHit from '@/server/modes/base/maintenance/players/hit';
 import GamePlayersKill from '@/server/modes/base/maintenance/players/kill';
 import GamePlayersPowerup from '@/server/modes/base/maintenance/players/powerup';
-import GamePlayersRespawn from '@/server/modes/base/maintenance/players/respawn';
-import GamePlayersUpdate from '@/server/modes/base/maintenance/players/update';
 import GamePlayersRepel from '@/server/modes/base/maintenance/players/repel';
+import GamePlayersRespawn from '@/server/modes/base/maintenance/players/respawn';
+import GamePlayersShipType from '@/server/modes/base/maintenance/players/ship-type';
+import GamePlayersUpdate from '@/server/modes/base/maintenance/players/update';
 import GameUpgrades from '@/server/modes/base/maintenance/players/upgrades';
 import GamePowerups from '@/server/modes/base/maintenance/powerups';
+import GameProjectiles from '@/server/modes/base/maintenance/projectiles';
 import GameSpectating from '@/server/modes/base/maintenance/spectating';
 import GameViewports from '@/server/modes/base/maintenance/viewports';
 import GameWarming from '@/server/modes/base/maintenance/warming';
@@ -49,7 +54,9 @@ import PingPeriodic from '@/server/modes/base/periodic/ping';
 import PowerupsPeriodic from '@/server/modes/base/periodic/powerups';
 import ScoreBoardPeriodic from '@/server/modes/base/periodic/score-board';
 import UserStatsPeriodic from '@/server/modes/base/periodic/user-stats';
+import AlreadyLoggedInResponse from '@/server/modes/base/responses/already-logged-in';
 import BackupResponse from '@/server/modes/base/responses/backup';
+import PlayerBanResponse from '@/server/modes/base/responses/ban';
 import ChatPublicBroadcast from '@/server/modes/base/responses/broadcast/chat-public';
 import ChatSayBroadcast from '@/server/modes/base/responses/broadcast/chat-say';
 import ChatServerPublicBroadcast from '@/server/modes/base/responses/broadcast/chat-server-public';
@@ -69,6 +76,7 @@ import PlayerFlagBroadcast from '@/server/modes/base/responses/broadcast/player-
 import PlayerHitBroadcast from '@/server/modes/base/responses/broadcast/player-hit';
 import PlayerKillBroadcast from '@/server/modes/base/responses/broadcast/player-kill';
 import PlayerLeaveBroadcast from '@/server/modes/base/responses/broadcast/player-leave';
+import PlayerLevelBroadcast from '@/server/modes/base/responses/broadcast/player-level';
 import PlayerNewBroadcast from '@/server/modes/base/responses/broadcast/player-new';
 import PlayerRespawnBroadcast from '@/server/modes/base/responses/broadcast/player-respawn';
 import PlayerReteamBroadcast from '@/server/modes/base/responses/broadcast/player-reteam';
@@ -87,7 +95,6 @@ import KickPlayer from '@/server/modes/base/responses/kick';
 import LoginResponse from '@/server/modes/base/responses/login';
 import NotEnoughUpgrades from '@/server/modes/base/responses/not-enough-upgrades';
 import PingResult from '@/server/modes/base/responses/ping-result';
-import PlayerLevelBroadcast from '@/server/modes/base/responses/broadcast/player-level';
 import PlayerPowerup from '@/server/modes/base/responses/player-powerup';
 import PlayerUpgrade from '@/server/modes/base/responses/player-upgrade';
 import PlayersLimit from '@/server/modes/base/responses/players-limit';
@@ -97,20 +104,14 @@ import ServerMessage from '@/server/modes/base/responses/server-message';
 import ServerPlayerConnectResponse from '@/server/modes/base/responses/server-player-connect';
 import SpectateInactivityRequired from '@/server/modes/base/responses/spectate-inactivity-required';
 import SpectateKillResponse from '@/server/modes/base/responses/spectate-kill';
-import PlayerBanResponse from '@/server/modes/base/responses/ban';
-import BansGuard from '@/server/modes/base/guards/bans';
+import LoginPublicKeyDownloader from '@/server/modes/base/support/auth';
 import MobIdStorageOptimizer from '@/server/modes/base/support/mob-id-storage';
 import Recovering from '@/server/modes/base/support/recovering';
 import AckTimeoutHandler from '@/server/modes/base/timeouts/ack';
 import BackupTimeoutHandler from '@/server/modes/base/timeouts/backup';
 import LoginTimeoutHandler from '@/server/modes/base/timeouts/login';
 import PongTimeoutHandler from '@/server/modes/base/timeouts/pong';
-import ChatGuard from '@/server/modes/base/guards/chat';
 import PacketRouter from '@/server/router';
-import SpectatorsCommandHandler from '@/server/modes/base/commands/spectators';
-import LoginPublicKeyDownloader from '@/server/modes/base/support/auth';
-import AlreadyLoggedInResponse from '@/server/modes/base/responses/already-logged-in';
-import GamePlayersShipType from '@/server/modes/base/maintenance/players/ship-type';
 
 export default abstract class BaseGameManifest extends GameManifest {
   constructor({ app }) {
@@ -143,13 +144,14 @@ export default abstract class BaseGameManifest extends GameManifest {
 
       // Commands.
       FlagCommandHandler,
+      ProfileCommandHandler,
       RespawnCommandHandler,
+      ServerCommandHandler,
       SpectateCommandHandler,
+      SpectatorsCommandHandler,
+      SuperuserCommandHandler,
       UpgradeCommandHandler,
       UpgradesCommandHandler,
-      SuperuserCommandHandler,
-      ServerCommandHandler,
-      SpectatorsCommandHandler,
 
       // Responses.
       ServerMessage,
