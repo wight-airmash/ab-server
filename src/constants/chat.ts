@@ -14,6 +14,10 @@ export const CHAT_SUPERUSER_MUTE_TIME_MS = 60 * SECONDS_PER_MINUTE * MS_PER_SEC;
  */
 export const CHAT_MIN_PLAYER_PLAYTIME_TO_VOTEMUTE_MS = 60 * MS_PER_SEC;
 
-export const CHAT_FIRST_MESSAGE_SAFE_DELAY_MS = 2000;
+/**
+ * StarMash client has built-in anti-spam, it rejects whisper messages
+ * that comes within first seconds after joining the game.
+ */
+export const CHAT_FIRST_MESSAGE_SAFE_DELAY_MS = 2 * MS_PER_SEC;
 
 export const CHAT_USERNAME_PLACEHOLDER = '%username%';
