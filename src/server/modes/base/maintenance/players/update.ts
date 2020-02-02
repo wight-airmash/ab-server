@@ -1,7 +1,13 @@
+import { CTF_TEAMS, FLAGS_ISO_TO_CODE } from '@airbattle/protocol';
 import { Polygon } from 'collisions';
-import { FLAGS_ISO_TO_CODE, CTF_TEAMS } from '@airbattle/protocol';
 import {
   COLLISIONS_OBJECT_TYPES,
+  LIMITS_ANY_DECREASE_WEIGHT,
+  LIMITS_DEBUG_DECREASE_WEIGHT,
+  LIMITS_KEY_DECREASE_WEIGHT,
+  LIMITS_RESPAWN_DECREASE_WEIGHT,
+  LIMITS_SPECTATE_DECREASE_WEIGHT,
+  LIMITS_SU_DECREASE_WEIGHT,
   MAP_SIZE,
   PI_X2,
   PLAYERS_ALIVE_STATUSES,
@@ -12,36 +18,29 @@ import {
   PLAYERS_POSITION,
   PROJECTILES_COLLISIONS,
   PROJECTILES_SPECS,
+  SERVER_MIN_MOB_ID,
   SHIPS_FIRE_MODES,
   SHIPS_FIRE_TYPES,
   SHIPS_SPECS,
   SHIPS_TYPES,
   UPGRADES_SPECS,
-  SERVER_MIN_MOB_ID,
-  LIMITS_ANY_DECREASE_WEIGHT,
-  LIMITS_KEY_DECREASE_WEIGHT,
-  LIMITS_CHAT_DECREASE_WEIGHT,
-  LIMITS_RESPAWN_DECREASE_WEIGHT,
-  LIMITS_SPECTATE_DECREASE_WEIGHT,
-  LIMITS_SU_DECREASE_WEIGHT,
-  LIMITS_DEBUG_DECREASE_WEIGHT,
 } from '@/constants';
 import {
-  COLLISIONS_ADD_OBJECT,
   BROADCAST_EVENT_BOOST,
   BROADCAST_EVENT_STEALTH,
   BROADCAST_PLAYER_FIRE,
   BROADCAST_PLAYER_FLAG,
   BROADCAST_PLAYER_UPDATE,
+  COLLISIONS_ADD_OBJECT,
   CTF_PLAYER_DROP_FLAG,
+  PLAYERS_EMIT_CHANNEL_FLAG,
   PLAYERS_REPEL_UPDATE,
-  RESPONSE_COMMAND_REPLY,
   PLAYERS_UPDATE,
   PLAYERS_UPDATE_FLAG,
-  PLAYERS_EMIT_CHANNEL_FLAG,
-  VIEWPORTS_UPDATE_POSITION,
   PLAYERS_UPDATE_TEAM,
+  RESPONSE_COMMAND_REPLY,
   TIMELINE_CLOCK_SECOND,
+  VIEWPORTS_UPDATE_POSITION,
 } from '@/events';
 import { CHANNEL_UPDATE_PLAYER_FLAG } from '@/server/channels';
 import Acceleration from '@/server/components/acceleration';
@@ -74,10 +73,10 @@ export default class GamePlayersUpdate extends System {
       [PLAYERS_EMIT_CHANNEL_FLAG]: this.onEmitDelayedFlagUpdateEvents,
 
       // Events.
-      [TIMELINE_CLOCK_SECOND]: this.onSecondTick,
-      [PLAYERS_UPDATE]: this.onUpdatePlayers,
-      [PLAYERS_UPDATE_TEAM]: this.onUpdatePlayerTeam,
       [PLAYERS_UPDATE_FLAG]: this.onUpdatePlayerFlag,
+      [PLAYERS_UPDATE_TEAM]: this.onUpdatePlayerTeam,
+      [PLAYERS_UPDATE]: this.onUpdatePlayers,
+      [TIMELINE_CLOCK_SECOND]: this.onSecondTick,
     };
   }
 
@@ -207,9 +206,9 @@ export default class GamePlayersUpdate extends System {
             : c.meta.limits.key - LIMITS_KEY_DECREASE_WEIGHT;
 
         c.meta.limits.chat =
-          c.meta.limits.chat < LIMITS_CHAT_DECREASE_WEIGHT
+          c.meta.limits.chat < this.app.config.packetsLimit.chatLeak
             ? 0
-            : c.meta.limits.chat - LIMITS_CHAT_DECREASE_WEIGHT;
+            : c.meta.limits.chat - this.app.config.packetsLimit.chatLeak;
 
         c.meta.limits.respawn =
           c.meta.limits.respawn < LIMITS_RESPAWN_DECREASE_WEIGHT

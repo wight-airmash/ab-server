@@ -2,17 +2,15 @@ import { SERVER_ERRORS, SERVER_PACKETS } from '@airbattle/protocol';
 import {
   CONNECTIONS_FLOODING_BAN_MS,
   CONNECTIONS_FLOOD_DETECTS_TO_BAN,
-  LIMITS_ANY,
-  LIMITS_KEY,
   CONNECTIONS_STATUS,
 } from '@/constants';
 import {
   CONNECTIONS_BAN_IP,
-  CONNECTIONS_DISCONNECT_PLAYER,
-  ERRORS_PACKET_FLOODING_DETECTED,
-  CONNECTIONS_SEND_PACKET,
   CONNECTIONS_BREAK,
   CONNECTIONS_CHECK_PACKET_LIMITS,
+  CONNECTIONS_DISCONNECT_PLAYER,
+  CONNECTIONS_SEND_PACKET,
+  ERRORS_PACKET_FLOODING_DETECTED,
 } from '@/events';
 import { System } from '@/server/system';
 import { ConnectionId, PlayerConnection } from '@/types';
@@ -22,14 +20,15 @@ export default class PacketsGuard extends System {
     super({ app });
 
     this.listeners = {
-      [ERRORS_PACKET_FLOODING_DETECTED]: this.onPacketFlooding,
       [CONNECTIONS_CHECK_PACKET_LIMITS]: this.onCheckLimits,
+      [ERRORS_PACKET_FLOODING_DETECTED]: this.onPacketFlooding,
     };
   }
 
   onCheckLimits(connection: PlayerConnection): void {
     if (
-      (connection.meta.limits.any > LIMITS_ANY || connection.meta.limits.key > LIMITS_KEY) &&
+      (connection.meta.limits.any > this.app.config.packetsLimit.any ||
+        connection.meta.limits.key > this.app.config.packetsLimit.key) &&
       connection.meta.status < CONNECTIONS_STATUS.PRECLOSED
     ) {
       this.onPacketFlooding(connection.meta.id);

@@ -36,11 +36,11 @@ import {
   CHANNEL_CONNECT_PLAYER,
   CHANNEL_DEFAULT,
   CHANNEL_DISCONNECT_PLAYER,
+  CHANNEL_MUTE,
   CHANNEL_RESPAWN_PLAYER,
   CHANNEL_SPECTATE,
   CHANNEL_UPDATE_HORIZON,
   CHANNEL_UPDATE_PLAYER_FLAG,
-  CHANNEL_MUTE,
 } from '@/server/channels';
 import { Channels } from '@/server/channels/channels';
 import { Helpers } from '@/server/helpers';
@@ -183,6 +183,20 @@ export default class GameServer {
     }
 
     /**
+     * Packet limits validation.
+     */
+    if (
+      this.config.packetsLimit.any <= this.config.packetsLimit.key ||
+      this.config.packetsLimit.any <= this.config.packetsLimit.chat
+    ) {
+      this.log.fatal(
+        'PACKETS_LIMIT_ANY must be greater than PACKETS_LIMIT_KEY and PACKETS_LIMIT_CHAT.',
+        this.config.packetsLimit
+      );
+      process.exit(1);
+    }
+
+    /**
      * Init default values.
      */
     if (typeof process.env.UPGRADES_DROP_MIN_CHANCE === 'undefined') {
@@ -315,73 +329,43 @@ export default class GameServer {
    * Server main loop emitting events for all subsystems.
    * @param params the params as sent by the ticker with information about timing
    */
-  private mainLoop(params: LoopParams): void {
-    this.events.emit(
-      TIMELINE_LOOP_START,
-      params.frame,
-      params.frameFactor,
-      params.timeFromStart,
-      params.skippedFrames
-    );
+  private mainLoop({ frame, frameFactor, timeFromStart, skippedFrames }: LoopParams): void {
+    this.events.emit(TIMELINE_LOOP_START, frame, frameFactor, timeFromStart, skippedFrames);
 
     try {
       this.events.emit(
         PLAYERS_EMIT_CHANNEL_DISCONNECT,
-        params.frame,
-        params.frameFactor,
-        params.timeFromStart,
-        params.skippedFrames
+        frame,
+        frameFactor,
+        timeFromStart,
+        skippedFrames
       );
     } catch (err) {
       this.log.error('Error while dispatching PLAYERS_EMIT_CHANNEL_DISCONNECT', err.stack);
     }
 
-    if (params.skippedFrames !== 0) {
+    if (skippedFrames !== 0) {
       try {
-        this.events.emit(
-          SERVER_FRAMES_SKIPPED,
-          params.frame,
-          params.frameFactor,
-          params.timeFromStart,
-          params.skippedFrames
-        );
+        this.events.emit(SERVER_FRAMES_SKIPPED, frame, frameFactor, timeFromStart, skippedFrames);
       } catch (err) {
         this.log.error('Error while dispatching SERVER_FRAMES_SKIPPED', err.stack);
       }
     }
 
     try {
-      this.events.emit(
-        TIMELINE_LOOP_TICK,
-        params.frame,
-        params.frameFactor,
-        params.timeFromStart,
-        params.skippedFrames
-      );
+      this.events.emit(TIMELINE_LOOP_TICK, frame, frameFactor, timeFromStart, skippedFrames);
     } catch (err) {
       this.log.error('Error while dispatching TIMELINE_LOOP_TICK', err.stack);
     }
 
     try {
-      this.events.emit(
-        PROJECTILES_UPDATE,
-        params.frame,
-        params.frameFactor,
-        params.timeFromStart,
-        params.skippedFrames
-      );
+      this.events.emit(PROJECTILES_UPDATE, frame, frameFactor, timeFromStart, skippedFrames);
     } catch (err) {
       this.log.error('Error while dispatching PROJECTILES_UPDATE', err.stack);
     }
 
     try {
-      this.events.emit(
-        PLAYERS_UPDATE,
-        params.frame,
-        params.frameFactor,
-        params.timeFromStart,
-        params.skippedFrames
-      );
+      this.events.emit(PLAYERS_UPDATE, frame, frameFactor, timeFromStart, skippedFrames);
     } catch (err) {
       this.log.error('Error while dispatching PLAYERS_UPDATE', err.stack);
     }
@@ -389,10 +373,10 @@ export default class GameServer {
     try {
       this.events.emit(
         PLAYERS_EMIT_CHANNEL_RESPAWN,
-        params.frame,
-        params.frameFactor,
-        params.timeFromStart,
-        params.skippedFrames
+        frame,
+        frameFactor,
+        timeFromStart,
+        skippedFrames
       );
     } catch (err) {
       this.log.error('Error while dispatching PLAYERS_EMIT_CHANNEL_RESPAWN', err.stack);
@@ -401,35 +385,23 @@ export default class GameServer {
     try {
       this.events.emit(
         PLAYERS_EMIT_CHANNEL_CONNECT,
-        params.frame,
-        params.frameFactor,
-        params.timeFromStart,
-        params.skippedFrames
+        frame,
+        frameFactor,
+        timeFromStart,
+        skippedFrames
       );
     } catch (err) {
       this.log.error('Error while dispatching PLAYERS_EMIT_CHANNEL_CONNECT', err.stack);
     }
 
     try {
-      this.events.emit(
-        COLLISIONS_DETECT,
-        params.frame,
-        params.frameFactor,
-        params.timeFromStart,
-        params.skippedFrames
-      );
+      this.events.emit(COLLISIONS_DETECT, frame, frameFactor, timeFromStart, skippedFrames);
     } catch (err) {
       this.log.error('Error while dispatching COLLISIONS_DETECT', err.stack);
     }
 
     try {
-      this.events.emit(
-        PLAYERS_EMIT_CHANNEL_FLAG,
-        params.frame,
-        params.frameFactor,
-        params.timeFromStart,
-        params.skippedFrames
-      );
+      this.events.emit(PLAYERS_EMIT_CHANNEL_FLAG, frame, frameFactor, timeFromStart, skippedFrames);
     } catch (err) {
       this.log.error('Error while dispatching PLAYERS_EMIT_CHANNEL_FLAG', err.stack);
     }
@@ -437,23 +409,17 @@ export default class GameServer {
     try {
       this.events.emit(
         CHAT_MUTE_EMIT_DELAYED_EVENTS,
-        params.frame,
-        params.frameFactor,
-        params.timeFromStart,
-        params.skippedFrames
+        frame,
+        frameFactor,
+        timeFromStart,
+        skippedFrames
       );
     } catch (err) {
       this.log.error('Error while dispatching CHAT_MUTE_EMIT_DELAYED_EVENTS', err.stack);
     }
 
     try {
-      this.events.emit(
-        CHAT_EMIT_DELAYED_EVENTS,
-        params.frame,
-        params.frameFactor,
-        params.timeFromStart,
-        params.skippedFrames
-      );
+      this.events.emit(CHAT_EMIT_DELAYED_EVENTS, frame, frameFactor, timeFromStart, skippedFrames);
     } catch (err) {
       this.log.error('Error while dispatching CHAT_EMIT_DELAYED_EVENTS', err.stack);
     }
@@ -461,21 +427,15 @@ export default class GameServer {
     try {
       this.events.emit(
         SPECTATE_EMIT_CHANNEL_EVENTS,
-        params.frame,
-        params.frameFactor,
-        params.timeFromStart,
-        params.skippedFrames
+        frame,
+        frameFactor,
+        timeFromStart,
+        skippedFrames
       );
     } catch (err) {
       this.log.error('Error while dispatching SPECTATE_EMIT_CHANNEL_EVENTS', err.stack);
     }
 
-    this.events.emit(
-      TIMELINE_LOOP_END,
-      params.frame,
-      params.frameFactor,
-      params.timeFromStart,
-      params.skippedFrames
-    );
+    this.events.emit(TIMELINE_LOOP_END, frame, frameFactor, timeFromStart, skippedFrames);
   }
 }

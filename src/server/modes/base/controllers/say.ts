@@ -1,5 +1,4 @@
 import { ClientPackets } from '@airbattle/protocol';
-import { LIMITS_CHAT } from '@/constants';
 import { CHAT_CHECK_LIMITS, CHAT_SAY, ROUTE_SAY } from '@/events';
 import { CHANNEL_CHAT } from '@/server/channels';
 import { System } from '@/server/system';
@@ -29,7 +28,7 @@ export default class SayMessageHandler extends System {
 
     this.log.debug(`Player id${connection.meta.playerId} requested say public '${msg.text}'.`);
 
-    if (connection.meta.limits.chat > LIMITS_CHAT) {
+    if (connection.meta.limits.chat > this.app.config.packetsLimit.chat) {
       this.log.debug(
         `Player id${connection.meta.playerId} say public request was skipped due to chat limits.`
       );

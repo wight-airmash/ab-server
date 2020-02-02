@@ -3,7 +3,6 @@ import { CHAT_CHECK_LIMITS, CHAT_PUBLIC, ROUTE_CHAT } from '@/events';
 import { CHANNEL_CHAT } from '@/server/channels';
 import { System } from '@/server/system';
 import { MainConnectionId } from '@/types';
-import { LIMITS_CHAT } from '@/constants';
 
 export default class ChatMessageHandler extends System {
   constructor({ app }) {
@@ -29,7 +28,7 @@ export default class ChatMessageHandler extends System {
 
     this.log.debug(`Player id${connection.meta.playerId} requested chat public '${msg.text}'.`);
 
-    if (connection.meta.limits.chat > LIMITS_CHAT) {
+    if (connection.meta.limits.chat > this.app.config.packetsLimit.chat) {
       this.log.debug(
         `Player id${connection.meta.playerId} public chat request was skipped due to chat limits.`
       );

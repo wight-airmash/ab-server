@@ -110,6 +110,36 @@ Default: `production`
 
 Environment: development or production. Also affects the work of some dependencies.
 
+### PACKETS_LIMIT_ANY
+
+Default: `140`
+
+Bucket volume per player for all incoming packets. Leak volume is 35 per second.
+
+If the limit is exceeded, the player will be kicked for packets flooding. The penalty for repeated violation is regulated with [PACKETS_FLOODING_AUTOBAN](#packets_flooding_autoban).
+
+### PACKETS_LIMIT_CHAT
+
+Default: `1`
+
+Bucket volume per player for all chat packets (public chat, team, whisper and say). Set the leak volume with [PACKETS_LIMIT_CHAT_LEAK](#packets_limit_chat_leak).
+
+If the limit is exceeded, the player will be asked to stop spam. The penalty for repeated violation is mute for 10 minutes.
+
+### PACKETS_LIMIT_CHAT_LEAK
+
+Default: `1`
+
+Leak volume per second for the chat bucket. For fine-tuning the anti-spam.
+
+### PACKETS_LIMIT_KEY
+
+Default: `100`
+
+Bucket volume per player for the `KEY` packets (movement/special key presses and releases). Leak volume is 20 per second.
+
+If the limit is exceeded, the player will be kicked for packets flooding. The penalty for repeated violation is regulated with [PACKETS_FLOODING_AUTOBAN](#packets_flooding_autoban).
+
 ### PACKETS_FLOODING_AUTOBAN
 
 Default: `true`

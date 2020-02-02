@@ -1,4 +1,4 @@
-import { LIMITS_CHAT, LIMITS_CHAT_SPAM_ATTEMPTS_TO_MUTE, LIMITS_CHAT_WEIGHT } from '@/constants';
+import { LIMITS_CHAT_SPAM_ATTEMPTS_TO_MUTE, LIMITS_CHAT_WEIGHT } from '@/constants';
 import {
   CHAT_CHECK_LIMITS,
   CHAT_MUTE_BY_SERVER,
@@ -28,7 +28,7 @@ export default class ChatGuard extends System {
       return;
     }
 
-    if (connection.meta.limits.chat > LIMITS_CHAT) {
+    if (connection.meta.limits.chat > this.app.config.packetsLimit.chat) {
       connection.meta.limits.spam += 1;
 
       if (connection.meta.limits.spam < LIMITS_CHAT_SPAM_ATTEMPTS_TO_MUTE) {
