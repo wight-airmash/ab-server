@@ -84,8 +84,6 @@ export default class Connections extends System {
     /**
      * Remove all connection data.
      */
-    this.storage.connectionList.delete(connectionId);
-
     if (connection.meta.isMain === true) {
       this.storage.mainConnectionIdList.delete(connectionId);
       this.storage.humanConnectionIdList.delete(connectionId);
@@ -119,6 +117,8 @@ export default class Connections extends System {
     } else if (connection.meta.isBackup === true) {
       this.storage.playerBackupConnectionList.delete(connection.meta.playerId);
     }
+
+    this.storage.connectionList.delete(connectionId);
 
     delete connection.meta;
   }
