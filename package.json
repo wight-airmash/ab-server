@@ -218,7 +218,8 @@
           "prev": [
             "const",
             "let",
-            "var"
+            "var",
+            "export"
           ],
           "next": "*"
         },

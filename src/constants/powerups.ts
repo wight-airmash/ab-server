@@ -26,6 +26,8 @@ export const POWERUPS_COLLISIONS = {
 /**
  * Random spawn coords hashing constants.
  */
-export const POWERUPS_GRID_POW = 12;
-export const POWERUPS_GRID_ROWS = 4;
 export const POWERUPS_GRID_COLS = 8;
+
+export const POWERUPS_GRID_ROWS = 4;
+
+export const POWERUPS_GRID_POW = 12;
