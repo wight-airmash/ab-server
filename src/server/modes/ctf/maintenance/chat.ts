@@ -2,6 +2,7 @@ import { CHAT_MESSAGE_PER_TICKS_LIMIT } from '@/constants';
 import {
   BROADCAST_CHAT_PUBLIC,
   BROADCAST_CHAT_SAY,
+  BROADCAST_CHAT_SERVER_WHISPER,
   BROADCAST_CHAT_TEAM,
   BROADCAST_CHAT_WHISPER,
   CHAT_EMIT_DELAYED_EVENTS,
@@ -9,7 +10,6 @@ import {
   CHAT_SAY,
   CHAT_TEAM,
   CHAT_WHISPER,
-  BROADCAST_CHAT_SERVER_WHISPER,
 } from '@/events';
 import { CHANNEL_CHAT } from '@/server/channels';
 import { System } from '@/server/system';
@@ -18,7 +18,7 @@ import { PlayerId } from '@/types';
 export default class GameChat extends System {
   private framesPassed = 0;
 
-  protected attackBlockResponse =
+  protected readonly responseAttackBlock =
     "This command isn't allowed: https://github.com/wight-airmash/ab-server/issues/53";
 
   constructor({ app }) {
@@ -34,14 +34,6 @@ export default class GameChat extends System {
   }
 
   onHandleChatMessages(): void {
-    /**
-     * TODO:
-     * 1. Forbidden words.
-     * 2. Throttling.
-     * 3. Non-break length check.
-     * 4. Custom filters (like % of non-language characters).
-     */
-
     this.framesPassed += 1;
 
     if (this.framesPassed < CHAT_MESSAGE_PER_TICKS_LIMIT) {
@@ -66,6 +58,10 @@ export default class GameChat extends System {
     return false;
   }
 
+  protected static isShieldTimerAlert(msg: string): boolean {
+    return msg.endsWith('seconds till enemy shield');
+  }
+
   onChatPublic(playerId: PlayerId, msg: string): void {
     if (!this.helpers.isPlayerConnected(playerId)) {
       return;
@@ -74,7 +70,7 @@ export default class GameChat extends System {
     if (GameChat.isAttackCommand(msg) === false) {
       this.emit(BROADCAST_CHAT_PUBLIC, playerId, msg);
     } else {
-      this.emit(BROADCAST_CHAT_SERVER_WHISPER, playerId, this.attackBlockResponse);
+      this.emit(BROADCAST_CHAT_SERVER_WHISPER, playerId, this.responseAttackBlock);
     }
   }
 
@@ -95,10 +91,10 @@ export default class GameChat extends System {
       return;
     }
 
-    if (GameChat.isAttackCommand(msg) === false) {
+    if (GameChat.isAttackCommand(msg) === true) {
+      this.emit(BROADCAST_CHAT_SERVER_WHISPER, playerId, this.responseAttackBlock);
+    } else if (GameChat.isShieldTimerAlert(msg) === false) {
       this.emit(BROADCAST_CHAT_TEAM, playerId, msg);
-    } else {
-      this.emit(BROADCAST_CHAT_SERVER_WHISPER, playerId, this.attackBlockResponse);
     }
   }
 
