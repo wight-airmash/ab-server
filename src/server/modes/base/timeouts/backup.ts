@@ -18,8 +18,11 @@ export default class BackupTimeoutHandler extends System {
 
     const connection = this.storage.connectionList.get(connectionId);
 
-    if (connection.meta.isBot === false) {
-      this.log.debug(`No Backup request. Kick player id${connection.meta.playerId}.`);
+    if (
+      connection.meta.isBot === false &&
+      this.app.config.invalidProtocolAutoKick.backup === true
+    ) {
+      this.log.info(`No Backup request. Kick player id${connection.meta.playerId}.`);
       this.emit(PLAYERS_KICK, connection.meta.playerId);
     }
   }

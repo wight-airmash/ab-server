@@ -18,8 +18,8 @@ export default class AckTimeoutHandler extends System {
 
     const connection = this.storage.connectionList.get(connectionId);
 
-    if (connection.meta.isBot === false) {
-      this.log.debug(`No Ack request. Kick player id${connection.meta.playerId}.`);
+    if (connection.meta.isBot === false && this.app.config.invalidProtocolAutoKick.ack === true) {
+      this.log.info(`No Ack request. Kick player id${connection.meta.playerId}.`);
       this.emit(PLAYERS_KICK, connection.meta.playerId);
     }
   }

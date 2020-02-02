@@ -16,11 +16,7 @@ export default class LoginTimeoutHandler extends System {
       return;
     }
 
-    const connection = this.storage.connectionList.get(connectionId);
-
-    if (connection.meta.isBot === false) {
-      this.log.debug(`No Login request. Kick by connection id${connectionId}.`);
-      this.emit(CONNECTIONS_KICK, connectionId);
-    }
+    this.log.info(`No Login request. Kick by connection id${connectionId}.`);
+    this.emit(CONNECTIONS_KICK, connectionId);
   }
 }

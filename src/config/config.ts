@@ -12,6 +12,7 @@ import {
   BOTS_WHITELIST_ENABLED,
   CONNECTIONS_DEFAULT_MAX_PLAYERS_PER_IP,
   CONNECTIONS_FLOODING_AUTOBAN,
+  CONNECTIONS_INVALID_PROTOCOL_AUTOKICK,
   LIMITS_ANY,
   LIMITS_CHAT,
   LIMITS_CHAT_DECREASE_WEIGHT,
@@ -231,6 +232,15 @@ export interface GameServerConfigInterface {
   };
 
   /**
+   * Permit automatic kicks based on invalid protocol implementation.
+   */
+  invalidProtocolAutoKick: {
+    ack: boolean;
+    pong: boolean;
+    backup: boolean;
+  };
+
+  /**
    * Server version.
    */
   version: string;
@@ -420,6 +430,21 @@ const config: GameServerConfigInterface = {
     key: intValue(process.env.PACKETS_LIMIT_KEY, LIMITS_KEY),
     chat: intValue(process.env.PACKETS_LIMIT_CHAT, LIMITS_CHAT),
     chatLeak: intValue(process.env.PACKETS_LIMIT_CHAT_LEAK, LIMITS_CHAT_DECREASE_WEIGHT),
+  },
+
+  invalidProtocolAutoKick: {
+    ack: boolValue(
+      process.env.INVALID_PROTOCOL_AUTOKICK_ACK,
+      CONNECTIONS_INVALID_PROTOCOL_AUTOKICK
+    ),
+    pong: boolValue(
+      process.env.INVALID_PROTOCOL_AUTOKICK_PONG,
+      CONNECTIONS_INVALID_PROTOCOL_AUTOKICK
+    ),
+    backup: boolValue(
+      process.env.INVALID_PROTOCOL_AUTOKICK_BACKUP,
+      CONNECTIONS_INVALID_PROTOCOL_AUTOKICK
+    ),
   },
 
   version,

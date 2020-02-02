@@ -62,6 +62,24 @@ Default: `0.0.0.0`
 
 Server host or IP.
 
+### INVALID_PROTOCOL_AUTOKICK_ACK
+
+Default: `true`
+
+Enable or disable auto kick policy based on invalid protocol implementation `ACK` packets. Normally, you don't need to turn it off.
+
+### INVALID_PROTOCOL_AUTOKICK_BACKUP
+
+Default: `true`
+
+Enable or disable auto kick policy based on invalid protocol implementation `BACKUP` packets. Normally, you don't need to turn it off.
+
+### INVALID_PROTOCOL_AUTOKICK_PONG
+
+Default: `true`
+
+Enable or disable auto kick policy based on invalid protocol implementation `PONG` packets. Normally, you don't need to turn it off.
+
 ### LOG_FILE
 
 Default: `../logs/airbattle.log`
