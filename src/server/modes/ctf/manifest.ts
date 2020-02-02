@@ -1,22 +1,23 @@
+import Match from '@/server/components/game/match';
 import BaseGameManifest from '@/server/modes/base/mainfest';
+import GameChat from '@/server/modes/base/maintenance/chat';
+import DropCommandHandler from '@/server/modes/ctf/commands/drop';
+import MatchCommandHandler from '@/server/modes/ctf/commands/match';
+import SwitchCommandHandler from '@/server/modes/ctf/commands/switch';
+import SpawnCampingGuard from '@/server/modes/ctf/guards/spawn-camping';
+import CTFGameChat from '@/server/modes/ctf/maintenance/chat';
+import GameFlags from '@/server/modes/ctf/maintenance/flags';
+import GameMatches from '@/server/modes/ctf/maintenance/matches';
 import GamePlayers from '@/server/modes/ctf/maintenance/players';
 import InfernosPeriodic from '@/server/modes/ctf/periodic/infernos';
 import ShieldsPeriodic from '@/server/modes/ctf/periodic/shields';
-import ServerCustomBroadcast from '@/server/modes/ctf/responses/broadcast/server-custom';
-import ScoreDetailed from '@/server/modes/ctf/responses/score-detailed';
-import Match from '@/server/components/game/match';
-import GameFlags from '@/server/modes/ctf/maintenance/flags';
-import GameFlagBroadcast from '@/server/modes/ctf/responses/broadcast/game-flag';
-import GameMatches from '@/server/modes/ctf/maintenance/matches';
-import DropCommandHandler from '@/server/modes/ctf/commands/drop';
+import PhantomPlayerKick from '@/server/modes/ctf/qbots/phantom-kick';
+import FlagCapturedBroadcast from '@/server/modes/ctf/responses/broadcast/flag-captured';
 import FlagReturnedBroadcast from '@/server/modes/ctf/responses/broadcast/flag-returned';
 import FlagTakenBroadcast from '@/server/modes/ctf/responses/broadcast/flag-taken';
-import FlagCapturedBroadcast from '@/server/modes/ctf/responses/broadcast/flag-captured';
-import SwitchCommandHandler from '@/server/modes/ctf/commands/switch';
-import MatchCommandHandler from '@/server/modes/ctf/commands/match';
-import GameChat from '@/server/modes/base/maintenance/chat';
-import CTFGameChat from '@/server/modes/ctf/maintenance/chat';
-import PhantomPlayerKick from '@/server/modes/ctf/qbots/phantom-kick';
+import GameFlagBroadcast from '@/server/modes/ctf/responses/broadcast/game-flag';
+import ServerCustomBroadcast from '@/server/modes/ctf/responses/broadcast/server-custom';
+import ScoreDetailed from '@/server/modes/ctf/responses/score-detailed';
 
 export default class CTFGameManifest extends BaseGameManifest {
   constructor({ app }) {
@@ -29,28 +30,31 @@ export default class CTFGameManifest extends BaseGameManifest {
     this.systems = [
       // Commands.
       DropCommandHandler,
-      SwitchCommandHandler,
       MatchCommandHandler,
+      SwitchCommandHandler,
+
+      // Guards.
+      SpawnCampingGuard,
 
       // Responses.
       ScoreDetailed,
 
       // Broadcast.
-      ServerCustomBroadcast,
-      GameFlagBroadcast,
-      FlagReturnedBroadcast,
       FlagCapturedBroadcast,
+      FlagReturnedBroadcast,
       FlagTakenBroadcast,
+      GameFlagBroadcast,
+      ServerCustomBroadcast,
 
       // Periodic.
-      ShieldsPeriodic,
       InfernosPeriodic,
+      ShieldsPeriodic,
 
       // Maintenance.
-      GamePlayers,
+      CTFGameChat,
       GameFlags,
       GameMatches,
-      CTFGameChat,
+      GamePlayers,
 
       // Q-bots
       PhantomPlayerKick,

@@ -1,4 +1,4 @@
-import { MOB_TYPES, GAME_TYPES } from '@airbattle/protocol';
+import { GAME_TYPES, MOB_TYPES } from '@airbattle/protocol';
 import {
   COLLISIONS_MAP_COORDS,
   PLAYERS_ALIVE_STATUSES,
@@ -9,18 +9,19 @@ import {
 import {
   BROADCAST_PLAYER_KILL,
   CTF_CARRIER_KILLED,
-  PLAYERS_KILL,
-  POWERUPS_SPAWN,
-  PLAYERS_RESPAWN,
-  RESPONSE_PLAYER_UPGRADE,
   PLAYERS_ALIVE_UPDATE,
+  PLAYERS_KILL,
+  PLAYERS_KILLED,
+  PLAYERS_RESPAWN,
+  POWERUPS_SPAWN,
+  RESPONSE_PLAYER_UPGRADE,
 } from '@/events';
 import { CHANNEL_RESPAWN_PLAYER } from '@/server/channels';
 import Entity from '@/server/entity';
 import { System } from '@/server/system';
 import { getRandomInt } from '@/support/numbers';
-import { MobId, PlayerId } from '@/types';
 import { has } from '@/support/objects';
+import { MobId, PlayerId } from '@/types';
 
 export default class GamePlayersKill extends System {
   private minScoreToDrop: number;
@@ -216,6 +217,7 @@ export default class GamePlayersKill extends System {
       victim.position.y
     );
 
+    this.delay(PLAYERS_KILLED, victimId, projectileOwner, projectileId);
     this.delay(PLAYERS_ALIVE_UPDATE);
   }
 }
