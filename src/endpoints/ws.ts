@@ -412,7 +412,7 @@ export default class WsEndpoint {
           CONNECTIONS_BAN_IP,
           player.ip.current,
           CONNECTIONS_SUPERUSER_BAN_MS,
-          mod
+          `${mod}: ${params.reason}`
         );
         this.app.events.emit(PLAYERS_KICK, playerId);
         break;

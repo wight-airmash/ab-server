@@ -185,3 +185,11 @@ Remove an IP from the ban list. Only affects new players.
 ### /server ban has \<IP\>
 
 Check an IP ban status.
+
+### /server ban list
+
+Display the list of IPs and reasons.
+
+### /server ban flush
+
+Remove all the IPs from the ban list.

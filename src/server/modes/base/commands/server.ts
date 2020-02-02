@@ -8,14 +8,15 @@ import {
 import {
   BROADCAST_CHAT_SERVER_PUBLIC,
   BROADCAST_CHAT_SERVER_WHISPER,
+  CHAT_MUTE_BY_IP,
+  CHAT_UNMUTE_BY_IP,
   COMMAND_SERVER,
   CONNECTIONS_BAN_IP,
+  CONNECTIONS_FLUSH_BANS,
   CONNECTIONS_KICK,
   CONNECTIONS_UNBAN_IP,
   PLAYERS_KICK,
   RESPONSE_COMMAND_REPLY,
-  CHAT_UNMUTE_BY_IP,
-  CHAT_MUTE_BY_IP,
 } from '@/events';
 import { System } from '@/server/system';
 import { has } from '@/support/objects';
@@ -159,8 +160,36 @@ export default class ServerCommandHandler extends System {
         const addCommand = 'ban add ';
         const hasCommand = 'ban has ';
         const removeCommand = 'ban remove ';
+        const listCommand = 'ban list';
+        const flushCommand = 'ban flush';
 
-        if (command.startsWith(addCommand)) {
+        if (command === listCommand) {
+          if (this.storage.ipBanList.size === 0) {
+            this.emit(
+              BROADCAST_CHAT_SERVER_WHISPER,
+              connection.meta.playerId,
+              'The ban list is empty.'
+            );
+          } else {
+            this.storage.ipBanList.forEach((ban, ip) => {
+              this.emit(
+                BROADCAST_CHAT_SERVER_WHISPER,
+                connection.meta.playerId,
+                `${ip}, ${ban.reason}`
+              );
+            });
+          }
+        } else if (command === flushCommand) {
+          const totalBans = this.storage.ipBanList.size;
+
+          this.emit(CONNECTIONS_FLUSH_BANS);
+
+          this.emit(
+            BROADCAST_CHAT_SERVER_WHISPER,
+            connection.meta.playerId,
+            `The ban list has been cleared (${totalBans}).`
+          );
+        } else if (command.startsWith(addCommand)) {
           const ip = command.substring(addCommand.length).trim();
 
           this.emit(CONNECTIONS_BAN_IP, ip, CONNECTIONS_SUPERUSER_BAN_MS, 'Superuser');
