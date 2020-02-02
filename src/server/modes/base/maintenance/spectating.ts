@@ -5,21 +5,21 @@ import {
   PLAYERS_SPECTATE_INACTIVITY_MS,
 } from '@/constants';
 import {
-  SPECTATE_EMIT_CHANNEL_EVENTS,
+  ERRORS_SPECTATE_INACTIVITY_HEALTH_REQUIRED,
+  PLAYERS_ALIVE_UPDATE,
   RESPONSE_GAME_SPECTATE,
   RESPONSE_SPECTATE_KILL,
-  ERRORS_SPECTATE_INACTIVITY_HEALTH_REQUIRED,
+  SPECTATE_EMIT_CHANNEL_EVENTS,
+  SPECTATE_ENTER_MODE,
   SPECTATE_NEXT,
   SPECTATE_PLAYER,
   SPECTATE_PREV,
-  SPECTATE_ENTER_MODE,
-  PLAYERS_ALIVE_UPDATE,
 } from '@/events';
 import { CHANNEL_SPECTATE } from '@/server/channels';
 import Entity from '@/server/entity';
 import { System } from '@/server/system';
-import { PlayerId, Viewports } from '@/types';
 import { getRandomInt } from '@/support/numbers';
+import { PlayerId, Viewports } from '@/types';
 
 export default class GameSpectating extends System {
   protected now = 0;
@@ -29,6 +29,8 @@ export default class GameSpectating extends System {
   protected players: Map<PlayerId, Entity>;
 
   protected viewports: Viewports;
+
+  protected isDelayedCall = false;
 
   constructor({ app }) {
     super({ app });
@@ -42,17 +44,13 @@ export default class GameSpectating extends System {
 
       // Events.
       [SPECTATE_ENTER_MODE]: this.onSwitchToSpectate,
+      [SPECTATE_NEXT]: this.onSpectateNext,
       [SPECTATE_PLAYER]: this.onSpectatePlayer,
       [SPECTATE_PREV]: this.onSpectatePrev,
-      [SPECTATE_NEXT]: this.onSpectateNext,
     };
   }
 
-  onEmitDelayedSpectateEvents(): void {
-    if (this.channel(CHANNEL_SPECTATE).events.length === 0) {
-      return;
-    }
-
+  protected updateCache(): void {
     this.now = Date.now();
     this.playerIds = [];
 
@@ -61,8 +59,18 @@ export default class GameSpectating extends System {
         this.playerIds.push(player.id.current);
       }
     });
+  }
 
+  onEmitDelayedSpectateEvents(): void {
+    if (this.channel(CHANNEL_SPECTATE).events.length === 0) {
+      return;
+    }
+
+    this.updateCache();
+
+    this.isDelayedCall = true;
     this.channel(CHANNEL_SPECTATE).emitDelayed();
+    this.isDelayedCall = false;
   }
 
   protected subscribeToViewport(viewportId: PlayerId, subscriberViewportId: PlayerId): void {
@@ -88,6 +96,10 @@ export default class GameSpectating extends System {
   onSwitchToSpectate(spectatorId: PlayerId): void {
     if (!this.helpers.isPlayerConnected(spectatorId)) {
       return;
+    }
+
+    if (this.isDelayedCall === false) {
+      this.updateCache();
     }
 
     const spectator = this.players.get(spectatorId);
@@ -170,6 +182,10 @@ export default class GameSpectating extends System {
       return;
     }
 
+    if (this.isDelayedCall === false) {
+      this.updateCache();
+    }
+
     const spectator = this.players.get(spectatorId);
     const connectionId = this.storage.playerMainConnectionList.get(spectatorId);
     const connection = this.storage.connectionList.get(connectionId);
@@ -196,6 +212,10 @@ export default class GameSpectating extends System {
   onSpectatePrev(spectatorId: PlayerId): void {
     if (!this.helpers.isPlayerConnected(spectatorId)) {
       return;
+    }
+
+    if (this.isDelayedCall === false) {
+      this.updateCache();
     }
 
     const spectator = this.players.get(spectatorId);
@@ -242,6 +262,10 @@ export default class GameSpectating extends System {
       return;
     }
 
+    if (this.isDelayedCall === false) {
+      this.updateCache();
+    }
+
     const spectator = this.players.get(spectatorId);
     const connectionId = this.storage.playerMainConnectionList.get(spectatorId);
     const connection = this.storage.connectionList.get(connectionId);
@@ -250,8 +274,6 @@ export default class GameSpectating extends System {
       this.log.debug(`Player id${spectatorId} wants to spec the next player, but not in spec.`);
       this.onSwitchToSpectate(spectatorId);
     }
-
-    this.log.debug(spectator.spectate.isActive);
 
     connection.meta.pending.spectate = false;
 
