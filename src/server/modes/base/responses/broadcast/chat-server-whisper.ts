@@ -1,7 +1,8 @@
-import { SERVER_PACKETS, ServerPackets } from '@airbattle/protocol';
+import { ServerPackets, SERVER_PACKETS } from '@airbattle/protocol';
+import { CHAT_FIRST_MESSAGE_SAFE_DELAY_MS } from '@/constants';
 import { BROADCAST_CHAT_SERVER_WHISPER, CONNECTIONS_SEND_PACKET } from '@/events';
 import { System } from '@/server/system';
-import { PlayerId } from '@/types';
+import { MainConnectionId, PlayerId } from '@/types';
 
 export default class ChatServerWhisperBroadcast extends System {
   constructor({ app }) {
@@ -12,6 +13,29 @@ export default class ChatServerWhisperBroadcast extends System {
     };
   }
 
+  protected sendMessage(
+    recipientConnectionId: MainConnectionId,
+    recipientId: PlayerId,
+    text: string
+  ): void {
+    let offset = 0;
+
+    while (offset < text.length) {
+      this.emit(
+        CONNECTIONS_SEND_PACKET,
+        {
+          c: SERVER_PACKETS.CHAT_WHISPER,
+          from: this.storage.serverPlayerId,
+          to: recipientId,
+          text: text.substring(offset, offset + 255),
+        } as ServerPackets.ChatWhisper,
+        recipientConnectionId
+      );
+
+      offset += 255;
+    }
+  }
+
   /**
    * Private message by server bot.
    *
@@ -19,29 +43,29 @@ export default class ChatServerWhisperBroadcast extends System {
    * @param text
    */
   onChatServerWhisper(recipientId: PlayerId, text: string): void {
-    if (this.storage.playerMainConnectionList.has(recipientId)) {
-      const recipientConnectionId = this.storage.playerMainConnectionList.get(recipientId);
+    if (!this.helpers.isPlayerConnected(recipientId)) {
+      return;
+    }
 
-      if (!this.storage.humanConnectionIdList.has(recipientConnectionId)) {
-        return;
-      }
+    const recipientConnectionId = this.storage.playerMainConnectionList.get(recipientId);
 
-      let offset = 0;
+    if (!this.storage.humanConnectionIdList.has(recipientConnectionId)) {
+      return;
+    }
 
-      while (offset < text.length) {
-        this.emit(
-          CONNECTIONS_SEND_PACKET,
-          {
-            c: SERVER_PACKETS.CHAT_WHISPER,
-            from: this.storage.serverPlayerId,
-            to: recipientId,
-            text: text.substring(offset, offset + 255),
-          } as ServerPackets.ChatWhisper,
-          recipientConnectionId
-        );
+    const connection = this.storage.connectionList.get(recipientConnectionId);
+    const now = Date.now();
+    const connectionDurationMs = now - connection.meta.createdAt;
 
-        offset += 255;
-      }
+    /**
+     * The logic of the frontend's anti-spam is taken into account.
+     */
+    if (connectionDurationMs < CHAT_FIRST_MESSAGE_SAFE_DELAY_MS) {
+      setTimeout(() => {
+        this.sendMessage(recipientConnectionId, recipientId, text);
+      }, CHAT_FIRST_MESSAGE_SAFE_DELAY_MS - connectionDurationMs);
+    } else {
+      this.sendMessage(recipientConnectionId, recipientId, text);
     }
   }
 }
