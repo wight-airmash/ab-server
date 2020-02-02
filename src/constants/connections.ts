@@ -7,10 +7,33 @@ import {
 } from '@/constants/units';
 
 export enum CONNECTIONS_STATUS {
+  /**
+   * The connection is opened. No checks have been passed yet.
+   * All packets from clients with this status are rejected.
+   */
   OPENED = 1,
+
+  /**
+   * The connection is opened and allowed to send packets.
+   */
   ESTABLISHED = 10,
+
+  /**
+   * The connection was marked for closing soon
+   * and not allowed to send packets. Server can send packets.
+   */
   PENDING_TO_CLOSE = 20,
+
+  /**
+   * The connection is in the process of closing.
+   * It will be closed as soon as possible.
+   * Server still can send packets.
+   */
   PRECLOSED = 101,
+
+  /**
+   * The connection is closed. Neither sending nor receiving are available.
+   */
   CLOSED = 201,
 }
 
