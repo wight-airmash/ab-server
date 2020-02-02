@@ -270,6 +270,7 @@ export default class GamePlayersConnect extends System {
         player.kills.carriers = recover.data.carriersKills;
         player.score.current = recover.data.score;
 
+        player.times.joinedAt = recover.data.joinedAt;
         player.times.activePlaying = recover.data.activePlaying;
         player.times.activePlayingBlue = recover.data.activePlayingBlue;
         player.times.activePlayingRed = recover.data.activePlayingRed;

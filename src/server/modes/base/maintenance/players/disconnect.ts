@@ -83,6 +83,7 @@ export default class GamePlayersDisconnect extends System {
             energyUpgrades: player.upgrades.energy,
             missileUpgrades: player.upgrades.missile,
 
+            joinedAt: player.times.joinedAt,
             lastSwitch: player.times.lastSwitch,
             activePlaying: player.times.activePlaying,
             activePlayingRed: player.times.activePlayingRed,

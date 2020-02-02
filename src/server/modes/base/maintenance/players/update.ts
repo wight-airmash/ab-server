@@ -289,6 +289,8 @@ export default class GamePlayersUpdate extends System {
         } else if (player.team.current === CTF_TEAMS.BLUE) {
           player.times.activePlayingBlue += 17;
         }
+      } else {
+        player.times.inactiveTotal += 17;
       }
 
       /**
