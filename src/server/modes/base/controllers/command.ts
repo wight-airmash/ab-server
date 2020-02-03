@@ -2,6 +2,7 @@ import { ClientPackets } from '@airbattle/protocol';
 import {
   COMMAND_DROP_FLAG,
   COMMAND_DROP_UPGRADE,
+  COMMAND_ELECTIONS,
   COMMAND_FLAG,
   COMMAND_HORIZON,
   COMMAND_MATCH,
@@ -47,6 +48,7 @@ export default class CommandMessageHandler extends System {
       upgrades: COMMAND_DROP_UPGRADE,
 
       // CTF only.
+      elections: COMMAND_ELECTIONS,
       match: COMMAND_MATCH,
       switch: COMMAND_SWITCH,
 

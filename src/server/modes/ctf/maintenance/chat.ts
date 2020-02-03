@@ -10,6 +10,7 @@ import {
   CHAT_SAY,
   CHAT_TEAM,
   CHAT_WHISPER,
+  CTF_BOT_CHAT_TEAM,
   RESPONSE_COMMAND_REPLY,
 } from '@/events';
 import { CHANNEL_CHAT } from '@/server/channels';
@@ -105,6 +106,10 @@ export default class GameChat extends System {
       this.emit(BROADCAST_CHAT_SERVER_WHISPER, playerId, this.responseAttackBlock);
     } else if (GameChat.isShieldTimerAlert(msg) === false) {
       this.emit(BROADCAST_CHAT_TEAM, playerId, msg);
+    }
+
+    if (this.storage.botIdList.has(playerId) === true) {
+      this.emit(CTF_BOT_CHAT_TEAM, playerId, msg);
     }
   }
 
