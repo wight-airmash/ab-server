@@ -3,6 +3,7 @@ import Connections from '@/server/connections';
 import Entity from '@/server/entity';
 import { GameManifest } from '@/server/manifest';
 import FlagCommandHandler from '@/server/modes/base/commands/flag';
+import HorizonCommandHandler from '@/server/modes/base/commands/horizon';
 import ProfileCommandHandler from '@/server/modes/base/commands/profile';
 import RespawnCommandHandler from '@/server/modes/base/commands/respawn';
 import ServerCommandHandler from '@/server/modes/base/commands/server';
@@ -144,6 +145,7 @@ export default abstract class BaseGameManifest extends GameManifest {
 
       // Commands.
       FlagCommandHandler,
+      HorizonCommandHandler,
       ProfileCommandHandler,
       RespawnCommandHandler,
       ServerCommandHandler,
