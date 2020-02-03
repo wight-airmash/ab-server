@@ -1,5 +1,5 @@
 import { CTF_TEAMS } from '@airbattle/protocol';
-import { MS_PER_SEC } from '@/constants/units';
+import { MS_PER_SEC, SECONDS_PER_MINUTE } from '@/constants/units';
 
 export const CTF_NEW_GAME_ALERT_DURATION_MS = 15 * MS_PER_SEC;
 
@@ -49,3 +49,5 @@ export const CTF_RETURNED_FLAG_INACTIVITY_TIMEOUT_MS = 5 * MS_PER_SEC;
 export const CTF_AFK_CHECK_INTERVAL_SEC = 59;
 
 export const CTF_AFK_TIME_TO_AUTO_SPECTATE_MS = 39 * MS_PER_SEC;
+
+export const CTF_AFK_TIME_TO_START_ELECTIONS_MS = 2 * SECONDS_PER_MINUTE * MS_PER_SEC;
