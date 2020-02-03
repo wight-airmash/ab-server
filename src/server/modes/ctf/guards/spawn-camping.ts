@@ -150,7 +150,11 @@ export default class SpawnCampingGuard extends System {
     this.secondsAfterMatchStart += 1;
     this.seconds += 1;
 
-    if (this.seconds === CTF_AFK_CHECK_INTERVAL_SEC || this.secondsAfterMatchStart === 1) {
+    if (
+      this.seconds === CTF_AFK_CHECK_INTERVAL_SEC ||
+      this.secondsAfterMatchStart === 1 ||
+      this.secondsAfterMatchStart === 40
+    ) {
       this.seconds = 0;
       this.checkPlayers();
     }
