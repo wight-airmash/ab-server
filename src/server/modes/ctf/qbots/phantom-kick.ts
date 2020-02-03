@@ -36,6 +36,8 @@ export default class PhantomPlayerKick extends System {
       return;
     }
 
+    this.log.debug(`Phantom kick the player id${playerId}.`);
+
     const recipients = [...this.storage.botConnectionIdList];
 
     this.emit(
