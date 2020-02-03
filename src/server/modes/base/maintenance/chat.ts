@@ -1,4 +1,4 @@
-import { CHAT_MESSAGE_PER_TICKS_LIMIT } from '@/constants';
+import { CHAT_MESSAGE_PER_TICKS_LIMIT, PLAYERS_ALIVE_STATUSES } from '@/constants';
 import {
   BROADCAST_CHAT_PUBLIC,
   BROADCAST_CHAT_SAY,
@@ -9,6 +9,7 @@ import {
   CHAT_SAY,
   CHAT_TEAM,
   CHAT_WHISPER,
+  RESPONSE_COMMAND_REPLY,
 } from '@/events';
 import { CHANNEL_CHAT } from '@/server/channels';
 import { System } from '@/server/system';
@@ -63,8 +64,17 @@ export default class GameChat extends System {
 
     const player = this.storage.playerList.get(playerId);
 
-    if (player.planestate.stealthed === false) {
+    if (
+      player.planestate.stealthed === false &&
+      player.alivestatus.current === PLAYERS_ALIVE_STATUSES.ALIVE
+    ) {
       this.emit(BROADCAST_CHAT_SAY, playerId, msg);
+    } else {
+      this.emit(
+        RESPONSE_COMMAND_REPLY,
+        this.storage.playerMainConnectionList.get(playerId),
+        'You have to be visible to use "/s".'
+      );
     }
   }
 
