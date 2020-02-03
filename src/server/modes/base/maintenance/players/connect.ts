@@ -82,7 +82,7 @@ import Velocity from '@/server/components/velocity';
 import Wins from '@/server/components/wins';
 import Entity from '@/server/entity';
 import { System } from '@/server/system';
-import { getRandomInt } from '@/support/numbers';
+import { convertEarningsToLevel, getRandomInt } from '@/support/numbers';
 import { has } from '@/support/objects';
 import { generateBackupToken } from '@/support/strings';
 import { PlayerId } from '@/types';
@@ -219,7 +219,7 @@ export default class GamePlayersConnect extends System {
         this.storage.userList.set(userId, user);
       }
 
-      player.level.current = this.helpers.convertEarningsToLevel(user.lifetimestats.earnings);
+      player.level.current = convertEarningsToLevel(user.lifetimestats.earnings);
     }
 
     this.log.info('Player connected.', {

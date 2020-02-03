@@ -1,10 +1,13 @@
-/* eslint-disable class-methods-use-this */
 import crypto from 'crypto';
-import { SERVER_MAX_MOB_ID, MAX_UINT32, SERVER_MIN_MOB_ID, NS_PER_SEC } from '@/constants';
+import { MAX_UINT32, NS_PER_SEC, SERVER_MAX_MOB_ID, SERVER_MIN_MOB_ID } from '@/constants';
 import Logger from '@/logger';
 import { GameStorage } from '@/server/storage';
-import { MobId, ConnectionId, PlayerId, AuthToken, AuthTokenData } from '@/types';
+import { AuthToken, AuthTokenData, ConnectionId, MobId, PlayerId } from '@/types';
 
+/**
+ * Helpers that need access to app instance.
+ * Place other helpers in @/support.
+ */
 export class Helpers {
   /**
    * Reference to game storage.
@@ -127,10 +130,6 @@ export class Helpers {
     return mobId;
   }
 
-  convertEarningsToLevel(earnings: number): number {
-    return Math.floor(0.0111 * earnings ** 0.5) + 1;
-  }
-
   /**
    * For verifying authentication tokens.
    */
@@ -230,16 +229,6 @@ export class Helpers {
     }
 
     return auth.uid;
-  }
-
-  escapeHTML(html: string): string {
-    return html
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#x27;')
-      .replace(/\//g, '&#x2F;');
   }
 }
 

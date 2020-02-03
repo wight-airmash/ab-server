@@ -5,3 +5,7 @@ export const getRandomInt = (min: number, max: number): number => {
 export const getRandomNumber = (min: number, max: number): number => {
   return Math.random() * (max - min) + min;
 };
+
+export const convertEarningsToLevel = (earnings: number): number => {
+  return Math.floor(0.0111 * earnings ** 0.5) + 1;
+};

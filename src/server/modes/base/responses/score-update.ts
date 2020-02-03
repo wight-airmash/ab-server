@@ -1,6 +1,7 @@
-import { PLAYER_LEVEL_UPDATE_TYPES, SERVER_PACKETS, ServerPackets } from '@airbattle/protocol';
+import { PLAYER_LEVEL_UPDATE_TYPES, ServerPackets, SERVER_PACKETS } from '@airbattle/protocol';
 import { BROADCAST_PLAYER_LEVEL, CONNECTIONS_SEND_PACKET, RESPONSE_SCORE_UPDATE } from '@/events';
 import { System } from '@/server/system';
+import { convertEarningsToLevel } from '@/support/numbers';
 import { has } from '@/support/objects';
 import { PlayerId } from '@/types';
 
@@ -36,7 +37,7 @@ export default class ScoreUpdate extends System {
 
       ({ earnings, totalkills, totaldeaths } = user.lifetimestats);
 
-      const newLevel = this.helpers.convertEarningsToLevel(earnings);
+      const newLevel = convertEarningsToLevel(earnings);
 
       if (newLevel > player.level.current) {
         player.level.current = newLevel;
