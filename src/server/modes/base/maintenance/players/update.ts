@@ -254,6 +254,8 @@ export default class GamePlayersUpdate extends System {
        * Skip spectators.
        */
       if (player.alivestatus.current !== PLAYERS_ALIVE_STATUSES.ALIVE) {
+        player.times.inactiveTotal += 17;
+
         return;
       }
 
