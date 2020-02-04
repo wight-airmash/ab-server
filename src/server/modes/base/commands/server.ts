@@ -533,6 +533,71 @@ export default class ServerCommandHandler extends System {
   }
 
   /**
+   * /server welcome <subcommand> [value]
+   *
+   * @param playerId
+   * @param command
+   */
+  protected handleWelcomeCommand(playerId: PlayerId, command: string): void {
+    const listCommand = 'welcome list';
+    const flushCommand = 'welcome flush';
+    const addCommand = 'welcome add ';
+    const removeCommand = 'welcome remove ';
+
+    if (command === listCommand) {
+      if (this.app.config.welcomeMessages.length === 0) {
+        this.emit(BROADCAST_CHAT_SERVER_WHISPER, playerId, 'Welcome messages list is empty.');
+
+        return;
+      }
+
+      for (let msgIndex = 0; msgIndex < this.app.config.welcomeMessages.length; msgIndex += 1) {
+        const msg = this.app.config.welcomeMessages[msgIndex];
+
+        this.emit(BROADCAST_CHAT_SERVER_WHISPER, playerId, `${msgIndex + 1}. ${msg}`);
+      }
+
+      return;
+    }
+
+    if (command === flushCommand) {
+      const totalMessages = this.app.config.welcomeMessages.length;
+
+      this.app.config.welcomeMessages = [];
+
+      this.emit(
+        BROADCAST_CHAT_SERVER_WHISPER,
+        playerId,
+        `Welcome messages list has been cleared (${totalMessages}).`
+      );
+
+      return;
+    }
+
+    if (command.indexOf(addCommand) === 0) {
+      const msg = command.substring(addCommand.length);
+
+      this.app.config.welcomeMessages.push(msg);
+
+      this.emit(BROADCAST_CHAT_SERVER_WHISPER, playerId, 'Message added.');
+
+      return;
+    }
+
+    if (command.indexOf(removeCommand) === 0) {
+      const msgIndex = ~~command.substring(removeCommand.length) - 1;
+
+      if (msgIndex > -1 && msgIndex < this.app.config.welcomeMessages.length) {
+        this.app.config.welcomeMessages.splice(msgIndex, 1);
+
+        this.emit(BROADCAST_CHAT_SERVER_WHISPER, playerId, 'Message removed.');
+      } else {
+        this.emit(BROADCAST_CHAT_SERVER_WHISPER, playerId, 'Invalid message index.');
+      }
+    }
+  }
+
+  /**
    * "/server" command handler.
    *
    * @param connectionId
@@ -673,6 +738,12 @@ export default class ServerCommandHandler extends System {
 
       if (command.indexOf('upgrades') === 0) {
         this.handleUpgradesSetupCommand(connectionId, playerId, command);
+
+        return;
+      }
+
+      if (command.indexOf('welcome') === 0) {
+        this.handleWelcomeCommand(playerId, command);
       }
     }
   }

@@ -193,3 +193,19 @@ Display the list of IPs and reasons.
 ### /server ban flush
 
 Remove all the IPs from the ban list.
+
+### /server welcome list
+
+Display the list of welcome messages.
+
+### /server welcome add \<message\>
+
+Add a welcome message to the end of the list. `%split%` doesn't work here, add the messages one by one.
+
+### /server welcome remove \<messageIndex\>
+
+Remove a message by the index from [/server welcome list](#server-welcome-list) result.
+
+### /server welcome flush
+
+Remove all the welcome messages from the list.
