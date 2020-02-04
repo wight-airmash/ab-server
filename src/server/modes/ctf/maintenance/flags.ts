@@ -1,47 +1,45 @@
+import { CTF_CAPTURE_BOUNTY, CTF_TEAMS } from '@airbattle/protocol';
 import { Circle, Polygon } from 'collisions';
-import { CTF_TEAMS, CTF_CAPTURE_BOUNTY } from '@airbattle/protocol';
-import {
-  TIMELINE_BEFORE_GAME_START,
-  COLLISIONS_ADD_OBJECT,
-  CTF_PLAYER_TOUCHED_FLAG,
-  CTF_PLAYER_CROSSED_FLAGZONE,
-  CTF_TEAM_CAPTURED_FLAG,
-  CTF_CARRIER_KILLED,
-  BROADCAST_GAME_FLAG,
-  CTF_PLAYER_DROP_FLAG,
-  BROADCAST_PLAYER_UPDATE,
-  CTF_RESET_FLAGS,
-  BROADCAST_FLAG_RETURNED,
-  BROADCAST_FLAG_CAPTURED,
-  BROADCAST_FLAG_TAKEN,
-  RESPONSE_SCORE_UPDATE,
-  PLAYERS_BEFORE_REMOVE,
-  TIMELINE_CLOCK_MINUTE,
-} from '@/events';
-import { System } from '@/server/system';
-import Entity from '@/server/entity';
-import Id from '@/server/components/mob-id';
-import Position from '@/server/components/position';
 import {
   COLLISIONS_OBJECT_TYPES,
-  MAP_SIZE,
   CTF_FLAGS_POSITIONS,
-  CTF_FLAG_OWNER_INACTIVITY_TIMEOUT_MS,
-  CTF_RETURNED_FLAG_INACTIVITY_TIMEOUT_MS,
   CTF_FLAGS_SPAWN_ZONE_COLLISIONS,
   CTF_FLAG_COLLISIONS,
+  CTF_FLAG_OWNER_INACTIVITY_TIMEOUT_MS,
+  CTF_RETURNED_FLAG_INACTIVITY_TIMEOUT_MS,
+  MAP_SIZE,
   PLAYERS_ALIVE_STATUSES,
 } from '@/constants';
-import Owner from '@/server/components/owner';
-import Team from '@/server/components/team';
-import Hitbox from '@/server/components/hitbox';
-import HitCircles from '@/server/components/hit-circles';
-import Rotation from '@/server/components/rotation';
+import {
+  BROADCAST_FLAG_CAPTURED,
+  BROADCAST_FLAG_RETURNED,
+  BROADCAST_FLAG_TAKEN,
+  BROADCAST_GAME_FLAG,
+  BROADCAST_PLAYER_UPDATE,
+  COLLISIONS_ADD_OBJECT,
+  CTF_CARRIER_KILLED,
+  CTF_PLAYER_CROSSED_FLAGZONE,
+  CTF_PLAYER_DROP_FLAG,
+  CTF_PLAYER_TOUCHED_FLAG,
+  CTF_RESET_FLAGS,
+  CTF_TEAM_CAPTURED_FLAG,
+  PLAYERS_BEFORE_REMOVE,
+  RESPONSE_SCORE_UPDATE,
+  TIMELINE_BEFORE_GAME_START,
+  TIMELINE_CLOCK_MINUTE,
+} from '@/events';
 import FlagState from '@/server/components/flag-state';
-import { PlayerId, MobId } from '@/types';
+import HitCircles from '@/server/components/hit-circles';
+import Hitbox from '@/server/components/hitbox';
+import Id from '@/server/components/mob-id';
+import Owner from '@/server/components/owner';
+import Position from '@/server/components/position';
+import Rotation from '@/server/components/rotation';
+import Team from '@/server/components/team';
+import Entity from '@/server/entity';
+import { System } from '@/server/system';
 import { has } from '@/support/objects';
-
-const [, , CTF_FLAG_RADUIS] = CTF_FLAG_COLLISIONS[0];
+import { MobId, PlayerId } from '@/types';
 
 export default class GameFlags extends System {
   constructor({ app }) {
@@ -110,18 +108,18 @@ export default class GameFlags extends System {
         new Rotation(),
         new Owner(),
         new Hitbox(),
-        new HitCircles([[0, 0, CTF_FLAG_RADUIS]])
+        new HitCircles([...CTF_FLAG_COLLISIONS])
       );
 
-      blueFlag.hitbox.x = x + MAP_SIZE.HALF_WIDTH - CTF_FLAG_RADUIS;
-      blueFlag.hitbox.y = y + MAP_SIZE.HALF_HEIGHT - CTF_FLAG_RADUIS;
-      blueFlag.hitbox.height = CTF_FLAG_RADUIS * 2;
-      blueFlag.hitbox.width = CTF_FLAG_RADUIS * 2;
+      blueFlag.hitbox.x = x + MAP_SIZE.HALF_WIDTH + this.storage.flagHitboxesCache.x;
+      blueFlag.hitbox.y = y + MAP_SIZE.HALF_HEIGHT + this.storage.flagHitboxesCache.y;
+      blueFlag.hitbox.height = this.storage.flagHitboxesCache.height;
+      blueFlag.hitbox.width = this.storage.flagHitboxesCache.width;
 
       const hitbox = new Circle(
-        blueFlag.hitbox.x + CTF_FLAG_RADUIS,
-        blueFlag.hitbox.y + CTF_FLAG_RADUIS,
-        CTF_FLAG_RADUIS
+        blueFlag.hitbox.x - this.storage.flagHitboxesCache.x,
+        blueFlag.hitbox.y - this.storage.flagHitboxesCache.y,
+        this.storage.flagHitboxesCache.width / 2
       );
 
       hitbox.id = blueFlag.id.current;
@@ -184,18 +182,18 @@ export default class GameFlags extends System {
         new Rotation(),
         new Owner(),
         new Hitbox(),
-        new HitCircles([[0, 0, CTF_FLAG_RADUIS]])
+        new HitCircles([...CTF_FLAG_COLLISIONS])
       );
 
-      redFlag.hitbox.x = x + MAP_SIZE.HALF_WIDTH - CTF_FLAG_RADUIS;
-      redFlag.hitbox.y = y + MAP_SIZE.HALF_HEIGHT - CTF_FLAG_RADUIS;
-      redFlag.hitbox.height = CTF_FLAG_RADUIS * 2;
-      redFlag.hitbox.width = CTF_FLAG_RADUIS * 2;
+      redFlag.hitbox.x = x + MAP_SIZE.HALF_WIDTH + this.storage.flagHitboxesCache.x;
+      redFlag.hitbox.y = y + MAP_SIZE.HALF_HEIGHT + this.storage.flagHitboxesCache.y;
+      redFlag.hitbox.height = this.storage.flagHitboxesCache.height;
+      redFlag.hitbox.width = this.storage.flagHitboxesCache.width;
 
       const hitbox = new Circle(
-        redFlag.hitbox.x + CTF_FLAG_RADUIS,
-        redFlag.hitbox.y + CTF_FLAG_RADUIS,
-        CTF_FLAG_RADUIS
+        redFlag.hitbox.x - this.storage.flagHitboxesCache.x,
+        redFlag.hitbox.y - this.storage.flagHitboxesCache.y,
+        this.storage.flagHitboxesCache.width / 2
       );
 
       hitbox.id = redFlag.id.current;
@@ -390,12 +388,12 @@ export default class GameFlags extends System {
      */
     flag.position.x = player.position.x;
     flag.position.y = player.position.y;
-    flag.hitbox.x = ~~flag.position.x + MAP_SIZE.HALF_WIDTH - CTF_FLAG_RADUIS;
-    flag.hitbox.y = ~~flag.position.y + MAP_SIZE.HALF_HEIGHT - CTF_FLAG_RADUIS;
-    flag.hitbox.height = CTF_FLAG_RADUIS * 2;
-    flag.hitbox.width = CTF_FLAG_RADUIS * 2;
-    flag.hitbox.current.x = flag.hitbox.x + CTF_FLAG_RADUIS;
-    flag.hitbox.current.y = flag.hitbox.y + CTF_FLAG_RADUIS;
+    flag.hitbox.x = ~~flag.position.x + MAP_SIZE.HALF_WIDTH + this.storage.flagHitboxesCache.x;
+    flag.hitbox.y = ~~flag.position.y + MAP_SIZE.HALF_HEIGHT + this.storage.flagHitboxesCache.y;
+    flag.hitbox.height = this.storage.flagHitboxesCache.height;
+    flag.hitbox.width = this.storage.flagHitboxesCache.width;
+    flag.hitbox.current.x = flag.hitbox.x - this.storage.flagHitboxesCache.x;
+    flag.hitbox.current.y = flag.hitbox.y - this.storage.flagHitboxesCache.y;
 
     this.emit(BROADCAST_GAME_FLAG, flag.team.current);
 
@@ -448,13 +446,13 @@ export default class GameFlags extends System {
     flag.flagstate.returned = false;
     flag.flagstate.captured = false;
 
-    flag.hitbox.x = ~~flag.position.x + MAP_SIZE.HALF_WIDTH - CTF_FLAG_RADUIS;
-    flag.hitbox.y = ~~flag.position.y + MAP_SIZE.HALF_HEIGHT - CTF_FLAG_RADUIS;
-    flag.hitbox.height = CTF_FLAG_RADUIS * 2;
-    flag.hitbox.width = CTF_FLAG_RADUIS * 2;
+    flag.hitbox.x = ~~flag.position.x + MAP_SIZE.HALF_WIDTH + this.storage.flagHitboxesCache.x;
+    flag.hitbox.y = ~~flag.position.y + MAP_SIZE.HALF_HEIGHT + this.storage.flagHitboxesCache.y;
+    flag.hitbox.height = this.storage.flagHitboxesCache.height;
+    flag.hitbox.width = this.storage.flagHitboxesCache.width;
 
-    flag.hitbox.current.x = flag.hitbox.x + CTF_FLAG_RADUIS;
-    flag.hitbox.current.y = flag.hitbox.y + CTF_FLAG_RADUIS;
+    flag.hitbox.current.x = flag.hitbox.x - this.storage.flagHitboxesCache.x;
+    flag.hitbox.current.y = flag.hitbox.y - this.storage.flagHitboxesCache.y;
 
     this.emit(BROADCAST_GAME_FLAG, flag.team.current);
     this.emit(BROADCAST_PLAYER_UPDATE, playerId);
@@ -509,13 +507,13 @@ export default class GameFlags extends System {
     flag.flagstate.captured = false;
     flag.flagstate.lastReturn = Date.now();
 
-    flag.hitbox.x = ~~flag.position.x + MAP_SIZE.HALF_WIDTH - CTF_FLAG_RADUIS;
-    flag.hitbox.y = ~~flag.position.y + MAP_SIZE.HALF_HEIGHT - CTF_FLAG_RADUIS;
-    flag.hitbox.height = CTF_FLAG_RADUIS * 2;
-    flag.hitbox.width = CTF_FLAG_RADUIS * 2;
+    flag.hitbox.x = ~~flag.position.x + MAP_SIZE.HALF_WIDTH + this.storage.flagHitboxesCache.x;
+    flag.hitbox.y = ~~flag.position.y + MAP_SIZE.HALF_HEIGHT + this.storage.flagHitboxesCache.y;
+    flag.hitbox.height = this.storage.flagHitboxesCache.height;
+    flag.hitbox.width = this.storage.flagHitboxesCache.width;
 
-    flag.hitbox.current.x = flag.hitbox.x + CTF_FLAG_RADUIS;
-    flag.hitbox.current.y = flag.hitbox.y + CTF_FLAG_RADUIS;
+    flag.hitbox.current.x = flag.hitbox.x - this.storage.flagHitboxesCache.x;
+    flag.hitbox.current.y = flag.hitbox.y - this.storage.flagHitboxesCache.y;
 
     this.log.debug('Blue flag was restored.', {
       owner: {
@@ -549,13 +547,13 @@ export default class GameFlags extends System {
     flag.flagstate.captured = false;
     flag.flagstate.lastReturn = Date.now();
 
-    flag.hitbox.x = ~~flag.position.x + MAP_SIZE.HALF_WIDTH - CTF_FLAG_RADUIS;
-    flag.hitbox.y = ~~flag.position.y + MAP_SIZE.HALF_HEIGHT - CTF_FLAG_RADUIS;
-    flag.hitbox.height = CTF_FLAG_RADUIS * 2;
-    flag.hitbox.width = CTF_FLAG_RADUIS * 2;
+    flag.hitbox.x = ~~flag.position.x + MAP_SIZE.HALF_WIDTH + this.storage.flagHitboxesCache.x;
+    flag.hitbox.y = ~~flag.position.y + MAP_SIZE.HALF_HEIGHT + this.storage.flagHitboxesCache.y;
+    flag.hitbox.height = this.storage.flagHitboxesCache.height;
+    flag.hitbox.width = this.storage.flagHitboxesCache.width;
 
-    flag.hitbox.current.x = flag.hitbox.x + CTF_FLAG_RADUIS;
-    flag.hitbox.current.y = flag.hitbox.y + CTF_FLAG_RADUIS;
+    flag.hitbox.current.x = flag.hitbox.x - this.storage.flagHitboxesCache.x;
+    flag.hitbox.current.y = flag.hitbox.y - this.storage.flagHitboxesCache.y;
 
     this.log.debug('Red flag was restored.', {
       owner: {

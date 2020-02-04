@@ -55,9 +55,7 @@ export class GameStorage {
   /**
    * CTF flag hitboxes cache.
    */
-  public flagHitboxesCache: {
-    [flagType: number]: { width: number; height: number; x: number; y: number };
-  } = {};
+  public flagHitboxesCache: { width: number; height: number; x: number; y: number };
 
   /**
    * Used to generate mob identifiers.
