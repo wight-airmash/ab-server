@@ -19,6 +19,7 @@ import {
   PLAYERS_EMIT_CHANNEL_DISCONNECT,
   PLAYERS_EMIT_CHANNEL_FLAG,
   PLAYERS_EMIT_CHANNEL_RESPAWN,
+  PLAYERS_RANKINGS_UPDATE,
   PLAYERS_UPDATE,
   PROJECTILES_UPDATE,
   SERVER_FRAMES_SKIPPED,
@@ -398,6 +399,12 @@ export default class GameServer {
       this.events.emit(COLLISIONS_DETECT, frame, frameFactor, timeFromStart, skippedFrames);
     } catch (err) {
       this.log.error('Error while dispatching COLLISIONS_DETECT', err.stack);
+    }
+
+    try {
+      this.events.emit(PLAYERS_RANKINGS_UPDATE, frame, frameFactor, timeFromStart, skippedFrames);
+    } catch (err) {
+      this.log.error('Error while dispatching PLAYERS_RANKINGS_UPDATE', err.stack);
     }
 
     try {

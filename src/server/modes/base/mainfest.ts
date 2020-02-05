@@ -48,6 +48,7 @@ import GamePlayersUpdate from '@/server/modes/base/maintenance/players/update';
 import GameUpgrades from '@/server/modes/base/maintenance/players/upgrades';
 import GamePowerups from '@/server/modes/base/maintenance/powerups';
 import GameProjectiles from '@/server/modes/base/maintenance/projectiles';
+import GameRankings from '@/server/modes/base/maintenance/rankings';
 import GameSpectating from '@/server/modes/base/maintenance/spectating';
 import GameViewports from '@/server/modes/base/maintenance/viewports';
 import GameWarming from '@/server/modes/base/maintenance/warming';
@@ -250,6 +251,7 @@ export default abstract class BaseGameManifest extends GameManifest {
       GameChat,
       GameMute,
       GameSpectating,
+      GameRankings,
     ];
 
     this.startSystems();
