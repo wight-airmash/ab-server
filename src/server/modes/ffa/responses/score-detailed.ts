@@ -3,7 +3,7 @@ import { RESPONSE_SCORE_DETAILED, CONNECTIONS_SEND_PACKET } from '@/events';
 import { System } from '@/server/system';
 import { MainConnectionId } from '@/types';
 
-export default class ScoreDetailed extends System {
+export default class ScoreDetailedResponse extends System {
   constructor({ app }) {
     super({ app });
 
@@ -19,21 +19,23 @@ export default class ScoreDetailed extends System {
    * @param connectionId player connection id
    */
   onScoreDetailed(connectionId: MainConnectionId): void {
-    const scores = [];
+    const scores: ServerPackets.ScoreDetailedScore[] = [];
 
-    this.storage.playerList.forEach(player => {
-      scores.push({
-        id: player.id.current,
-        level: player.level.current,
-        score: player.score.current,
-        kills: player.kills.current,
-        deaths: player.deaths.current,
-        damage: player.damage.current,
-        ping: player.ping.current,
-      } as ServerPackets.ScoreDetailedScore);
-    });
+    for (let idIndex = 0; idIndex < this.storage.playerRankings.byBounty.length; idIndex += 1) {
+      if (this.storage.playerList.has(this.storage.playerRankings.byBounty[idIndex])) {
+        const player = this.storage.playerList.get(this.storage.playerRankings.byBounty[idIndex]);
 
-    scores.sort((p1, p2) => p1.score - p2.score);
+        scores.push({
+          id: player.id.current,
+          level: player.level.current,
+          score: player.score.current,
+          kills: player.kills.current,
+          deaths: player.deaths.current,
+          damage: player.damage.current,
+          ping: player.ping.current,
+        } as ServerPackets.ScoreDetailedScore);
+      }
+    }
 
     this.emit(
       CONNECTIONS_SEND_PACKET,

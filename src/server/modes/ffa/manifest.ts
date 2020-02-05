@@ -1,8 +1,8 @@
+import Match from '@/server/components/game/match';
 import BaseGameManifest from '@/server/modes/base/mainfest';
 import GamePlayers from '@/server/modes/ffa/maintenance/players';
-import ScoreDetailed from '@/server/modes/ffa/responses/score-detailed';
 import InfernosPeriodic from '@/server/modes/ffa/periodic/infernos';
-import Match from '@/server/components/game/match';
+import ScoreDetailedResponse from '@/server/modes/ffa/responses/score-detailed';
 
 export default class FFAGameManifest extends BaseGameManifest {
   constructor({ app }) {
@@ -13,7 +13,7 @@ export default class FFAGameManifest extends BaseGameManifest {
       GamePlayers,
 
       // Responses.
-      ScoreDetailed,
+      ScoreDetailedResponse,
 
       // Periodic.
       InfernosPeriodic,
