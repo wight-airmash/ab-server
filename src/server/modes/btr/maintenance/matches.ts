@@ -23,6 +23,7 @@ import {
   TIMELINE_CLOCK_HALFSECOND,
   TIMELINE_CLOCK_SECOND,
   TIMELINE_GAME_MATCH_START,
+  TIMELINE_GAME_MATCH_END,
 } from '@/events';
 import Entity from '@/server/entity';
 import { System } from '@/server/system';
@@ -282,6 +283,8 @@ export default class GameMatches extends System {
         match.isActive = false;
         this.gameStartTimeout = -5;
         this.broadcastServerMessageAlert('Game ended!', 5);
+
+        this.emit(TIMELINE_GAME_MATCH_END);
       }
     }
   }

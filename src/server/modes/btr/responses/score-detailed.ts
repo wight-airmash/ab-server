@@ -1,10 +1,10 @@
 import { ServerPackets, SERVER_PACKETS } from '@airbattle/protocol';
-import { RESPONSE_SCORE_DETAILED, CONNECTIONS_SEND_PACKET } from '@/events';
+import { PLAYERS_ALIVE_STATUSES } from '@/constants';
+import { CONNECTIONS_SEND_PACKET, RESPONSE_SCORE_DETAILED } from '@/events';
 import { System } from '@/server/system';
 import { MainConnectionId } from '@/types';
-import { PLAYERS_ALIVE_STATUSES } from '@/constants';
 
-export default class ScoreDetailed extends System {
+export default class ScoreDetailedResponse extends System {
   constructor({ app }) {
     super({ app });
 
@@ -20,23 +20,25 @@ export default class ScoreDetailed extends System {
    * @param connectionId player connection id
    */
   onScoreDetailed(сonnectionId: MainConnectionId): void {
-    const scores = [];
+    const scores: ServerPackets.ScoreDetailedBtrScore[] = [];
 
-    this.storage.playerList.forEach(player => {
-      scores.push({
-        id: player.id.current,
-        level: player.level.current,
-        alive: player.alivestatus.current === PLAYERS_ALIVE_STATUSES.ALIVE,
-        wins: player.wins.current,
-        score: player.score.current,
-        kills: player.kills.current,
-        deaths: player.deaths.current,
-        damage: player.damage.current,
-        ping: player.ping.current,
-      } as ServerPackets.ScoreDetailedBtrScore);
-    });
+    for (let idIndex = 0; idIndex < this.storage.playerRankings.byBounty.length; idIndex += 1) {
+      if (this.storage.playerList.has(this.storage.playerRankings.byBounty[idIndex])) {
+        const player = this.storage.playerList.get(this.storage.playerRankings.byBounty[idIndex]);
 
-    scores.sort((p1, p2) => p1.score - p2.score);
+        scores.push({
+          id: player.id.current,
+          level: player.level.current,
+          alive: player.alivestatus.current === PLAYERS_ALIVE_STATUSES.ALIVE,
+          wins: player.wins.current,
+          score: player.score.current,
+          kills: player.kills.current,
+          deaths: player.deaths.current,
+          damage: player.damage.current,
+          ping: player.ping.current,
+        } as ServerPackets.ScoreDetailedBtrScore);
+      }
+    }
 
     this.emit(
       CONNECTIONS_SEND_PACKET,

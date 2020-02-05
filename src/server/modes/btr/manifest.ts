@@ -8,7 +8,7 @@ import GamePlayers from '@/server/modes/btr/maintenance/players';
 import GameFirewallBroadcast from '@/server/modes/btr/responses/broadcast/game-firewall';
 import PlayersAliveBroadcast from '@/server/modes/btr/responses/broadcast/players-alive';
 import ServerCustomBroadcast from '@/server/modes/btr/responses/broadcast/server-custom';
-import ScoreDetailed from '@/server/modes/btr/responses/score-detailed';
+import ScoreDetailedResponse from '@/server/modes/btr/responses/score-detailed';
 
 export default class BTRGameManifest extends BaseGameManifest {
   constructor({ app }) {
@@ -30,7 +30,7 @@ export default class BTRGameManifest extends BaseGameManifest {
       BTRRespawnCommandHandler,
 
       // Responses.
-      ScoreDetailed,
+      ScoreDetailedResponse,
 
       // Maintenance.
       GameMatches,
