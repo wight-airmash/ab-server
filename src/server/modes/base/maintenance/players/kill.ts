@@ -81,6 +81,7 @@ export default class GamePlayersKill extends System {
     /**
      * Tracking victim deaths and score.
      */
+    victim.deaths.killerId = projectileOwner;
     victim.deaths.current += 1;
     victim.score.current = Math.round(victim.score.current * 0.8) - 5;
 

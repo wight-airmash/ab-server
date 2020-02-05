@@ -1,3 +1,4 @@
+import { GAME_TYPES } from '@airbattle/protocol';
 import {
   COLLISIONS_MAP_COORDS,
   PLAYERS_ALIVE_STATUSES,
@@ -18,7 +19,6 @@ import {
 import { CHANNEL_SPECTATE } from '@/server/channels';
 import Entity from '@/server/entity';
 import { System } from '@/server/system';
-import { getRandomInt } from '@/support/numbers';
 import { PlayerId, Viewports } from '@/types';
 
 export default class GameSpectating extends System {
@@ -51,14 +51,43 @@ export default class GameSpectating extends System {
   }
 
   protected updateCache(): void {
+    const excludeIds = [];
+
     this.now = Date.now();
     this.playerIds = [];
 
-    this.players.forEach(player => {
-      if (player.alivestatus.current === PLAYERS_ALIVE_STATUSES.ALIVE) {
-        this.playerIds.push(player.id.current);
+    /**
+     * Add CTF carriers.
+     *
+     * Note: don't add any personal dependent IDs to `this.playerIds` (like last killer id),
+     * this is a common array among all players who want to switch in spectate mode.
+     */
+    if (this.app.config.server.typeId === GAME_TYPES.CTF) {
+      const blueFlag = this.storage.mobList.get(this.storage.ctfFlagBlueId);
+      const redFlag = this.storage.mobList.get(this.storage.ctfFlagRedId);
+
+      if (blueFlag.owner.current !== 0) {
+        this.playerIds.push(blueFlag.owner.current);
+        excludeIds.push(blueFlag.owner.current);
       }
-    });
+
+      if (redFlag.owner.current !== 0) {
+        this.playerIds.push(redFlag.owner.current);
+        excludeIds.push(redFlag.owner.current);
+      }
+    }
+
+    for (let idIndex = 0; idIndex < this.storage.playerRankings.byBounty.length; idIndex += 1) {
+      const playerId = this.storage.playerRankings.byBounty[idIndex];
+      const player = this.storage.playerList.get(playerId);
+
+      if (
+        player.alivestatus.current === PLAYERS_ALIVE_STATUSES.ALIVE &&
+        excludeIds.indexOf(playerId) === -1
+      ) {
+        this.playerIds.push(playerId);
+      }
+    }
   }
 
   onEmitDelayedSpectateEvents(): void {
@@ -152,10 +181,19 @@ export default class GameSpectating extends System {
       viewport.subs.clear();
 
       /**
-       * Choose a random player to spectate
+       * Choose a player to spectate
        */
-      const playerId =
-        this.playerIds.length > 0 ? this.playerIds[getRandomInt(0, this.playerIds.length - 1)] : 0;
+      let playerId: PlayerId = 0;
+
+      if (
+        this.app.config.server.typeId !== GAME_TYPES.CTF &&
+        spectator.deaths.killerId > 0 &&
+        this.playerIds.indexOf(spectator.deaths.killerId) !== -1
+      ) {
+        playerId = spectator.deaths.killerId;
+      } else {
+        playerId = this.playerIds.length > 0 ? this.playerIds[0] : 0;
+      }
 
       spectator.spectate.current = playerId;
       this.subscribeToViewport(playerId, spectatorId);
