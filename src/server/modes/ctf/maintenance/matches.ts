@@ -18,11 +18,13 @@ import {
   PLAYERS_RESPAWN,
   RESPONSE_SCORE_UPDATE,
   TIMELINE_CLOCK_SECOND,
+  TIMELINE_GAME_MATCH_END,
   TIMELINE_GAME_MATCH_START,
 } from '@/events';
 import { System } from '@/server/system';
 import { has } from '@/support/objects';
 import { PlayerId, TeamId } from '@/types';
+import { msToHumanReadable } from '@/support/datetime';
 
 export default class GameMatches extends System {
   private timeout = 0;
@@ -180,25 +182,8 @@ export default class GameMatches extends System {
       });
 
       this.emit(BROADCAST_SERVER_CUSTOM);
-
-      const humanTimeParts = [];
-      const seconds = Math.floor((matchDuration / 1000) % 60);
-      const minutes = Math.floor((matchDuration / (1000 * 60)) % 60);
-      const hours = Math.floor((matchDuration / (1000 * 60 * 60)) % 24);
-
-      if (hours > 0) {
-        humanTimeParts.push(`${hours}h`);
-      }
-
-      if (minutes > 0) {
-        humanTimeParts.push(`${minutes}m`);
-      }
-
-      if (seconds > 0) {
-        humanTimeParts.push(`${seconds}s`);
-      }
-
-      this.emit(BROADCAST_CHAT_SERVER_PUBLIC, `Game time: ${humanTimeParts.join(' ')}.`);
+      this.emit(BROADCAST_CHAT_SERVER_PUBLIC, `Game time: ${msToHumanReadable(matchDuration)}.`);
+      this.emit(TIMELINE_GAME_MATCH_END);
     }
   }
 }

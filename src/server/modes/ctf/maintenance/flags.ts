@@ -314,8 +314,6 @@ export default class GameFlags extends System {
           : this.storage.ctfFlagBlueId
       );
 
-      this.emit(CTF_TEAM_CAPTURED_FLAG, player.team.current);
-
       const bounty =
         CTF_CAPTURE_BOUNTY.BASE + CTF_CAPTURE_BOUNTY.INCREMENT * (this.storage.playerList.size - 1);
 
@@ -349,6 +347,11 @@ export default class GameFlags extends System {
        * Flush flagspeed.
        */
       this.emit(BROADCAST_PLAYER_UPDATE, player.id.current);
+
+      /**
+       * Update match scores.
+       */
+      this.emit(CTF_TEAM_CAPTURED_FLAG, player.team.current);
 
       /**
        * Broadcast flag reset to base.

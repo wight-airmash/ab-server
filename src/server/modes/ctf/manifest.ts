@@ -10,6 +10,7 @@ import CTFGameChat from '@/server/modes/ctf/maintenance/chat';
 import GameFlags from '@/server/modes/ctf/maintenance/flags';
 import GameMatches from '@/server/modes/ctf/maintenance/matches';
 import GamePlayers from '@/server/modes/ctf/maintenance/players';
+import GameRankings from '@/server/modes/ctf/maintenance/rankings';
 import InfernosPeriodic from '@/server/modes/ctf/periodic/infernos';
 import ShieldsPeriodic from '@/server/modes/ctf/periodic/shields';
 import Elections from '@/server/modes/ctf/qbots/elections';
@@ -19,7 +20,7 @@ import FlagReturnedBroadcast from '@/server/modes/ctf/responses/broadcast/flag-r
 import FlagTakenBroadcast from '@/server/modes/ctf/responses/broadcast/flag-taken';
 import GameFlagBroadcast from '@/server/modes/ctf/responses/broadcast/game-flag';
 import ServerCustomBroadcast from '@/server/modes/ctf/responses/broadcast/server-custom';
-import ScoreDetailed from '@/server/modes/ctf/responses/score-detailed';
+import ScoreDetailedResponse from '@/server/modes/ctf/responses/score-detailed';
 
 export default class CTFGameManifest extends BaseGameManifest {
   constructor({ app }) {
@@ -40,7 +41,7 @@ export default class CTFGameManifest extends BaseGameManifest {
       SpawnCampingGuard,
 
       // Responses.
-      ScoreDetailed,
+      ScoreDetailedResponse,
 
       // Broadcast.
       FlagCapturedBroadcast,
@@ -58,6 +59,7 @@ export default class CTFGameManifest extends BaseGameManifest {
       GameFlags,
       GameMatches,
       GamePlayers,
+      GameRankings,
 
       // Q-bots
       Elections,
