@@ -19,6 +19,7 @@ import {
   UnmuteTime,
   UserId,
   Viewports,
+  RankingsStorage,
 } from '@/types';
 
 export class GameStorage {
@@ -244,6 +245,9 @@ export class GameStorage {
 
   public serverPlayerId: number = null;
 
+  /**
+   * TODO: group CTF specific storage items.
+   */
   public ctfFlagBlueId: number = null;
 
   public ctfFlagRedId: number = null;
@@ -252,4 +256,9 @@ export class GameStorage {
    * Public key from login server
    */
   public loginPublicKey: KeyObject = null;
+
+  public playerRankings: RankingsStorage = {
+    outdated: false,
+    byBounty: [],
+  };
 }

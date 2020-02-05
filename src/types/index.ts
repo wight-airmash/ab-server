@@ -200,3 +200,8 @@ export interface SpawnZone {
 export interface SpawnZonesTemplate {
   [key: number]: SpawnZone[];
 }
+
+export interface RankingsStorage {
+  outdated: boolean;
+  byBounty: PlayerId[];
+}
