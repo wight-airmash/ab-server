@@ -23,7 +23,6 @@ export default class ScoreBoardBroadcast extends System {
    * @param connectionId
    */
   onScoreBoard(connectionId: MainConnectionId = null): void {
-    const playersData = [];
     const players = [];
     const rankings = [];
     let recipients = null;
@@ -34,31 +33,24 @@ export default class ScoreBoardBroadcast extends System {
       recipients = [...this.storage.mainConnectionIdList];
     }
 
-    this.storage.playerList.forEach(player => {
-      playersData.push({
-        alive: player.alivestatus.current,
-        id: player.id.current,
-        score: player.score.current,
-        level: player.level.current,
-        x: player.position.lowX,
-        y: player.position.lowY,
-      });
-    });
+    for (let idIndex = 0; idIndex < this.storage.playerRankings.byBounty.length; idIndex += 1) {
+      const playerId = this.storage.playerRankings.byBounty[idIndex];
 
-    playersData.sort((p1, p2) => p2.score - p1.score);
+      if (this.storage.playerList.has(playerId)) {
+        const player = this.storage.playerList.get(playerId);
 
-    for (let i = 0; i < playersData.length; i += 1) {
-      players.push({
-        id: playersData[i].id,
-        score: playersData[i].score,
-        level: playersData[i].level,
-      } as ServerPackets.ScoreBoardData);
+        players.push({
+          id: playerId,
+          score: player.score.current,
+          level: player.level.current,
+        } as ServerPackets.ScoreBoardData);
 
-      rankings.push({
-        id: playersData[i].id,
-        x: playersData[i].alive === PLAYERS_ALIVE_STATUSES.ALIVE ? playersData[i].x : 0,
-        y: playersData[i].alive === PLAYERS_ALIVE_STATUSES.ALIVE ? playersData[i].y : 0,
-      } as ServerPackets.ScoreBoardRanking);
+        rankings.push({
+          id: playerId,
+          x: player.alivestatus.current === PLAYERS_ALIVE_STATUSES.ALIVE ? player.position.lowX : 0,
+          y: player.alivestatus.current === PLAYERS_ALIVE_STATUSES.ALIVE ? player.position.lowY : 0,
+        } as ServerPackets.ScoreBoardRanking);
+      }
     }
 
     this.emit(
