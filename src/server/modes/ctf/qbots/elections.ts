@@ -1,8 +1,8 @@
 import { CTF_TEAMS } from '@airbattle/protocol';
 import {
   CTF_AFK_TIME_TO_START_ELECTIONS_MS,
-  CTF_ELECTIONS_DATA_EXPIRE_SEC,
-  MS_PER_SEC,
+  CTF_LEADER_DATA_EXPIRE_INTERVAL_MS,
+  CTF_LEADER_DATA_EXPIRE_INTERVAL_SEC,
 } from '@/constants';
 import {
   CTF_REMOVE_PLAYER_FROM_LEADER,
@@ -47,7 +47,7 @@ export default class Elections extends System {
     const initiator = this.storage.playerList.get(initiatorId);
     const connectionId = this.storage.playerMainConnectionList.get(initiatorId);
     const now = Date.now();
-    const updateExpiredAt = now - CTF_ELECTIONS_DATA_EXPIRE_SEC * MS_PER_SEC;
+    const updateExpiredAt = now - CTF_LEADER_DATA_EXPIRE_INTERVAL_MS;
 
     if (
       (initiator.team.current === CTF_TEAMS.BLUE && this.leaders.isBlueElections === true) ||
@@ -69,7 +69,7 @@ export default class Elections extends System {
       this.emit(
         RESPONSE_COMMAND_REPLY,
         connectionId,
-        `Please use #status first. After bot response you will have ${CTF_ELECTIONS_DATA_EXPIRE_SEC} seconds to request /elections.`
+        `Please use #status first. After bot response you will have ${CTF_LEADER_DATA_EXPIRE_INTERVAL_SEC} seconds to request /elections.`
       );
 
       return;

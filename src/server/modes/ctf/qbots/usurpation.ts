@@ -1,5 +1,9 @@
 import { CTF_TEAMS } from '@airbattle/protocol';
-import { CTF_ELECTIONS_DATA_EXPIRE_SEC, MS_PER_SEC } from '@/constants';
+import {
+  CTF_LEADER_DATA_EXPIRE_INTERVAL_MS,
+  CTF_LEADER_DATA_EXPIRE_INTERVAL_SEC,
+  CTF_USURP_DEBOUNCE_INTERVAL_MS,
+} from '@/constants';
 import { BROADCAST_CHAT_TEAM, CTF_USURP_LEADER_POSITION, RESPONSE_COMMAND_REPLY } from '@/events';
 import { System } from '@/server/system';
 import { CTFLeadersStorage, PlayerId } from '@/types';
@@ -32,7 +36,21 @@ export default class Usurpation extends System {
     const usurper = this.storage.playerList.get(usurperId);
     const connectionId = this.storage.playerMainConnectionList.get(usurperId);
     const now = Date.now();
-    const updateExpiredAt = now - CTF_ELECTIONS_DATA_EXPIRE_SEC * MS_PER_SEC;
+    const updateExpiredAt = now - CTF_LEADER_DATA_EXPIRE_INTERVAL_MS;
+    const debounceExpiredAt = now - CTF_USURP_DEBOUNCE_INTERVAL_MS;
+
+    if (
+      (usurper.team.current === CTF_TEAMS.BLUE && this.latestBlueUsurpAt > debounceExpiredAt) ||
+      (usurper.team.current === CTF_TEAMS.RED && this.latestRedUsurpAt > debounceExpiredAt)
+    ) {
+      this.emit(
+        RESPONSE_COMMAND_REPLY,
+        connectionId,
+        'Too frequent use of /usurp, repeat the request later.'
+      );
+
+      return;
+    }
 
     if (
       (usurper.team.current === CTF_TEAMS.BLUE && this.leaders.blueUpdatedAt < updateExpiredAt) ||
@@ -41,7 +59,7 @@ export default class Usurpation extends System {
       this.emit(
         RESPONSE_COMMAND_REPLY,
         connectionId,
-        `Please use #status first. After bot response you will have ${CTF_ELECTIONS_DATA_EXPIRE_SEC} seconds to request /usurp.`
+        `Please use #status first. After bot response you will have ${CTF_LEADER_DATA_EXPIRE_INTERVAL_SEC} seconds to request /usurp.`
       );
 
       return;
@@ -61,6 +79,7 @@ export default class Usurpation extends System {
       const leader = this.storage.playerList.get(this.leaders.blueId);
 
       if (usurper.score.current > leader.score.current) {
+        this.latestBlueUsurpAt = now;
         this.emit(BROADCAST_CHAT_TEAM, this.leaders.blueId, `#leader ${usurper.name.current}`);
       } else {
         this.emit(RESPONSE_COMMAND_REPLY, connectionId, "Your score isn't high enough.");
@@ -79,6 +98,7 @@ export default class Usurpation extends System {
       const leader = this.storage.playerList.get(this.leaders.redId);
 
       if (usurper.score.current > leader.score.current) {
+        this.latestRedUsurpAt = now;
         this.emit(BROADCAST_CHAT_TEAM, this.leaders.redId, `#leader ${usurper.name.current}`);
       } else {
         this.emit(RESPONSE_COMMAND_REPLY, connectionId, "Your score isn't high enough.");
