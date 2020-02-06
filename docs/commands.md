@@ -74,6 +74,14 @@ Switch CTF team.
 
 CTF match info.
 
+### /elections
+
+Run the leader elections if the current leader is AFK for 2 minutes in CTF. Works only with Q-bots.
+
+### /usurp
+
+Take over the leader position in CTF. You must have higher score than the current leader. Works only with Q-bots.
+
 ### /server
 
 Get server version and the result of the last performance check.
