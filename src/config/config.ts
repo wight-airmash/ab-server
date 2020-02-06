@@ -13,6 +13,7 @@ import {
   CONNECTIONS_DEFAULT_MAX_PLAYERS_PER_IP,
   CONNECTIONS_FLOODING_AUTOBAN,
   CONNECTIONS_INVALID_PROTOCOL_AUTOKICK,
+  CTF_QBOTS_FEATURES,
   LIMITS_ANY,
   LIMITS_CHAT,
   LIMITS_CHAT_DECREASE_WEIGHT,
@@ -241,6 +242,11 @@ export interface GameServerConfigInterface {
   };
 
   /**
+   * Enable special CTF Q-bots features.
+   */
+  ctfQBotsFeatures: boolean;
+
+  /**
    * Server version.
    */
   version: string;
@@ -446,6 +452,8 @@ const config: GameServerConfigInterface = {
       CONNECTIONS_INVALID_PROTOCOL_AUTOKICK
     ),
   },
+
+  ctfQBotsFeatures: boolValue(process.env.CTF_QBOTS_FEATURES, CTF_QBOTS_FEATURES),
 
   version,
 };

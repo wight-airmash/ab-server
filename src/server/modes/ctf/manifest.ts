@@ -36,10 +36,8 @@ export default class CTFGameManifest extends BaseGameManifest {
     this.systems = [
       // Commands.
       DropCommandHandler,
-      ElectionsCommandHandler,
       MatchCommandHandler,
       SwitchCommandHandler,
-      UsurpCommandHandler,
 
       // Guards.
       SpawnCampingGuard,
@@ -64,13 +62,21 @@ export default class CTFGameManifest extends BaseGameManifest {
       GameMatches,
       GamePlayers,
       GameRankings,
-
-      // Q-bots
-      Elections,
-      Leaders,
-      PhantomPlayerKick,
-      Usurpation,
     ];
+
+    if (this.app.config.ctfQBotsFeatures === true) {
+      this.systems = [
+        // Commands.
+        ElectionsCommandHandler,
+        UsurpCommandHandler,
+
+        // Q-bots.
+        Elections,
+        Leaders,
+        PhantomPlayerKick,
+        Usurpation,
+      ];
+    }
 
     this.startSystems();
 

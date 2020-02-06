@@ -50,6 +50,12 @@ Path to the certificates directory. Relative (to `app.js` [root](#app-root)) or 
 
 Must contain `privkey.pem` and `fullchain.pem` files (if `ENDPOINTS_TLS` is `true`).
 
+### CTF_QBOTS_FEATURES
+
+Default: `true`
+
+Turn on/off features like [/usurp](./commands#usurp) or [/elections](./commands#elections) applicable only to Q-bots in CTF. Affects only CTF mode.
+
 ### ENDPOINTS_TLS
 
 Default: `false`
