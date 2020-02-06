@@ -62,6 +62,7 @@ import PlayerBanResponse from '@/server/modes/base/responses/ban';
 import ChatPublicBroadcast from '@/server/modes/base/responses/broadcast/chat-public';
 import ChatSayBroadcast from '@/server/modes/base/responses/broadcast/chat-say';
 import ChatServerPublicBroadcast from '@/server/modes/base/responses/broadcast/chat-server-public';
+import ChatServerTeamBroadcast from '@/server/modes/base/responses/broadcast/chat-server-team';
 import ChatServerWhisperBroadcast from '@/server/modes/base/responses/broadcast/chat-server-whisper';
 import ChatTeamBroadcast from '@/server/modes/base/responses/broadcast/chat-team';
 import ChatWhisperBroadcast from '@/server/modes/base/responses/broadcast/chat-whisper';
@@ -182,33 +183,34 @@ export default abstract class BaseGameManifest extends GameManifest {
       AlreadyLoggedInResponse,
 
       // Broadcast.
-      PlayerNewBroadcast,
       ChatPublicBroadcast,
+      ChatSayBroadcast,
       ChatServerPublicBroadcast,
+      ChatServerTeamBroadcast,
       ChatServerWhisperBroadcast,
       ChatTeamBroadcast,
       ChatWhisperBroadcast,
-      ChatSayBroadcast,
-      PlayerFlagBroadcast,
-      PlayerUpdateBroadcast,
       EventBoostBroadcast,
-      PlayerLeaveBroadcast,
-      PlayerKillBroadcast,
-      PlayerRespawnBroadcast,
-      PlayerTypeBroadcast,
-      EventStealthBroadcast,
-      ScoreBoardBroadcast,
       EventBounceBroadcast,
+      EventRepelBroadcast,
+      EventStealthBroadcast,
       MobDespawnBroadcast,
       MobDespawnCoordsBroadcast,
-      MobUpdateStationaryBroadcast,
       MobUpdateBroadcast,
+      MobUpdateStationaryBroadcast,
       PlayerFireBroadcast,
+      PlayerFlagBroadcast,
       PlayerHitBroadcast,
-      PlayerReteamBroadcast,
-      EventRepelBroadcast,
-      ServerMessageBroadcast,
+      PlayerKillBroadcast,
+      PlayerLeaveBroadcast,
       PlayerLevelBroadcast,
+      PlayerNewBroadcast,
+      PlayerRespawnBroadcast,
+      PlayerReteamBroadcast,
+      PlayerTypeBroadcast,
+      PlayerUpdateBroadcast,
+      ScoreBoardBroadcast,
+      ServerMessageBroadcast,
 
       // Timeouts.
       AckTimeoutHandler,
