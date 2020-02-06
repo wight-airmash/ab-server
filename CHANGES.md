@@ -3,26 +3,28 @@
 Features:
 
 - Battle Royale mode. Set SERVER_TYPE to `BTR` to run this mode.
-- Custom limits for packet flooding and spam (#72). Check [PACKETS_LIMIT_ANY](./docs/env-variables.md#packets_limit_any), [PACKETS_LIMIT_CHAT](./docs/env-variables.md#packets_limit_chat), [PACKETS_LIMIT_CHAT_LEAK](./docs/env-variables.md#packets_limit_chat_leak) and [PACKETS_LIMIT_KEY](./docs/env-variables.md#packets_limit_key).
-- CTF: `/elections` command. It allows to run the leader elections if the current leader is AFK for 2 minutes. See [commands.md](./docs/commands.md).
-- `/profile` command. See [commands.md](./docs/commands.md).
+- CTF: `/elections` command. It allows to run the leader elections if the current leader is AFK for 2 minutes. See [commands.md](./docs/commands.md#elections).
+- CTF: `/usurp` command. It allows to take over the leader position if the current leader has lower score than the player running the command. One command run per minute per team. See [commands.md](./docs/commands.md#usurp).
+- `/profile` command. See [commands.md](./docs/commands.md#profile).
 - "Kick" feature in moderator panel.
-- Superuser `/server welcome` commands group to change welcome messages without server restart. See [commands.md](./docs/commands.md).
-- Superuser `/server ban list` and `/server ban flush` commands. See [commands.md](./docs/commands.md).
-- Adjustable "severity" for non-compliance with protocol (#73). Check [INVALID_PROTOCOL_AUTOKICK_ACK](./docs/env-variables.md#invalid_protocol_autokick_ack), [INVALID_PROTOCOL_AUTOKICK_BACKUP](./docs/env-variables.md#invalid_protocol_autokick_backup) and [INVALID_PROTOCOL_AUTOKICK_PONG](./docs/env-variables.md#invalid_protocol_autokick_pong).
+- Superuser `/server welcome` commands group to change welcome messages without server restart. See [commands.md](./docs/commands.md#server-welcome).
+- Superuser `/server ban list` and `/server ban flush` commands. See [commands.md](./docs/commands.md#server-ban-list).
 
 Improvements:
 
 - CTF: automatically switch AFK players at the spawn zone into spectate mode (#75).
 - After switching into spectate mode players auto watch: top player or last killer in FFA and BTR; top player or flag carrier in CTF.
 - Filter CTF timer alerts (#54).
-- Sending `BROADCAST_CHAT_SERVER_WHISPER` is now safe without any delays after player connect (frontend anti-spam issue resolved).
+- Custom limits for packet flooding and spam (#72). Check [PACKETS_LIMIT_ANY](./docs/env-variables.md#packets_limit_any), [PACKETS_LIMIT_CHAT](./docs/env-variables.md#packets_limit_chat), [PACKETS_LIMIT_CHAT_LEAK](./docs/env-variables.md#packets_limit_chat_leak) and [PACKETS_LIMIT_KEY](./docs/env-variables.md#packets_limit_key).
+- Adjustable "severity" for non-compliance with protocol (#73). Check [INVALID_PROTOCOL_AUTOKICK_ACK](./docs/env-variables.md#invalid_protocol_autokick_ack), [INVALID_PROTOCOL_AUTOKICK_BACKUP](./docs/env-variables.md#invalid_protocol_autokick_backup) and [INVALID_PROTOCOL_AUTOKICK_PONG](./docs/env-variables.md#invalid_protocol_autokick_pong).
 - Players are sorted by type (human/bot) and by name in moderator panel.
+- Sending `BROADCAST_CHAT_SERVER_WHISPER` is now safe without any delays after player connect (frontend anti-spam issue resolved).
 
 Bug fixes:
 
 - Spectators or dead players are not allowed to use `/s` (#51).
 - "Not enough upgrades" is shown for already fully upgraded skill (#71).
+- CTF: the bounty in the match results pop-up is always 1000 bug (#78).
 - Prevent the access to undefined connection during commands run.
 - Prevent the access to closed connection through side storages.
 
