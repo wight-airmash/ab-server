@@ -2,6 +2,7 @@ import { ServerPackets, SERVER_CUSTOM_TYPES, SERVER_PACKETS } from '@airbattle/p
 import { CTF_WIN_ALERT_DURATION_SEC } from '@/constants';
 import { BROADCAST_SERVER_CUSTOM, CONNECTIONS_SEND_PACKET } from '@/events';
 import { System } from '@/server/system';
+import { PlayerId, MainConnectionId } from '@/types';
 
 export default class ServerCustomBroadcast extends System {
   constructor({ app }) {
@@ -16,7 +17,23 @@ export default class ServerCustomBroadcast extends System {
    * End game alert.
    * Broadcast to all players.
    */
-  onServerCustom(): void {
+  onServerCustom(playerId: PlayerId = null, bounty = this.storage.gameEntity.match.bounty): void {
+    let recipients: MainConnectionId | MainConnectionId[] = null;
+
+    if (playerId !== null) {
+      if (this.storage.playerMainConnectionList.has(playerId)) {
+        recipients = this.storage.playerMainConnectionList.get(playerId);
+      } else {
+        return;
+      }
+    } else {
+      recipients = [...this.storage.mainConnectionIdList];
+    }
+
+    if (recipients === null) {
+      return;
+    }
+
     this.emit(
       CONNECTIONS_SEND_PACKET,
       {
@@ -24,11 +41,11 @@ export default class ServerCustomBroadcast extends System {
         type: SERVER_CUSTOM_TYPES.CTF,
         data: JSON.stringify({
           w: this.storage.gameEntity.match.winnerTeam,
-          b: this.storage.gameEntity.match.bounty,
+          b: bounty,
           t: CTF_WIN_ALERT_DURATION_SEC,
         } as ServerPackets.ServerCustomCTFData),
       } as ServerPackets.ServerCustom,
-      [...this.storage.mainConnectionIdList]
+      recipients
     );
   }
 }

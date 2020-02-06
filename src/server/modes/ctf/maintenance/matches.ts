@@ -179,9 +179,14 @@ export default class GameMatches extends System {
 
           this.emit(RESPONSE_SCORE_UPDATE, player.id.current);
         }
+
+        this.emit(
+          BROADCAST_SERVER_CUSTOM,
+          player.id.current,
+          player.team.current === winnerTeamId ? shareInScore : 0
+        );
       });
 
-      this.emit(BROADCAST_SERVER_CUSTOM);
       this.emit(BROADCAST_CHAT_SERVER_PUBLIC, `Game time: ${msToHumanReadable(matchDuration)}.`);
       this.emit(TIMELINE_GAME_MATCH_END);
     }
