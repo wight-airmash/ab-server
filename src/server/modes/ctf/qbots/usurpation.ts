@@ -4,7 +4,12 @@ import {
   CTF_LEADER_DATA_EXPIRE_INTERVAL_SEC,
   CTF_USURP_DEBOUNCE_INTERVAL_MS,
 } from '@/constants';
-import { BROADCAST_CHAT_TEAM, CTF_USURP_LEADER_POSITION, RESPONSE_COMMAND_REPLY } from '@/events';
+import {
+  BROADCAST_CHAT_SERVER_TEAM,
+  BROADCAST_CHAT_TEAM,
+  CTF_USURP_LEADER_POSITION,
+  RESPONSE_COMMAND_REPLY,
+} from '@/events';
 import { System } from '@/server/system';
 import { CTFLeadersStorage, PlayerId } from '@/types';
 
@@ -80,6 +85,11 @@ export default class Usurpation extends System {
 
       if (usurper.score.current > leader.score.current) {
         this.latestBlueUsurpAt = now;
+        this.emit(
+          BROADCAST_CHAT_SERVER_TEAM,
+          CTF_TEAMS.BLUE,
+          `${usurper.name.current} usurped the leader position.`
+        );
         this.emit(BROADCAST_CHAT_TEAM, this.leaders.blueId, `#leader ${usurper.name.current}`);
       } else {
         this.emit(RESPONSE_COMMAND_REPLY, connectionId, "Your score isn't high enough.");
@@ -99,6 +109,11 @@ export default class Usurpation extends System {
 
       if (usurper.score.current > leader.score.current) {
         this.latestRedUsurpAt = now;
+        this.emit(
+          BROADCAST_CHAT_SERVER_TEAM,
+          CTF_TEAMS.RED,
+          `${usurper.name.current} usurped the leader position.`
+        );
         this.emit(BROADCAST_CHAT_TEAM, this.leaders.redId, `#leader ${usurper.name.current}`);
       } else {
         this.emit(RESPONSE_COMMAND_REPLY, connectionId, "Your score isn't high enough.");
