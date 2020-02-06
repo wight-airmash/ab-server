@@ -14,6 +14,7 @@ import {
   COMMAND_SU,
   COMMAND_SWITCH,
   COMMAND_UPGRADE,
+  COMMAND_USURP,
   ROUTE_COMMAND,
 } from '@/events';
 import { System } from '@/server/system';
@@ -50,6 +51,7 @@ export default class CommandMessageHandler extends System {
       // CTF only.
       elections: COMMAND_ELECTIONS,
       match: COMMAND_MATCH,
+      usurp: COMMAND_USURP,
       switch: COMMAND_SWITCH,
 
       // Temporarily added debug commands. These commands will be removed in the future.
