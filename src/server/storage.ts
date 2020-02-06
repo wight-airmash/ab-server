@@ -4,6 +4,7 @@ import Entity from '@/server/entity';
 import {
   BackupConnectionId,
   ConnectionId,
+  CTFStorage,
   HitboxCacheItem,
   IPv4,
   MainConnectionId,
@@ -14,12 +15,12 @@ import {
   PlayerNameHistoryItem,
   PlayerRecoverItem,
   PowerupSpawnChunk,
+  RankingsStorage,
   SpawnZones,
   TeamId,
   UnmuteTime,
   UserId,
   Viewports,
-  RankingsStorage,
 } from '@/types';
 
 export class GameStorage {
@@ -246,11 +247,28 @@ export class GameStorage {
   public serverPlayerId: number = null;
 
   /**
-   * TODO: group CTF specific storage items.
+   * TODO: move in CTF specific storage.
    */
   public ctfFlagBlueId: number = null;
 
   public ctfFlagRedId: number = null;
+
+  public ctf: CTFStorage = {
+    flags: {
+      blueId: null,
+      redId: null,
+    },
+
+    leaders: {
+      blueId: null,
+      blueUpdatedAt: 0,
+      isBlueElections: false,
+
+      redId: null,
+      redUpdatedAt: 0,
+      isRedElections: false,
+    },
+  };
 
   /**
    * Public key from login server

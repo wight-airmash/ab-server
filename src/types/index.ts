@@ -205,3 +205,46 @@ export interface RankingsStorage {
   outdated: boolean;
   byBounty: PlayerId[];
 }
+
+export interface CTFLeadersStorage {
+  /**
+   * Blue leader ID.
+   */
+  blueId: PlayerId;
+
+  /**
+   * Blue leader info updated at.
+   * ms timestamp.
+   */
+  blueUpdatedAt: number;
+
+  /**
+   * Is blue leader elections running right now.
+   */
+  isBlueElections: boolean;
+
+  /**
+   * Red leader ID.
+   */
+  redId: PlayerId;
+
+  /**
+   * Blue leader info updated at.
+   * ms timestamp.
+   */
+  redUpdatedAt: number;
+
+  /**
+   * Is red leader elections running right now.
+   */
+  isRedElections: boolean;
+}
+
+export interface CTFStorage {
+  flags: {
+    blueId: MobId;
+    redId: MobId;
+  };
+
+  leaders: CTFLeadersStorage;
+}
