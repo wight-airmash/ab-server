@@ -1,14 +1,15 @@
 import { CTF_TEAMS } from '@airbattle/protocol';
+import { CTF_PLAYER_SWITCH_TIMEOUT_MS, MS_PER_SEC, PLAYERS_ALIVE_STATUSES } from '@/constants';
 import {
+  BROADCAST_CHAT_SERVER_PUBLIC,
+  BROADCAST_PLAYER_RETEAM,
   COMMAND_SWITCH,
   CTF_PLAYER_DROP_FLAG,
-  RESPONSE_COMMAND_REPLY,
-  BROADCAST_PLAYER_RETEAM,
-  BROADCAST_CHAT_SERVER_PUBLIC,
+  CTF_PLAYER_SWITCHED,
   PLAYERS_UPDATE_TEAM,
+  RESPONSE_COMMAND_REPLY,
 } from '@/events';
 import { System } from '@/server/system';
-import { PLAYERS_ALIVE_STATUSES, CTF_PLAYER_SWITCH_TIMEOUT_MS, MS_PER_SEC } from '@/constants';
 import { ConnectionId } from '@/types';
 
 export default class SwitchCommandHandler extends System {
@@ -30,7 +31,8 @@ export default class SwitchCommandHandler extends System {
       return;
     }
 
-    const player = this.storage.playerList.get(connection.meta.playerId);
+    const { playerId } = connection.meta;
+    const player = this.storage.playerList.get(playerId);
 
     if (
       player.alivestatus.current === PLAYERS_ALIVE_STATUSES.SPECTATE &&
@@ -59,10 +61,11 @@ export default class SwitchCommandHandler extends System {
       }
 
       player.times.lastSwitch = now;
-      this.emit(PLAYERS_UPDATE_TEAM, connection.meta.playerId, teamId);
+      this.emit(PLAYERS_UPDATE_TEAM, playerId, teamId);
 
-      this.emit(BROADCAST_PLAYER_RETEAM, [connection.meta.playerId]);
-      this.emit(CTF_PLAYER_DROP_FLAG, connection.meta.playerId);
+      this.emit(BROADCAST_PLAYER_RETEAM, [playerId]);
+      this.emit(CTF_PLAYER_DROP_FLAG, playerId);
+      this.emit(CTF_PLAYER_SWITCHED, playerId);
       this.emit(BROADCAST_CHAT_SERVER_PUBLIC, `${player.name.current} switched to ${teamText}.`);
 
       this.log.debug('SWITCHING, blue connections.', [

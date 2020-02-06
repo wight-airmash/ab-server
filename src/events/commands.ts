@@ -25,3 +25,5 @@ export const COMMAND_SU = 'COMMAND_SU';
 export const COMMAND_SWITCH = 'COMMAND_SWITCH';
 
 export const COMMAND_UPGRADE = 'COMMAND_UPGRADE';
+
+export const COMMAND_USURP = 'COMMAND_USURP';

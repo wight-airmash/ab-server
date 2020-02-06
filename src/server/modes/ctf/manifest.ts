@@ -5,6 +5,7 @@ import DropCommandHandler from '@/server/modes/ctf/commands/drop';
 import ElectionsCommandHandler from '@/server/modes/ctf/commands/elections';
 import MatchCommandHandler from '@/server/modes/ctf/commands/match';
 import SwitchCommandHandler from '@/server/modes/ctf/commands/switch';
+import UsurpCommandHandler from '@/server/modes/ctf/commands/usurp';
 import SpawnCampingGuard from '@/server/modes/ctf/guards/spawn-camping';
 import CTFGameChat from '@/server/modes/ctf/maintenance/chat';
 import GameFlags from '@/server/modes/ctf/maintenance/flags';
@@ -14,7 +15,9 @@ import GameRankings from '@/server/modes/ctf/maintenance/rankings';
 import InfernosPeriodic from '@/server/modes/ctf/periodic/infernos';
 import ShieldsPeriodic from '@/server/modes/ctf/periodic/shields';
 import Elections from '@/server/modes/ctf/qbots/elections';
+import Leaders from '@/server/modes/ctf/qbots/leaders';
 import PhantomPlayerKick from '@/server/modes/ctf/qbots/phantom-kick';
+import Usurpation from '@/server/modes/ctf/qbots/usurpation';
 import FlagCapturedBroadcast from '@/server/modes/ctf/responses/broadcast/flag-captured';
 import FlagReturnedBroadcast from '@/server/modes/ctf/responses/broadcast/flag-returned';
 import FlagTakenBroadcast from '@/server/modes/ctf/responses/broadcast/flag-taken';
@@ -36,6 +39,7 @@ export default class CTFGameManifest extends BaseGameManifest {
       ElectionsCommandHandler,
       MatchCommandHandler,
       SwitchCommandHandler,
+      UsurpCommandHandler,
 
       // Guards.
       SpawnCampingGuard,
@@ -63,7 +67,9 @@ export default class CTFGameManifest extends BaseGameManifest {
 
       // Q-bots
       Elections,
+      Leaders,
       PhantomPlayerKick,
+      Usurpation,
     ];
 
     this.startSystems();
