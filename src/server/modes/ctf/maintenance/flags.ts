@@ -50,7 +50,7 @@ export default class GameFlags extends System {
       [TIMELINE_CLOCK_MINUTE]: this.checkFlagsState,
       [CTF_PLAYER_TOUCHED_FLAG]: this.onPlayerTouchedFlag,
       [CTF_PLAYER_CROSSED_FLAGZONE]: this.onPlayerCrossedDropZone,
-      [CTF_PLAYER_DROP_FLAG]: this.onPlayerLostFlag,
+      [CTF_PLAYER_DROP_FLAG]: this.onPlayerDropFlag,
       [CTF_CARRIER_KILLED]: this.onPlayerLostFlag,
       [CTF_RESET_FLAGS]: this.onResetFlags,
       [PLAYERS_BEFORE_REMOVE]: this.onPlayerDelete,
@@ -263,15 +263,28 @@ export default class GameFlags extends System {
           } flag.`
         );
 
+        player.captures.attempts += 1;
+
         if (flag.flagstate.returned === false) {
           player.captures.saves += 1;
-        }
 
-        player.captures.attempts += 1;
+          if (flag.flagstate.dropped === true) {
+            player.captures.savesAfterDrop += 1;
+          } else {
+            player.captures.savesAfterDeath += 1;
+          }
+        } else {
+          player.captures.attemptsFromBase += 1;
+
+          if (player.shield.current === true) {
+            player.captures.attemptsFromBaseWithShield += 1;
+          }
+        }
 
         flag.owner.current = player.id.current;
         player.planestate.flagspeed = true;
         flag.flagstate.returned = false;
+        flag.flagstate.dropped = false;
         flag.flagstate.captured = true;
 
         flag.hitbox.x = MAP_SIZE.WIDTH + 1000;
@@ -384,6 +397,7 @@ export default class GameFlags extends System {
     flag.owner.current = 0;
     flag.owner.lastDrop = Date.now();
     flag.flagstate.returned = false;
+    flag.flagstate.dropped = false;
     flag.flagstate.captured = false;
 
     /**
@@ -403,12 +417,17 @@ export default class GameFlags extends System {
     this.log.debug(`Player id${player.id.current} disconnected with a flag.`);
   }
 
+  onPlayerDropFlag(playerId: PlayerId): void {
+    this.onPlayerLostFlag(playerId, true);
+  }
+
   /**
    * Player /drop the flag, was killed or disconnected.
    *
    * @param playerId
+   * @param isDropped
    */
-  onPlayerLostFlag(playerId: PlayerId): void {
+  onPlayerLostFlag(playerId: PlayerId, isDropped = false): void {
     const player = this.storage.playerList.get(playerId);
     let flag = null;
 
@@ -422,6 +441,10 @@ export default class GameFlags extends System {
           ? this.storage.ctfFlagRedId
           : this.storage.ctfFlagBlueId
       );
+
+      if (isDropped === true) {
+        player.stats.flagDrops += 1;
+      }
 
       player.planestate.flagspeed = false;
       flag.position.x = player.position.x;
@@ -448,6 +471,7 @@ export default class GameFlags extends System {
     flag.owner.lastDrop = Date.now();
     flag.flagstate.returned = false;
     flag.flagstate.captured = false;
+    flag.flagstate.dropped = isDropped;
 
     flag.hitbox.x = ~~flag.position.x + MAP_SIZE.HALF_WIDTH + this.storage.flagHitboxesCache.x;
     flag.hitbox.y = ~~flag.position.y + MAP_SIZE.HALF_HEIGHT + this.storage.flagHitboxesCache.y;
@@ -508,6 +532,7 @@ export default class GameFlags extends System {
     flag.owner.current = 0;
     flag.flagstate.returned = true;
     flag.flagstate.captured = false;
+    flag.flagstate.dropped = false;
     flag.flagstate.lastReturn = Date.now();
 
     flag.hitbox.x = ~~flag.position.x + MAP_SIZE.HALF_WIDTH + this.storage.flagHitboxesCache.x;
@@ -548,6 +573,7 @@ export default class GameFlags extends System {
     flag.owner.current = 0;
     flag.flagstate.returned = true;
     flag.flagstate.captured = false;
+    flag.flagstate.dropped = false;
     flag.flagstate.lastReturn = Date.now();
 
     flag.hitbox.x = ~~flag.position.x + MAP_SIZE.HALF_WIDTH + this.storage.flagHitboxesCache.x;

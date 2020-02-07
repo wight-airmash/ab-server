@@ -5,6 +5,8 @@ export default class FlagState extends Component {
 
   public returned = true;
 
+  public dropped = false;
+
   public lastReturn = 0;
 
   constructor() {

@@ -1,5 +1,5 @@
 import { ClientPackets, KEY_CODES, KEY_NAMES } from '@airbattle/protocol';
-import { PLAYERS_ALIVE_STATUSES, SHIPS_TYPES, LIMITS_KEY_WEIGHT } from '@/constants';
+import { LIMITS_KEY_WEIGHT, PLAYERS_ALIVE_STATUSES, SHIPS_TYPES } from '@/constants';
 import { CONNECTIONS_KICK, ROUTE_KEY } from '@/events';
 import { System } from '@/server/system';
 import { ConnectionId } from '@/types';
@@ -67,6 +67,11 @@ export default class KeyMessageHandler extends System {
     ) {
       player.keystate[KEY_NAMES[msg.key]] = msg.state;
       player.keystate.seq = msg.seq;
+
+      if (msg.state === true) {
+        player.keystate.presses.total += 1;
+        player.keystate.presses[KEY_NAMES[msg.key]] += 1;
+      }
 
       if (
         msg.key !== KEY_CODES.SPECIAL ||

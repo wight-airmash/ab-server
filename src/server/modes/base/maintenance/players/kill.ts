@@ -43,6 +43,8 @@ export default class GamePlayersKill extends System {
    * @param victimId
    */
   onKillPlayer(victimId: PlayerId, projectileId: MobId): void {
+    const isVictimBot = this.storage.botIdList.has(victimId);
+    let isKillerBot = false;
     let killer: Entity = null;
     let projectileOwner: PlayerId = 0;
     const victim = this.storage.playerList.get(victimId);
@@ -50,6 +52,7 @@ export default class GamePlayersKill extends System {
     if (projectileId !== 0) {
       const projectile = this.storage.mobList.get(projectileId);
 
+      isKillerBot = this.storage.botIdList.has(killer.id.current);
       projectileOwner = projectile.owner.current;
 
       this.log.debug(`Player id${victimId} was killed by player id${projectile.owner.current}.`);
@@ -63,6 +66,19 @@ export default class GamePlayersKill extends System {
 
         killer.kills.current += 1;
         killer.kills.currentmatch += 1;
+
+        if (projectile.inferno.current === true) {
+          killer.kills.totalByInferno += 1;
+        }
+
+        if (isVictimBot === true) {
+          killer.kills.bots += 1;
+
+          if (projectile.inferno.current === true) {
+            killer.kills.botsByInferno += 1;
+          }
+        }
+
         const earnedScore = Math.round(victim.score.current * 0.2) + 25;
 
         killer.score.current += earnedScore;
@@ -83,6 +99,11 @@ export default class GamePlayersKill extends System {
      */
     victim.deaths.killerId = projectileOwner;
     victim.deaths.current += 1;
+
+    if (killer !== null && isKillerBot === true) {
+      victim.deaths.byBots += 1;
+    }
+
     victim.score.current = Math.round(victim.score.current * 0.8) - 5;
 
     if (has(victim, 'user')) {
@@ -177,6 +198,14 @@ export default class GamePlayersKill extends System {
 
       if (killer !== null) {
         killer.kills.carriers += 1;
+
+        if (isKillerBot === true) {
+          victim.deaths.withFlagByBots += 1;
+        }
+
+        if (isVictimBot === true) {
+          killer.kills.carriersBots += 1;
+        }
       }
     }
 

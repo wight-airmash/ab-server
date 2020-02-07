@@ -49,6 +49,7 @@ import Delayed from '@/server/components/delayed';
 import Distance from '@/server/components/distance';
 import HitCircles from '@/server/components/hit-circles';
 import Hitbox from '@/server/components/hitbox';
+import Inferno from '@/server/components/inferno-powerup';
 import Id from '@/server/components/mob-id';
 import MobType from '@/server/components/mob-type';
 import Owner from '@/server/components/owner';
@@ -660,6 +661,8 @@ export default class GamePlayersUpdate extends System {
 
           player.times.lastFire = now;
           player.energy.current -= fireEnergy;
+          player.stats.fires += 1;
+          player.stats.fireProjectiles += FIRE_TEMPLATE.length;
 
           /**
            * Angle between player velocity vector and player rotation vector.
@@ -727,7 +730,8 @@ export default class GamePlayersUpdate extends System {
               new Hitbox(),
               new HitCircles([...PROJECTILES_COLLISIONS[PROJECTILE_SPECS.shape]]),
               new Damage(PROJECTILE_SPECS.damage),
-              new Repel()
+              new Repel(),
+              new Inferno(player.inferno.current)
             );
 
             projectile.velocity.length =

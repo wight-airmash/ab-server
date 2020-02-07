@@ -5,7 +5,15 @@ export default class Captures extends Component {
 
   public saves = 0;
 
+  public savesAfterDrop = 0;
+
+  public savesAfterDeath = 0;
+
   public attempts = 0;
+
+  public attemptsFromBase = 0;
+
+  public attemptsFromBaseWithShield = 0;
 
   constructor(captures = 0) {
     super();

@@ -56,6 +56,7 @@ export default class GamePlayersHit extends System {
       }
 
       victim.times.lastHit = now;
+      victim.damage.hitsReceived += 1;
 
       const projectile = this.storage.mobList.get(projectileId);
       const scalar =
@@ -116,10 +117,21 @@ export default class GamePlayersHit extends System {
        */
       if (this.helpers.isPlayerConnected(projectile.owner.current)) {
         const owner = this.storage.playerList.get(projectile.owner.current);
-
-        owner.damage.current += Math.round(
+        const trackingDamage = Math.round(
           PROJECTILES_SPECS[projectile.mobtype.current].damage * 100
         );
+
+        owner.damage.current += trackingDamage;
+        owner.damage.hits += 1;
+
+        if (this.storage.botIdList.has(victimId) === true) {
+          owner.damage.bots += trackingDamage;
+          owner.damage.hitsToBots += 1;
+        }
+
+        if (this.storage.botIdList.has(projectile.owner.current) === true) {
+          victim.damage.hitsByBots += 1;
+        }
       }
     }
 

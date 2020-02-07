@@ -72,6 +72,7 @@ import Rotation from '@/server/components/rotation';
 import Score from '@/server/components/score';
 import Shield from '@/server/components/shield-powerup';
 import Spectate from '@/server/components/spectate';
+import Stats from '@/server/components/stats';
 import Su from '@/server/components/su';
 import Team from '@/server/components/team';
 import Times from '@/server/components/times';
@@ -198,7 +199,8 @@ export default class GamePlayersConnect extends System {
       new Spectate(),
       new Su(),
       new Ip(mainConnection.meta.ip),
-      new Repel()
+      new Repel(),
+      new Stats()
     );
 
     player.attach(new Team(player.id.current));

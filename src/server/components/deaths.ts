@@ -6,6 +6,10 @@ export default class Deaths extends Component {
 
   public withFlag = 0;
 
+  public byBots = 0;
+
+  public withFlagByBots = 0;
+
   /**
    * ID of the latest killer.
    * 0 - BTR firewall.
