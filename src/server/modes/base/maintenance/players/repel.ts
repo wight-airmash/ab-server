@@ -84,7 +84,7 @@ export default class GamePlayersRepel extends System {
   }
 
   onDeleteRepel(player: Entity): void {
-    if (this.storage.repelList.has(player.id.current) !== true) {
+    if (this.storage.repelList.has(player.id.current) === false) {
       return;
     }
 

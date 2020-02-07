@@ -7,6 +7,7 @@ import {
   PLAYERS_EMIT_CHANNEL_DISCONNECT,
   PLAYERS_REMOVE,
   PLAYERS_REMOVED,
+  PLAYERS_REPEL_DELETE,
   VIEWPORTS_REMOVE,
 } from '@/events';
 import { CHANNEL_DISCONNECT_PLAYER } from '@/server/channels';
@@ -101,8 +102,9 @@ export default class GamePlayersDisconnect extends System {
       /**
        * Clear player storage.
        */
+      this.emit(PLAYERS_REPEL_DELETE, player);
+
       this.storage.playerInSpecModeList.delete(playerId);
-      this.storage.repelList.delete(playerId);
       this.storage.playerNameList.delete(player.name.current);
       this.storage.playerList.delete(playerId);
       this.storage.mobIdList.delete(playerId);
