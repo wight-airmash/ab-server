@@ -139,8 +139,12 @@ export default class Leaders extends System {
       msg.indexOf('The blue team has') === 0 &&
       msg.indexOf('controlled by', 20) !== -1 &&
       isStillIndex === -1 &&
-      leaderChosenIndex !== -1
+      leaderChosenIndex === -1
     ) {
+      this.log.debug(
+        'Parse mgs type "The blue team has 5 bots in auto mode controlled by playerName."'
+      );
+
       this.parseLeaderFromControlledBy(msg, CTF_TEAMS.BLUE);
 
       return;
@@ -151,8 +155,12 @@ export default class Leaders extends System {
       msg.indexOf('The red team has') === 0 &&
       msg.indexOf('controlled by', 20) !== -1 &&
       isStillIndex === -1 &&
-      leaderChosenIndex !== -1
+      leaderChosenIndex === -1
     ) {
+      this.log.debug(
+        'Parse mgs type "The red team has 7 bots in capture mode controlled by playerName."'
+      );
+
       this.parseLeaderFromControlledBy(msg, CTF_TEAMS.RED);
 
       return;
@@ -163,6 +171,8 @@ export default class Leaders extends System {
       (leaderChosenIndex !== -1 && isStillIndex === -1) ||
       (leaderChosenIndex !== -1 && isStillIndex === 0)
     ) {
+      this.log.debug('Parse mgs type "playerName has been chosen as the new team leader."');
+
       this.setLeaderByName(msg.substring(0, leaderChosenIndex === 0 ? 40 : leaderChosenIndex));
 
       return;
@@ -170,6 +180,8 @@ export default class Leaders extends System {
 
     // playerName is still the team leader.
     if (isStillIndex !== -1) {
+      this.log.debug('Parse mgs type "playerName is still the team leader."');
+
       this.setLeaderByName(msg.substring(0, isStillIndex === 0 ? 26 : isStillIndex));
     }
   }
