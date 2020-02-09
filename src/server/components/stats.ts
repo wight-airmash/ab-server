@@ -11,6 +11,8 @@ export default class Stats extends Component {
 
   public fireProjectiles = 0;
 
+  public switches = 0;
+
   constructor() {
     super();
   }

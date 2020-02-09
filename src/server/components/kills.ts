@@ -11,9 +11,9 @@ export default class Kills extends Component {
 
   public bots = 0;
 
-  public totalByInferno = 0;
+  public totalWithInferno = 0;
 
-  public botsByInferno = 0;
+  public botsWithInferno = 0;
 
   constructor(kills = 0) {
     super();

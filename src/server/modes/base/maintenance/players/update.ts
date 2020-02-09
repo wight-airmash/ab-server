@@ -511,6 +511,7 @@ export default class GamePlayersUpdate extends System {
 
         if (player.planestate.flagspeed) {
           maxVelocity = SHIP_SPECS.flagSpeed;
+          player.captures.time += 17;
         }
 
         if (velocityValue > maxVelocity) {

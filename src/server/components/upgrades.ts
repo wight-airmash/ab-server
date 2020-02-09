@@ -3,6 +3,16 @@ import Component from '@/server/component';
 export default class Upgrades extends Component {
   public amount: number;
 
+  /**
+   * History value: collected for the whole game.
+   */
+  public collected = 0;
+
+  /**
+   * History value: used for the whole game.
+   */
+  public used = 0;
+
   public speed = 0;
 
   public defense = 0;

@@ -61,6 +61,8 @@ export default class SwitchCommandHandler extends System {
       }
 
       player.times.lastSwitch = now;
+      player.stats.switches += 1;
+
       this.emit(PLAYERS_UPDATE_TEAM, playerId, teamId);
 
       this.emit(BROADCAST_PLAYER_RETEAM, [playerId]);

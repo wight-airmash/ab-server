@@ -13,6 +13,7 @@ import GameMatches from '@/server/modes/ctf/maintenance/matches';
 import GamePlayers from '@/server/modes/ctf/maintenance/players';
 import GameRankings from '@/server/modes/ctf/maintenance/rankings';
 import InfernosPeriodic from '@/server/modes/ctf/periodic/infernos';
+import ExtraStatsPeriodic from '@/server/modes/ctf/periodic/player-stats';
 import ShieldsPeriodic from '@/server/modes/ctf/periodic/shields';
 import Elections from '@/server/modes/ctf/qbots/elections';
 import Leaders from '@/server/modes/ctf/qbots/leaders';
@@ -53,6 +54,7 @@ export default class CTFGameManifest extends BaseGameManifest {
       ServerCustomBroadcast,
 
       // Periodic.
+      ExtraStatsPeriodic,
       InfernosPeriodic,
       ShieldsPeriodic,
 
@@ -81,6 +83,7 @@ export default class CTFGameManifest extends BaseGameManifest {
     this.startSystems();
 
     this.app.storage.gameEntity.attach(new Match());
+    this.app.storage.gameEntity.match.current = 0;
     this.app.storage.gameEntity.match.isActive = false;
   }
 }

@@ -52,7 +52,6 @@ export default class GamePlayersKill extends System {
     if (projectileId !== 0) {
       const projectile = this.storage.mobList.get(projectileId);
 
-      isKillerBot = this.storage.botIdList.has(killer.id.current);
       projectileOwner = projectile.owner.current;
 
       this.log.debug(`Player id${victimId} was killed by player id${projectile.owner.current}.`);
@@ -63,19 +62,20 @@ export default class GamePlayersKill extends System {
        */
       if (this.storage.playerList.has(projectile.owner.current)) {
         killer = this.storage.playerList.get(projectile.owner.current);
+        isKillerBot = this.storage.botIdList.has(killer.id.current);
 
         killer.kills.current += 1;
         killer.kills.currentmatch += 1;
 
         if (projectile.inferno.current === true) {
-          killer.kills.totalByInferno += 1;
+          killer.kills.totalWithInferno += 1;
         }
 
         if (isVictimBot === true) {
           killer.kills.bots += 1;
 
           if (projectile.inferno.current === true) {
-            killer.kills.botsByInferno += 1;
+            killer.kills.botsWithInferno += 1;
           }
         }
 

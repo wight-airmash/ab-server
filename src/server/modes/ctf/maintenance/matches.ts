@@ -180,11 +180,19 @@ export default class GameMatches extends System {
           this.emit(RESPONSE_SCORE_UPDATE, player.id.current);
         }
 
-        this.emit(
-          BROADCAST_SERVER_CUSTOM,
-          player.id.current,
-          player.team.current === winnerTeamId ? shareInScore : 0
-        );
+        if (player.team.current === winnerTeamId) {
+          player.wins.current += 1;
+
+          this.emit(BROADCAST_SERVER_CUSTOM, player.id.current, shareInScore);
+        } else {
+          this.emit(BROADCAST_SERVER_CUSTOM, player.id.current, 0);
+        }
+
+        player.stats.matchesTotal += 1;
+
+        if (player.times.activePlayingBlue !== 0 || player.times.activePlayingRed !== 0) {
+          player.stats.matchesActivePlayed += 1;
+        }
       });
 
       this.emit(BROADCAST_CHAT_SERVER_PUBLIC, `Game time: ${msToHumanReadable(matchDuration)}.`);

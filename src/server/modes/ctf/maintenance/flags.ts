@@ -269,7 +269,11 @@ export default class GameFlags extends System {
           player.captures.saves += 1;
 
           if (flag.flagstate.dropped === true) {
-            player.captures.savesAfterDrop += 1;
+            if (flag.owner.previous !== player.id.current) {
+              player.captures.savesAfterDrop += 1;
+            } else {
+              player.captures.attempts -= 1;
+            }
           } else {
             player.captures.savesAfterDeath += 1;
           }

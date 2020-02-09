@@ -1,17 +1,11 @@
+import { GAME_TYPES } from '@airbattle/protocol';
 import fs from 'fs';
+import { join as joinPath } from 'path';
 import querystring from 'querystring';
 import util from 'util';
 import uws from 'uWebSockets.js';
-import {
-  CHAT_SUPERUSER_MUTE_TIME_MS,
-  CONNECTIONS_IDLE_TIMEOUT_SEC,
-  CONNECTIONS_MAX_PAYLOAD_BYTES,
-  CONNECTIONS_PACKET_LOGIN_TIMEOUT_MS,
-  CONNECTIONS_PLAYERS_TO_CONNECTIONS_MULTIPLIER,
-  CONNECTIONS_STATUS,
-  CONNECTIONS_SUPERUSER_BAN_MS,
-} from '@/constants';
-import GameServer from '@/core/server';
+import { ConnectionMeta, IPv4, PlayerConnection } from '@/types';
+import Logger from '@/logger';
 import {
   CHAT_MUTE_BY_IP,
   CHAT_UNMUTE_BY_IP,
@@ -26,10 +20,19 @@ import {
   RESPONSE_PLAYER_BAN,
   TIMEOUT_LOGIN,
 } from '@/events';
-import Logger from '@/logger';
-import { ConnectionMeta, IPv4, PlayerConnection } from '@/types';
+import GameServer from '@/core/server';
+import {
+  CHAT_SUPERUSER_MUTE_TIME_MS,
+  CONNECTIONS_IDLE_TIMEOUT_SEC,
+  CONNECTIONS_MAX_PAYLOAD_BYTES,
+  CONNECTIONS_PACKET_LOGIN_TIMEOUT_MS,
+  CONNECTIONS_PLAYERS_TO_CONNECTIONS_MULTIPLIER,
+  CONNECTIONS_STATUS,
+  CONNECTIONS_SUPERUSER_BAN_MS,
+} from '@/constants';
 
 const readFile = util.promisify(fs.readFile);
+const readDir = util.promisify(fs.readdir);
 
 const readRequest = (res: uws.HttpResponse, cb: Function, err: () => void): void => {
   let buffer = Buffer.alloc(0);
@@ -335,6 +338,75 @@ export default class WsEndpoint {
             res.end(`internal error: ${e}`);
           }
         });
+
+      if (this.app.config.server.typeId === GAME_TYPES.CTF) {
+        const matchesDir = joinPath(this.app.config.cache.path, 'matches');
+
+        /**
+         * Get the list of the matches history records.
+         * Temporary route.
+         */
+        this.uws
+          .post(`/${this.app.config.admin.route}/matches`, async res => {
+            readRequest(
+              res,
+              async (requestData: string) => {
+                const isAuth = await this.isModAuthorized(requestData);
+
+                if (isAuth === true) {
+                  try {
+                    const files = JSON.stringify(await readDir(matchesDir));
+
+                    res.writeHeader('Content-type', 'application/json');
+                    res.end(files);
+                  } catch (err) {
+                    this.log.error(`Error while reading ${matchesDir}`, err.stack);
+
+                    res.writeStatus('500 Internal Server Error').end('');
+                  }
+                } else {
+                  res.writeStatus('403 Forbidden').end('');
+                }
+              },
+              () => {
+                this.log.error('failed to parse /matches POST');
+              }
+            );
+          })
+
+          /**
+           * Get the match record.
+           * Temporary route.
+           */
+          .post(`/${this.app.config.admin.route}/matches/:timestamp`, async (res, req) => {
+            const timestamp = parseInt(req.getParameter(0), 10);
+
+            readRequest(
+              res,
+              async (requestData: string) => {
+                const isAuth = await this.isModAuthorized(requestData);
+
+                if (isAuth === true) {
+                  try {
+                    const content = await readFile(joinPath(matchesDir, `${timestamp}.json`));
+
+                    res.writeHeader('Content-type', 'application/json');
+                    res.end(content);
+                  } catch (err) {
+                    this.log.error(`Error while reading ${matchesDir}${timestamp}.json`, err.stack);
+
+                    res.writeStatus('404 Not Found').end('');
+                  }
+                } else {
+                  res.writeStatus('403 Forbidden').end('');
+                }
+              },
+              () => {
+                this.log.error('failed to parse /matches/:timestamp POST');
+              }
+            );
+          });
+      }
     }
   }
 
@@ -363,6 +435,13 @@ export default class WsEndpoint {
     this.log.error('Failed mod password attempt');
 
     return false;
+  }
+
+  protected async isModAuthorized(requestData: string): Promise<boolean> {
+    const params = querystring.parse(requestData);
+    const mod = await this.getModeratorByPassword(params.password as string);
+
+    return mod !== false;
   }
 
   protected async onActionsPost(res: uws.HttpResponse, requestData: string): Promise<void> {

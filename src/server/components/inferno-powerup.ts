@@ -5,6 +5,8 @@ export default class Inferno extends Component {
 
   public endTime: number;
 
+  public collected = 0;
+
   constructor(isActive = false, endTime = 0) {
     super();
 

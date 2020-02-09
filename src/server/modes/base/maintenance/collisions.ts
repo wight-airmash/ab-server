@@ -10,7 +10,6 @@ import {
   UPGRADES_OWNER_INACTIVITY_TIMEOUT_MS,
 } from '@/constants';
 import {
-  COLLISIONS_ADD_OBJECT,
   BROADCAST_EVENT_BOUNCE,
   BROADCAST_EVENT_REPEL,
   BROADCAST_MOB_DESPAWN_COORDS,
@@ -18,19 +17,20 @@ import {
   BROADCAST_MOB_UPDATE_STATIONARY,
   BROADCAST_PLAYER_HIT,
   BROADCAST_PLAYER_UPDATE,
-  PROJECTILES_DELETE,
+  COLLISIONS_ADD_OBJECT,
   COLLISIONS_DETECT,
+  COLLISIONS_REMOVE_OBJECT,
+  CTF_PLAYER_CROSSED_FLAGZONE,
+  CTF_PLAYER_TOUCHED_FLAG,
   PLAYERS_APPLY_INFERNO,
   PLAYERS_APPLY_SHIELD,
   PLAYERS_BOUNCE,
   PLAYERS_HIT,
   PLAYERS_KILL,
-  CTF_PLAYER_CROSSED_FLAGZONE,
-  CTF_PLAYER_TOUCHED_FLAG,
+  PLAYERS_REPEL_MOBS,
   POWERUPS_DESPAWN,
   POWERUPS_PICKED,
-  COLLISIONS_REMOVE_OBJECT,
-  PLAYERS_REPEL_MOBS,
+  PROJECTILES_DELETE,
   RESPONSE_EVENT_LEAVE_HORIZON,
   RESPONSE_SCORE_UPDATE,
   TIMELINE_BEFORE_GAME_START,
@@ -305,10 +305,13 @@ export default class GameCollisions extends System {
 
               if (type === COLLISIONS_OBJECT_TYPES.INFERNO) {
                 this.delay(PLAYERS_APPLY_INFERNO, player.id.current, POWERUPS_DEFAULT_DURATION_MS);
+                player.inferno.collected += 1;
               } else if (type === COLLISIONS_OBJECT_TYPES.SHIELD) {
                 this.delay(PLAYERS_APPLY_SHIELD, player.id.current, POWERUPS_DEFAULT_DURATION_MS);
+                player.shield.collected += 1;
               } else {
                 player.upgrades.amount += 1;
+                player.upgrades.collected += 1;
 
                 if (!player.delayed.RESPONSE_SCORE_UPDATE) {
                   player.delayed.RESPONSE_SCORE_UPDATE = true;

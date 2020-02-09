@@ -17,14 +17,14 @@ export default class Keystate extends Component {
 
   public seq: number;
 
-  public presses: {
-    total: 0;
-    FIRE: 0;
-    UP: 0;
-    RIGHT: 0;
-    DOWN: 0;
-    LEFT: 0;
-    SPECIAL: 0;
+  public presses = {
+    total: 0,
+    FIRE: 0,
+    UP: 0,
+    RIGHT: 0,
+    DOWN: 0,
+    LEFT: 0,
+    SPECIAL: 0,
   };
 
   constructor() {

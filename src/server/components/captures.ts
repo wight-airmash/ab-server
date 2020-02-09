@@ -15,6 +15,8 @@ export default class Captures extends Component {
 
   public attemptsFromBaseWithShield = 0;
 
+  public time = 0;
+
   constructor(captures = 0) {
     super();
 

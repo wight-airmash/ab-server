@@ -1,4 +1,4 @@
-import { UPGRADES_ACTION_TYPE, UPGRADES_TYPES, PLAYERS_ALIVE_STATUSES } from '@/constants';
+import { PLAYERS_ALIVE_STATUSES, UPGRADES_ACTION_TYPE, UPGRADES_TYPES } from '@/constants';
 import { COMMAND_UPGRADE, ERRORS_NOT_ENOUGH_UPGRADES, RESPONSE_PLAYER_UPGRADE } from '@/events';
 import { System } from '@/server/system';
 import { MainConnectionId } from '@/types';
@@ -44,6 +44,7 @@ export default class UpgradeCommandHandler extends System {
 
         player.upgrades[upgradeTypePropName] += 1;
         player.upgrades.amount -= 1;
+        player.upgrades.used += 1;
 
         this.emit(
           RESPONSE_PLAYER_UPGRADE,
