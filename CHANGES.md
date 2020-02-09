@@ -1,5 +1,7 @@
 ## Future version (unversioned)
 
+## 5.0.0 (February 9, 2020)
+
 Features:
 
 - Battle Royale mode. Set SERVER_TYPE to `BTR` to run this mode.
@@ -35,6 +37,7 @@ Breaking changes:
 Temporary features (will be removed soon, don't use to create any extensions/frontend features):
 
 - `/horizon` command to debug #26.
+- After each CTF match, statistics are written to the `cache/matches` directory in files. Use POST requests to `/admin/matches` and `/admin/matches/:timestamp` to download the results; the requests must pass a valid moderator password in the `password` field. The statistics don't contain any personal data (`./src/server/modes/ctf/periodic/player-stats.ts`). This data collecting is part of the preparation for writing a new balance system.
 
 ## 4.16.1 (January 21, 2020)
 
