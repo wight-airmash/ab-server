@@ -4,6 +4,7 @@ import {
   PLAYERS_RANKINGS_UPDATE,
   PLAYERS_REMOVE,
   TIMELINE_GAME_MATCH_END,
+  TIMELINE_GAME_MATCH_START,
 } from '@/events';
 import { System } from '@/server/system';
 import { PlayerId } from '@/types';
@@ -18,6 +19,7 @@ export default class GameRankings extends System {
       [PLAYERS_RANKINGS_UPDATE]: this.onUpdateRequest,
       [PLAYERS_REMOVE]: this.onPlayerRemove,
       [TIMELINE_GAME_MATCH_END]: this.onMatchEnd,
+      [TIMELINE_GAME_MATCH_START]: this.onMatchStart,
     };
   }
 
@@ -32,12 +34,17 @@ export default class GameRankings extends System {
     });
   }
 
+  onMatchStart(): void {
+    this.storage.playerRankings.outdated = true;
+  }
+
   onMatchEnd(): void {
     this.storage.playerRankings.outdated = true;
   }
 
   onPlayerCreated(playerId: PlayerId): void {
     this.storage.playerRankings.byBounty.push(playerId);
+    this.storage.playerRankings.outdated = true;
   }
 
   onPlayerRemove(playerId: PlayerId): void {
