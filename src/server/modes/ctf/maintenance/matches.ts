@@ -25,6 +25,7 @@ import { System } from '@/server/system';
 import { has } from '@/support/objects';
 import { PlayerId, TeamId } from '@/types';
 import { msToHumanReadable } from '@/support/datetime';
+import { SCOREBOARD_FORCE_UPDATE } from '@/events/scoreboard';
 
 export default class GameMatches extends System {
   private timeout = 0;
@@ -111,6 +112,8 @@ export default class GameMatches extends System {
         });
 
         this.emit(TIMELINE_GAME_MATCH_START);
+
+        this.emit(SCOREBOARD_FORCE_UPDATE);
       }
     }
   }

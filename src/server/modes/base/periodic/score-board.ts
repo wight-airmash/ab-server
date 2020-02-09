@@ -1,23 +1,30 @@
-import { SERVER_BROADCAST_SCORE_BOARD_INTERVAL_SEC } from '@/constants';
-import { BROADCAST_SCORE_BOARD, TIMELINE_CLOCK_SECOND } from '@/events';
+import { SERVER_BROADCAST_SCORE_BOARD_INTERVAL_TICKS } from '@/constants';
+import { BROADCAST_SCORE_BOARD, TIMELINE_LOOP_TICK } from '@/events';
 import { System } from '@/server/system';
+import { SCOREBOARD_FORCE_UPDATE } from '@/events/scoreboard';
 
 export default class ScoreBoardPeriodic extends System {
-  protected seconds = 0;
+  protected ticks = 0;
 
   constructor({ app }) {
     super({ app });
 
     this.listeners = {
-      [TIMELINE_CLOCK_SECOND]: this.onSecondTick,
+      [TIMELINE_LOOP_TICK]: this.onTick,
+      [SCOREBOARD_FORCE_UPDATE]: this.onForceUpdate,
     };
   }
 
-  onSecondTick(): void {
-    this.seconds += 1;
+  onForceUpdate(): void {
+    this.ticks = 0;
+    this.emit(BROADCAST_SCORE_BOARD);
+  }
 
-    if (this.seconds >= SERVER_BROADCAST_SCORE_BOARD_INTERVAL_SEC) {
-      this.seconds = 0;
+  onTick(): void {
+    this.ticks += 1;
+
+    if (this.ticks >= SERVER_BROADCAST_SCORE_BOARD_INTERVAL_TICKS) {
+      this.ticks = 0;
       this.emit(BROADCAST_SCORE_BOARD);
     }
   }
