@@ -26,17 +26,29 @@ export default class ProfileCommandHandler extends System {
       const stats = [`Connected: ${unixMsToHumanReadable(player.times.createdAt, now)} ago.`];
       const afkMs = now - player.times.lastMove;
       const frameMs = 1000 / SERVER_FPS;
-      const afkTotalMs = ~~((player.times.inactiveTotal / 17) * frameMs);
-      const playingMs = ~~((player.times.activePlaying / 17) * frameMs);
+      const afkTotalMs = Math.floor((player.times.inactiveTotal / 17) * frameMs);
+      const playingMs = Math.floor((player.times.activePlaying / 17) * frameMs);
 
-      stats.push(`Playing: ${msToHumanReadable(playingMs)}.`);
-      stats.push(`AFK (total): ${msToHumanReadable(afkTotalMs)}.`);
+      let playTimeMsg = `Playing: ${msToHumanReadable(playingMs)}, AFK: ${msToHumanReadable(
+        afkTotalMs
+      )}`;
 
       if (afkMs > 10 * MS_PER_SEC) {
-        stats.push(`AFK (now): ${msToHumanReadable(afkMs)}.`);
+        playTimeMsg += `total and ${msToHumanReadable(afkMs)} since the last playing.`;
+      } else {
+        playTimeMsg += '.';
       }
 
-      stats.push(`Keys pressed: ${Math.ceil((player.keystate.seq - 1) / 2)}.`);
+      stats.push(playTimeMsg);
+      stats.push(`${player.keystate.presses.total} keys pressed.`);
+
+      stats.push(
+        `Picked up ${player.shield.collected} shields, ${player.inferno.collected} infernos, ${player.upgrades.collected} upgrades and ${player.upgrades.used} used.`
+      );
+
+      stats.push(
+        `Fired ${player.stats.fireProjectiles} missiles and killed ${player.kills.bots} bots.`
+      );
 
       this.emit(BROADCAST_CHAT_SERVER_WHISPER, connection.meta.playerId, stats.join(' '));
     }
