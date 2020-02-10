@@ -100,6 +100,7 @@ export default class SpawnCampingGuard extends System {
 
   checkPlayer(player: Entity): void {
     if (
+      this.storage.botIdList.has(player.id.current) === false &&
       player.spectate.isActive === false &&
       player.planestate.flagspeed === false &&
       this.now - player.times.lastMove > CTF_AFK_TIME_TO_AUTO_SPECTATE_MS &&

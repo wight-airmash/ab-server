@@ -1,6 +1,6 @@
 ## Future version (unversioned)
 
-## 5.1.0 (February 10, 2020)
+## 5.1.1 (February 10, 2020)
 
 Improvements:
 
@@ -10,6 +10,7 @@ Bug fixes:
 
 - Fix the result of `/profile` command.
 - Fix wrong value of CTF statistics.
+- Exclude bots from the AFK auto switching (they can't respawn after spectating).
 
 ## 5.0.0 (February 9, 2020)
 
