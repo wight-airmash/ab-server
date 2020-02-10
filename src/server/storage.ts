@@ -113,6 +113,9 @@ export class GameStorage {
 
   /**
    * Main connection ids accessible by username.
+   * This storage clears not instantly after player disconnection,
+   * but on each game loop tick. Don't forget to additionally check
+   * that a connection with given ID still exists.
    */
   public connectionIdByNameList: {
     [playerName: string]: MainConnectionId;

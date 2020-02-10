@@ -8,6 +8,7 @@ import {
   TIMELINE_GAME_MATCH_START,
 } from '@/events';
 import { System } from '@/server/system';
+import { has } from '@/support/objects';
 import { CTFLeadersStorage, PlayerId } from '@/types';
 
 /**
@@ -40,10 +41,11 @@ export default class Leaders extends System {
     stopElections = true
   ): void {
     if (
-      this.storage.playerNameList.has(playerName) === true &&
-      this.storage.playerHistoryNameToIdList.has(playerName)
+      has(this.storage.connectionIdByNameList, playerName) === true &&
+      this.storage.connectionList.has(this.storage.connectionIdByNameList[playerName])
     ) {
-      const { id } = this.storage.playerHistoryNameToIdList.get(playerName);
+      const id = this.storage.connectionList.get(this.storage.connectionIdByNameList[playerName])
+        .meta.playerId;
       let playerTeamId: CTF_TEAMS;
 
       if (teamId === null) {
