@@ -174,7 +174,7 @@ export default class ExtraStatsPeriodic extends System {
       w: player.wins.current,
       swt: player.stats.switches,
       hx: player.horizon.x,
-      hy: player.horizon.x,
+      hy: player.horizon.y,
       hxv: player.horizon.validX,
       hyv: player.horizon.validY,
       p: 0,
