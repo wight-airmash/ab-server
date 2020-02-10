@@ -56,6 +56,7 @@ import PingPeriodic from '@/server/modes/base/periodic/ping';
 import PowerupsPeriodic from '@/server/modes/base/periodic/powerups';
 import ScoreBoardPeriodic from '@/server/modes/base/periodic/score-board';
 import UserStatsPeriodic from '@/server/modes/base/periodic/user-stats';
+import AfkDisconnectResponse from '@/server/modes/base/responses/afk-disconnect';
 import AlreadyLoggedInResponse from '@/server/modes/base/responses/already-logged-in';
 import BackupResponse from '@/server/modes/base/responses/backup';
 import PlayerBanResponse from '@/server/modes/base/responses/ban';
@@ -181,6 +182,7 @@ export default abstract class BaseGameManifest extends GameManifest {
       SpectateKillResponse,
       PlayerBanResponse,
       AlreadyLoggedInResponse,
+      AfkDisconnectResponse,
 
       // Broadcast.
       ChatPublicBroadcast,
