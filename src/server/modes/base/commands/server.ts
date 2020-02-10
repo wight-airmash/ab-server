@@ -144,7 +144,19 @@ export default class ServerCommandHandler extends System {
         `next id: ${this.storage.nextMobId}. `,
         `Viewports: ${this.storage.viewportList.size}, `,
         `${this.storage.broadcast.size} broadcast. `,
-        `Recover: ${this.storage.playerRecoverList.size} records.`,
+        `Recover: ${this.storage.playerRecoverList.size} records. `,
+        `Rankings: ${this.storage.playerRankings.byBounty.length} items. `,
+        (() => {
+          let total = 0;
+
+          this.storage.spawnZoneSet.forEach(zonesByPlaneType => {
+            zonesByPlaneType.forEach(zones => {
+              total += zones.size;
+            });
+          });
+
+          return `Precached spawn zones: ${total}, sets: ${this.storage.spawnZoneSet.size}.`;
+        })(),
       ].join('')
     );
   }
