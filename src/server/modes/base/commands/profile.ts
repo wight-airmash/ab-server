@@ -34,7 +34,7 @@ export default class ProfileCommandHandler extends System {
       )}`;
 
       if (afkMs > 10 * MS_PER_SEC) {
-        playTimeMsg += `total and ${msToHumanReadable(afkMs)} since the last playing.`;
+        playTimeMsg += ` total and ${msToHumanReadable(afkMs)} since the last playing.`;
       } else {
         playTimeMsg += '.';
       }
