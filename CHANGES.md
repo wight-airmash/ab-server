@@ -1,5 +1,16 @@
 ## Future version (unversioned)
 
+## 5.1.0 (February 10, 2020)
+
+Improvements:
+
+- Add recently created storages info in `/server debug` result.
+
+Bug fixes:
+
+- Fix the result of `/profile` command.
+- Fix wrong value of CTF statistics.
+
 ## 5.0.0 (February 9, 2020)
 
 Features:
