@@ -411,8 +411,10 @@ export default class WsEndpoint {
   }
 
   protected async getModeratorByPassword(password: string): Promise<string | boolean> {
-    if (!password) return false;
-    
+    if (typeof password === 'undefined') {
+      return false;
+    }
+
     let file = null;
 
     try {
@@ -427,10 +429,13 @@ export default class WsEndpoint {
 
     for (let i = 0; i < lines.length; i += 1) {
       const line = lines[i];
-      const [name, test] = line.split(':');
 
-      if (test === password) {
-        return name;
+      if (line.indexOf(':') !== -1) {
+        const [name, test] = line.split(':');
+
+        if (test === password) {
+          return name;
+        }
       }
     }
 
