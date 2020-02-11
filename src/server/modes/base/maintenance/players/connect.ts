@@ -263,19 +263,55 @@ export default class GamePlayersConnect extends System {
 
         player.recaptures.current = recover.data.recaptures;
         player.captures.current = recover.data.captures;
+        player.captures.time = recover.data.capturesTime;
         player.captures.saves = recover.data.capSaves;
+        player.captures.savesAfterDeath = recover.data.capSavesAfterDeath;
+        player.captures.savesAfterDrop = recover.data.capSavesAfterDrop;
         player.captures.attempts = recover.data.capAttempts;
+        player.captures.attemptsFromBase = recover.data.capAttemptsFromBase;
+        player.captures.attemptsFromBaseWithShield = recover.data.capAttemptsFromBaseWithShield;
         player.damage.current = recover.data.damage;
+        player.damage.bots = recover.data.damageBots;
+        player.damage.hits = recover.data.damageHits;
+        player.damage.hitsToBots = recover.data.damageHitsToBots;
+        player.damage.hitsReceived = recover.data.damageHitsReceived;
+        player.damage.hitsByBots = recover.data.damageHitsByBots;
         player.deaths.current = recover.data.deaths;
+        player.deaths.byBots = recover.data.deathsByBots;
         player.deaths.withFlag = recover.data.deathsWithFlag;
+        player.deaths.withFlagByBots = recover.data.deathsWithFlagByBots;
         player.kills.current = recover.data.kills;
+        player.kills.bots = recover.data.killsBots;
+        player.kills.totalWithInferno = recover.data.killsWithInferno;
+        player.kills.botsWithInferno = recover.data.killsBotsWithInferno;
         player.kills.carriers = recover.data.carriersKills;
+        player.kills.carriersBots = recover.data.carriersBotsKills;
         player.score.current = recover.data.score;
+        player.stats.fires = recover.data.fires;
+        player.stats.fireProjectiles = recover.data.fireProjectiles;
+
+        player.keystate.presses.total = recover.data.pressesTotal;
+        player.keystate.presses.FIRE = recover.data.pressesFire;
+        player.keystate.presses.UP = recover.data.pressesUp;
+        player.keystate.presses.RIGHT = recover.data.pressesRight;
+        player.keystate.presses.DOWN = recover.data.pressesDown;
+        player.keystate.presses.LEFT = recover.data.pressesLeft;
+        player.keystate.presses.SPECIAL = recover.data.pressesSpecial;
 
         player.times.joinedAt = recover.data.joinedAt;
         player.times.activePlaying = recover.data.activePlaying;
         player.times.activePlayingBlue = recover.data.activePlayingBlue;
         player.times.activePlayingRed = recover.data.activePlayingRed;
+
+        player.stats.matchesTotal = recover.data.matchesTotal;
+        player.stats.matchesActivePlayed = recover.data.matchesActivePlayed;
+        player.wins.current = recover.data.winsTotal;
+        player.stats.switches = recover.data.switches;
+
+        player.upgrades.collected = recover.data.upgradesCollected;
+        player.upgrades.used = recover.data.upgradesUsed;
+        player.shield.collected = recover.data.shieldsCollected;
+        player.inferno.collected = recover.data.infernosCollected;
 
         this.log.debug(`Player id${player.id.current} data recovered.`);
       } else {
