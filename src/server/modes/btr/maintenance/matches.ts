@@ -30,6 +30,7 @@ import { System } from '@/server/system';
 import { getRandomNumber } from '@/support/numbers';
 import { has } from '@/support/objects';
 import { PlayerId } from '@/types';
+import { SCOREBOARD_FORCE_UPDATE } from '@/events/scoreboard';
 
 export default class GameMatches extends System {
   private gameStartTimeout = 0;
@@ -121,6 +122,8 @@ export default class GameMatches extends System {
 
     this.emit(PLAYERS_ALIVE_UPDATE);
 
+    this.emit(SCOREBOARD_FORCE_UPDATE);
+
     this.storage.gameEntity.match.start = Date.now();
   }
 
@@ -152,6 +155,8 @@ export default class GameMatches extends System {
 
       this.emit(PLAYERS_RESPAWN, player.id.current, shipType);
     });
+
+    this.emit(SCOREBOARD_FORCE_UPDATE);
   }
 
   onSecondTick(): void {
