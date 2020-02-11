@@ -1,5 +1,16 @@
 ## Future version (unversioned)
 
+## 5.2.0 (February 11, 2020)
+
+Improvements:
+
+- Forced scoreboard updates for when all players respawn.
+- New stats in CTF recovering feature.
+
+Bug fixes:
+
+- Fix moderator passwords check.
+
 ## 5.1.2 (February 10, 2020)
 
 Improvements:
