@@ -411,6 +411,8 @@ export default class WsEndpoint {
   }
 
   protected async getModeratorByPassword(password: string): Promise<string | boolean> {
+    if (!password) return false;
+    
     let file = null;
 
     try {
