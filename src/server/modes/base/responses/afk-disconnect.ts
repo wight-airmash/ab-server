@@ -42,8 +42,8 @@ export default class AfkDisconnectResponse extends System {
       setTimeout(() => {
         this.emit(CONNECTIONS_BREAK, connectionId);
       }, 100);
-    }
 
-    connection.meta.status = CONNECTIONS_STATUS.PENDING_TO_CLOSE;
+      connection.meta.status = CONNECTIONS_STATUS.PENDING_TO_CLOSE;
+    }
   }
 }

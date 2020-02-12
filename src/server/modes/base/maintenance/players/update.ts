@@ -42,6 +42,7 @@ import {
   TIMELINE_CLOCK_SECOND,
   VIEWPORTS_UPDATE_POSITION,
   ERRORS_AFK_DISCONNECT,
+  CONNECTIONS_BREAK,
 } from '@/events';
 import { CHANNEL_UPDATE_PLAYER_FLAG } from '@/server/channels';
 import Acceleration from '@/server/components/acceleration';
@@ -196,7 +197,7 @@ export default class GamePlayersUpdate extends System {
         const backupConnectionId = this.storage.playerBackupConnectionList.get(player.id.current);
 
         this.emit(ERRORS_AFK_DISCONNECT, mainConnectionId);
-        this.emit(ERRORS_AFK_DISCONNECT, backupConnectionId);
+        this.emit(CONNECTIONS_BREAK, backupConnectionId);
 
         return;
       }
