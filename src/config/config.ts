@@ -247,6 +247,11 @@ export interface GameServerConfigInterface {
   ctfQBotsFeatures: boolean;
 
   /**
+   * AFK disconnect timeout in minutes.
+   */
+  afkDisconnectTimeout: number;
+
+  /**
    * Server version.
    */
   version: string;
@@ -455,6 +460,8 @@ const config: GameServerConfigInterface = {
 
   ctfQBotsFeatures: boolValue(process.env.CTF_QBOTS_FEATURES, CTF_QBOTS_FEATURES),
 
+  afkDisconnectTimeout: floatValue(process.env.AFK_DISCONNECT_TIMEOUT, undefined),
+
   version,
 };
 
@@ -476,6 +483,10 @@ config.bot.flagId = FLAGS_ISO_TO_CODE[config.bot.flag];
 
 if (config.bot.name.length === 0 || config.bot.name.length > 20) {
   config.bot.name = BOTS_SERVER_BOT_NAME;
+}
+
+if (config.afkDisconnectTimeout === undefined) {
+  config.afkDisconnectTimeout = config.server.typeId === GAME_TYPES.BTR ? 10 : 0;
 }
 
 mkdirSync(config.certs.path, { recursive: true });

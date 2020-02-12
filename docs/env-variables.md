@@ -14,6 +14,12 @@ Default: `../admin/passwords.txt`
 
 Moderation panel access list file. You don't need to restart a server after update the content of this file.
 
+### AFK_DISCONNECT_TIMEOUT
+
+Default: 10 for BTR, 0 (disabled) for other game types
+
+Timeout in minutes for inactive (AFK) user, after which they will be disconnected.
+
 ### ALLOW_NON_ASCII_USERNAMES
 
 Default: `false`
