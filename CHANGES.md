@@ -1,5 +1,9 @@
 ## Future version (unversioned)
 
+## 5.3.0 (February 12, 2020)
+
+- Configurable AFK disconnect timeout. Use [AFK_DISCONNECT_TIMEOUT](./docs/env-variables.md#afk_disconnect_timeout) to set the timeout value in minutes. By default it is disabled for FFA and CTF, and for BTR it is 10 minutes.
+
 ## 5.2.0 (February 11, 2020)
 
 Improvements:
