@@ -23,6 +23,12 @@ export default class GameChat extends System {
   protected readonly responseAttackBlock =
     "This command isn't allowed: https://github.com/wight-airmash/ab-server/issues/53";
 
+  protected readonly responseQBotsHelp = `Commands: #cap (or #capture, #escort),
+#recap (or #recover), #defend, #auto, #assist <player | me>, #drop, #leader <player>, #status.
+Type #help <command without #> to see more details.
+If you play on starma.sh, you can bind those commands in team radio menu (key x).
+`;
+
   constructor({ app }) {
     super({ app });
 
@@ -44,6 +50,20 @@ export default class GameChat extends System {
 
     this.channel(CHANNEL_CHAT).emitFirstDelayed();
     this.framesPassed = 0;
+  }
+
+  protected static isHelpCommand(msg: string): boolean {
+    if (msg.charAt(0) !== '#' || msg.length > 5) {
+      return false;
+    }
+
+    const command = msg.toLowerCase();
+
+    if (command === '#help') {
+      return true;
+    }
+
+    return false;
   }
 
   protected static isAttackCommand(msg: string): boolean {
@@ -69,10 +89,12 @@ export default class GameChat extends System {
       return;
     }
 
-    if (GameChat.isAttackCommand(msg) === false) {
-      this.emit(BROADCAST_CHAT_PUBLIC, playerId, msg);
-    } else {
+    if (GameChat.isAttackCommand(msg) === true) {
       this.emit(BROADCAST_CHAT_SERVER_WHISPER, playerId, this.responseAttackBlock);
+    } else if (GameChat.isHelpCommand(msg) === true) {
+      this.emit(BROADCAST_CHAT_SERVER_WHISPER, playerId, this.responseQBotsHelp);
+    } else {
+      this.emit(BROADCAST_CHAT_PUBLIC, playerId, msg);
     }
   }
 
@@ -104,6 +126,8 @@ export default class GameChat extends System {
 
     if (GameChat.isAttackCommand(msg) === true) {
       this.emit(BROADCAST_CHAT_SERVER_WHISPER, playerId, this.responseAttackBlock);
+    } else if (GameChat.isHelpCommand(msg) === true) {
+      this.emit(BROADCAST_CHAT_SERVER_WHISPER, playerId, this.responseQBotsHelp);
     } else if (GameChat.isShieldTimerAlert(msg) === false) {
       this.emit(BROADCAST_CHAT_TEAM, playerId, msg);
     }
