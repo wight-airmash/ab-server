@@ -1,5 +1,15 @@
 ## Future version (unversioned)
 
+## 5.4.0 (February 13, 2020)
+
+Features:
+
+- CTF: built-in help for Q-bots. Type #help in the chat to get help.
+
+Improvements:
+
+- Add sending of own player packets (PLAYER_UPDATE, PLAYER_FIRE, EVENT_BOUNCE, EVENT_BOOST) via backup connection (in addition to the main connection). This change improves responsiveness of aircraft control for the players. Based on the analysis of the original server logs and the frontend code.
+
 ## 5.3.0 (February 12, 2020)
 
 - Configurable AFK disconnect timeout. Use [AFK_DISCONNECT_TIMEOUT](./docs/env-variables.md#afk_disconnect_timeout) to set the timeout value in minutes. By default it is disabled for FFA and CTF, and for BTR it is 10 minutes.
