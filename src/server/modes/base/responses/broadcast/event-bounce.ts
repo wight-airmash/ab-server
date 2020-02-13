@@ -1,7 +1,7 @@
 import { encodeKeystate, ServerPackets, SERVER_PACKETS } from '@airbattle/protocol';
 import { BROADCAST_EVENT_BOUNCE, CONNECTIONS_SEND_PACKET } from '@/events';
 import { System } from '@/server/system';
-import { MainConnectionId, PlayerId } from '@/types';
+import { ConnectionId, PlayerId } from '@/types';
 
 export default class EventBounceBroadcast extends System {
   constructor({ app }) {
@@ -28,7 +28,7 @@ export default class EventBounceBroadcast extends System {
     const player = this.storage.playerList.get(playerId);
     const playerConnectionId = this.storage.playerMainConnectionList.get(playerId);
     const playerTeamConnections = this.storage.connectionIdByTeam.get(player.team.current);
-    const recipients: MainConnectionId[] = [];
+    const recipients: ConnectionId[] = [];
 
     this.storage.broadcast.get(playerId).forEach(recipientConnectionId => {
       const recipientConnection = this.storage.connectionList.get(recipientConnectionId);
@@ -45,6 +45,13 @@ export default class EventBounceBroadcast extends System {
           (recipient.spectate.isActive === false || this.app.config.visibleTeamProwlers === true))
       ) {
         recipients.push(recipientConnectionId);
+
+        if (
+          playerConnectionId === recipientConnectionId &&
+          this.storage.playerBackupConnectionList.has(playerId) === true
+        ) {
+          recipients.push(this.storage.playerBackupConnectionList.get(playerId));
+        }
       }
     });
 

@@ -1,7 +1,7 @@
-import { SERVER_PACKETS, ServerPackets } from '@airbattle/protocol';
+import { ServerPackets, SERVER_PACKETS } from '@airbattle/protocol';
 import { BROADCAST_PLAYER_FIRE, CONNECTIONS_SEND_PACKET } from '@/events';
 import { System } from '@/server/system';
-import { PlayerId, MobId } from '@/types';
+import { ConnectionId, MobId, PlayerId } from '@/types';
 
 export default class PlayerFireBroadcast extends System {
   constructor({ app }) {
@@ -24,9 +24,9 @@ export default class PlayerFireBroadcast extends System {
     }
 
     const player = this.storage.playerList.get(playerId);
-
-    const recipients = [...this.storage.broadcast.get(playerId)];
+    const broadcast = [...this.storage.broadcast.get(playerId)];
     const projectiles = [];
+    let recipients: ConnectionId[];
 
     for (let index = 0; index < projectileIds.length; index += 1) {
       if (this.storage.mobList.has(projectileIds[index])) {
@@ -44,6 +44,23 @@ export default class PlayerFireBroadcast extends System {
           maxSpeed: projectile.velocity.max,
         } as ServerPackets.PlayerFireProjectile);
       }
+    }
+
+    if (this.storage.playerBackupConnectionList.has(playerId) === true) {
+      const mainConnectionId = this.storage.playerMainConnectionList.get(playerId);
+      const backupConnectionId = this.storage.playerBackupConnectionList.get(playerId);
+
+      recipients = [];
+
+      for (let connectionIndex = 0; connectionIndex < broadcast.length; connectionIndex += 1) {
+        recipients.push(broadcast[connectionIndex]);
+
+        if (broadcast[connectionIndex] === mainConnectionId) {
+          recipients.push(backupConnectionId);
+        }
+      }
+    } else {
+      recipients = broadcast;
     }
 
     this.emit(

@@ -1,7 +1,7 @@
-import { SERVER_PACKETS, ServerPackets } from '@airbattle/protocol';
+import { ServerPackets, SERVER_PACKETS } from '@airbattle/protocol';
 import { BROADCAST_EVENT_BOOST, CONNECTIONS_SEND_PACKET } from '@/events';
 import { System } from '@/server/system';
-import { PlayerId } from '@/types';
+import { ConnectionId, PlayerId } from '@/types';
 
 export default class EventBoostBroadcast extends System {
   constructor({ app }) {
@@ -27,7 +27,27 @@ export default class EventBoostBroadcast extends System {
     }
 
     const player = this.storage.playerList.get(playerId);
-    const recipients = [...this.storage.broadcast.get(playerId)];
+    const broadcast = [...this.storage.broadcast.get(playerId)];
+    let recipients: ConnectionId[];
+
+    if (this.storage.playerBackupConnectionList.has(playerId) === true) {
+      const mainConnectionId = this.storage.playerMainConnectionList.get(playerId);
+      const backupConnectionId = this.storage.playerBackupConnectionList.get(playerId);
+
+      recipients = [];
+
+      for (let connectionIndex = 0; connectionIndex < broadcast.length; connectionIndex += 1) {
+        recipients.push(broadcast[connectionIndex]);
+
+        if (broadcast[connectionIndex] === mainConnectionId) {
+          recipients.push(backupConnectionId);
+        }
+      }
+    } else {
+      recipients = broadcast;
+    }
+
+    this.log.debug('EVENT_BOOST broadcast', recipients);
 
     this.emit(
       CONNECTIONS_SEND_PACKET,
