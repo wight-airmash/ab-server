@@ -21,6 +21,7 @@ export default class LoginResponse extends System {
     const connection = this.storage.connectionList.get(connectionId);
     const player = this.storage.playerList.get(connection.meta.playerId);
     const players = [];
+    const bots = [];
 
     /**
      * TODO: it is possible to keep the list up to date and not re-create it
@@ -40,6 +41,12 @@ export default class LoginResponse extends System {
         flag: p.flag.code,
         upgrades: encodeUpgrades(p.upgrades.speed, ~~p.shield.current, ~~p.inferno.current),
       });
+
+      if (this.storage.botIdList.has(p.id.current)) {
+        bots.push({
+          id: p.id.current,
+        });
+      }
     });
 
     this.emit(
@@ -54,6 +61,7 @@ export default class LoginResponse extends System {
         type: this.app.config.server.typeId,
         room: this.app.config.server.room,
         players,
+        bots,
       } as ServerPackets.Login,
       connectionId
     );
