@@ -35,6 +35,7 @@ export default class ServerPlayerConnectResponse extends System {
         rot: 0,
         flag: this.app.config.bot.flagId,
         upgrades: encodeUpgrades(0, 0, 0),
+        isBot: true,
       } as ServerPackets.PlayerNew,
       connectionId
     );

@@ -44,6 +44,7 @@ export default class PlayerNewBroadcast extends System {
           ~~player.shield.current,
           ~~player.inferno.current
         ),
+        isBot: this.storage.botIdList.has(player.id.current),
       } as ServerPackets.PlayerNew,
       recipients,
       [playerConnectionId]
