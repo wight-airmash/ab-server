@@ -453,7 +453,6 @@ export default class GamePlayersConnect extends System {
      * More broadcasts
      */
     this.emit(BROADCAST_PLAYER_NEW, player.id.current);
-    this.emit(BROADCAST_SCORE_BOARD, connectionId);
     this.emit(RESPONSE_SEND_PING, connectionId);
     this.emit(PLAYERS_APPLY_SHIELD, player.id.current, PLAYERS_SPAWN_SHIELD_DURATION_MS);
 
@@ -468,6 +467,7 @@ export default class GamePlayersConnect extends System {
     }
 
     this.emit(PLAYERS_CREATED, player.id.current);
+    this.emit(BROADCAST_SCORE_BOARD, connectionId);
 
     if (isRecovered === true) {
       let hasUpgrades = false;
