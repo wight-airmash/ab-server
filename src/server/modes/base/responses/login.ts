@@ -20,8 +20,8 @@ export default class LoginResponse extends System {
   onLoginResponse(connectionId: MainConnectionId): void {
     const connection = this.storage.connectionList.get(connectionId);
     const player = this.storage.playerList.get(connection.meta.playerId);
-    const players = [];
-    const bots = [];
+    const players: ServerPackets.LoginPlayer[] = [];
+    const bots: ServerPackets.LoginBot[] = [];
 
     /**
      * TODO: it is possible to keep the list up to date and not re-create it
@@ -61,6 +61,7 @@ export default class LoginResponse extends System {
         type: this.app.config.server.typeId,
         room: this.app.config.server.room,
         players,
+        botsNamePrefix: this.app.config.botsNamePrefix,
         bots,
       } as ServerPackets.Login,
       connectionId

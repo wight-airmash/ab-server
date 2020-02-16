@@ -7,6 +7,7 @@ import { has } from '@/support/objects';
 import {
   AUTH_LOGIN_SERVER_KEY_URL,
   BOTS_DEFAULT_IP_LIST,
+  BOTS_DEFAULT_NAME_PREFIX,
   BOTS_SERVER_BOT_FLAG,
   BOTS_SERVER_BOT_NAME,
   BOTS_WHITELIST_ENABLED,
@@ -252,6 +253,11 @@ export interface GameServerConfigInterface {
   afkDisconnectTimeout: number;
 
   /**
+   * Auto add prefix to the bot name.
+   */
+  botsNamePrefix: string;
+
+  /**
    * Server version.
    */
   version: string;
@@ -461,6 +467,8 @@ const config: GameServerConfigInterface = {
   ctfQBotsFeatures: boolValue(process.env.CTF_QBOTS_FEATURES, CTF_QBOTS_FEATURES),
 
   afkDisconnectTimeout: floatValue(process.env.AFK_DISCONNECT_TIMEOUT, undefined),
+
+  botsNamePrefix: strValue(process.env.BOTS_NAME_PREFIX, BOTS_DEFAULT_NAME_PREFIX),
 
   version,
 };

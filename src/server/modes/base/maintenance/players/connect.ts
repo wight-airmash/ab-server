@@ -160,6 +160,10 @@ export default class GamePlayersConnect extends System {
     const mainConnection = this.storage.connectionList.get(connectionId);
     let uniqueName = name;
 
+    if (mainConnection.meta.isBot === true && this.app.config.botsNamePrefix !== '') {
+      uniqueName = `${this.app.config.botsNamePrefix}${name}`;
+    }
+
     while (this.storage.playerNameList.has(uniqueName)) {
       uniqueName = `${name}#${getRandomInt(101, 999)}`;
     }
@@ -339,7 +343,7 @@ export default class GamePlayersConnect extends System {
     /**
      * Players storage filling.
      */
-    this.storage.playerNameList.add(name);
+    this.storage.playerNameList.add(uniqueName);
     this.storage.playerList.set(player.id.current, player);
 
     /**
