@@ -158,9 +158,13 @@ export default class GamePlayersConnect extends System {
     }
 
     const mainConnection = this.storage.connectionList.get(connectionId);
-    let uniqueName = name;
+    let uniqueName: string = name;
 
-    if (mainConnection.meta.isBot === true && this.app.config.botsNamePrefix !== '') {
+    if (
+      mainConnection.meta.isBot === true &&
+      this.app.config.botsNamePrefix !== '' &&
+      uniqueName.indexOf(this.app.config.botsNamePrefix) !== 0
+    ) {
       uniqueName = `${this.app.config.botsNamePrefix}${name}`;
     }
 
