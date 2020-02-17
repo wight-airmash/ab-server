@@ -13,6 +13,12 @@ import { has } from '@/support/objects';
 import { MainConnectionId } from '@/types';
 
 export default class LoginMessageHandler extends System {
+  private readonly nonAsciiRegexp = new RegExp('[^\x20-\x7E]', 'g');
+
+  private readonly repeatedWhiteSpacesRegexp = new RegExp('\\s{2,}', 'g');
+
+  private readonly onlyWhiteSpacesRegexp = new RegExp('^\\s+$');
+
   constructor({ app }) {
     super({ app });
 
@@ -99,12 +105,12 @@ export default class LoginMessageHandler extends System {
     }
 
     if (this.app.config.allowNonAsciiUsernames === false) {
-      name = name.replace(/[^\x20-\x7E]/g, '');
+      name = name.replace(this.nonAsciiRegexp, '');
     }
 
-    name = name.replace(/\s{2,}/g, ' ').trim();
+    name = name.replace(this.repeatedWhiteSpacesRegexp, ' ').trim();
 
-    if (name.length === 0 || name.length > 20 || /^\s+$/.test(name) === true) {
+    if (name.length === 0 || name.length > 20 || this.onlyWhiteSpacesRegexp.test(name) === true) {
       this.emit(ERRORS_INVALID_LOGIN_DATA, connectionId);
 
       return;
