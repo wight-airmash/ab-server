@@ -49,6 +49,19 @@ export default class LoginResponse extends System {
       }
     });
 
+    /**
+     * Server configuration data
+     */
+    const config: any = {};
+
+    config.sf = this.app.config.server.scaleFactor;
+
+    if (this.app.config.afkDisconnectTimeout) {
+      config.afk = this.app.config.afkDisconnectTimeout;
+    }
+
+    config.botsNamePrefix = this.app.config.botsNamePrefix;
+
     this.emit(
       CONNECTIONS_SEND_PACKET,
       {
@@ -61,7 +74,7 @@ export default class LoginResponse extends System {
         type: this.app.config.server.typeId,
         room: this.app.config.server.room,
         players,
-        botsNamePrefix: this.app.config.botsNamePrefix,
+        serverConfiguration: JSON.stringify(config),
         bots,
       } as ServerPackets.Login,
       connectionId
