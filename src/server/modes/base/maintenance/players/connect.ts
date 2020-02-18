@@ -439,23 +439,31 @@ export default class GamePlayersConnect extends System {
     /**
      * Server configuration data
      */
-    const config: any = {};
+    if (
+      !(
+        this.app.config.server.typeId === GAME_TYPES.CTF &&
+        mainConnection.meta.isBot === true &&
+        this.app.config.ctfQBotsFeatures === true
+      )
+    ) {
+      const config: any = {};
 
-    config.sf = this.app.config.server.scaleFactor;
+      config.sf = this.app.config.server.scaleFactor;
 
-    if (this.app.config.afkDisconnectTimeout) {
-      config.afk = this.app.config.afkDisconnectTimeout;
+      if (this.app.config.afkDisconnectTimeout) {
+        config.afk = this.app.config.afkDisconnectTimeout;
+      }
+
+      this.emit(
+        CONNECTIONS_SEND_PACKET,
+        {
+          c: SERVER_PACKETS.SERVER_CUSTOM,
+          type: SERVER_CUSTOM_TYPES.SERVER_CONFIG,
+          data: JSON.stringify(config),
+        } as ServerPackets.ServerCustom,
+        connectionId
+      );
     }
-
-    this.emit(
-      CONNECTIONS_SEND_PACKET,
-      {
-        c: SERVER_PACKETS.SERVER_CUSTOM,
-        type: SERVER_CUSTOM_TYPES.SERVER_CONFIG,
-        data: JSON.stringify(config),
-      } as ServerPackets.ServerCustom,
-      connectionId
-    );
 
     /**
      * More broadcasts
