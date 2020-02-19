@@ -47,8 +47,6 @@ export default class EventBoostBroadcast extends System {
       recipients = broadcast;
     }
 
-    this.log.debug('EVENT_BOOST broadcast', recipients);
-
     this.emit(
       CONNECTIONS_SEND_PACKET,
       {
