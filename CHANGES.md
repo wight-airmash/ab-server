@@ -1,5 +1,21 @@
 ## Future version (unversioned)
 
+## 5.5.0 (February 19, 2020)
+
+Features:
+
+- Automatically add prefix to bot names with [BOTS_NAME_PREFIX](./docs/env-variables.md#bots_name_prefix), no prefix by default. Helps to prevent mimicry. Non-bot players cannot use this prefix.
+- New fields `serverConfiguration` and `bots` for server packets `LOGIN`. See `LoginServerConfig` type and protocol lib.
+- New field `isBot` for server packets `PLAYER_NEW`. `true` if the player is a bot.
+
+Bug fixes:
+
+- Fix BROADCAST_SCORE_BOARD packet sending order.
+
+Removed temporary features:
+
+- `/horizon` command.
+
 ## 5.4.0 (February 13, 2020)
 
 Features:
