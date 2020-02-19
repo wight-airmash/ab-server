@@ -38,7 +38,7 @@
   },
   "pre-commit": "lint-staged",
   "dependencies": {
-    "@airbattle/protocol": "github:wight-airmash/ab-protocol#feature/bots",
+    "@airbattle/protocol": "github:wight-airmash/ab-protocol#v6.0.0",
     "collisions": "github:wight-airmash/ab-collisions",
     "dotenv": "^8.2.0",
     "eventemitter3": "^4.0.0",
