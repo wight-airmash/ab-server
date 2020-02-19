@@ -435,39 +435,6 @@ export default class GamePlayersConnect extends System {
      * Broadcasts.
      */
     this.emit(RESPONSE_LOGIN, connectionId);
-
-    /**
-     * Server configuration data
-     */
-    if (
-      !(
-        this.app.config.server.typeId === GAME_TYPES.CTF &&
-        mainConnection.meta.isBot === true &&
-        this.app.config.ctfQBotsFeatures === true
-      )
-    ) {
-      const config: any = {};
-
-      config.sf = this.app.config.server.scaleFactor;
-
-      if (this.app.config.afkDisconnectTimeout) {
-        config.afk = this.app.config.afkDisconnectTimeout;
-      }
-
-      this.emit(
-        CONNECTIONS_SEND_PACKET,
-        {
-          c: SERVER_PACKETS.SERVER_CUSTOM,
-          type: SERVER_CUSTOM_TYPES.SERVER_CONFIG,
-          data: JSON.stringify(config),
-        } as ServerPackets.ServerCustom,
-        connectionId
-      );
-    }
-
-    /**
-     * More broadcasts
-     */
     this.emit(BROADCAST_PLAYER_NEW, player.id.current);
     this.emit(RESPONSE_SEND_PING, connectionId);
     this.emit(PLAYERS_APPLY_SHIELD, player.id.current, PLAYERS_SPAWN_SHIELD_DURATION_MS);
