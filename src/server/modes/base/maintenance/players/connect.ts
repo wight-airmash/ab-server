@@ -1,10 +1,4 @@
-import {
-  GAME_TYPES,
-  PLAYER_LEVEL_UPDATE_TYPES,
-  ServerPackets,
-  SERVER_CUSTOM_TYPES,
-  SERVER_PACKETS,
-} from '@airbattle/protocol';
+import { GAME_TYPES, PLAYER_LEVEL_UPDATE_TYPES } from '@airbattle/protocol';
 import { Polygon } from 'collisions';
 import {
   CHAT_USERNAME_PLACEHOLDER,
@@ -47,7 +41,6 @@ import {
   TIMEOUT_ACK,
   TIMEOUT_BACKUP,
   VIEWPORTS_CREATE,
-  CONNECTIONS_SEND_PACKET,
 } from '@/events';
 import { CHANNEL_CONNECT_PLAYER, CHANNEL_MUTE } from '@/server/channels';
 import AliveStatus from '@/server/components/alive-status';
