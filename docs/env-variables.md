@@ -42,6 +42,14 @@ Use the [commands](./commands#server-bot-add-ip) to update the list without rest
 
 Example: `"127.0.0.1,127.0.0.2,127.0.0.3"` will be parsed as `["127.0.0.1", "127.0.0.2", "127.0.0.3"]`.
 
+### BOTS_NAME_PREFIX
+
+Default: `""`
+
+Automatically add prefix to bot names, helps to prevent mimicry. Non-bot players cannot use this prefix.
+
+Example: `"[bot] "` (don't forget a space at the end if you want to use it as separator), the bot with a requested name `Lunokhod` will receive an assigned name `[bot] Lunokhod`.
+
 ### CACHE_PATH
 
 Default: `../cache`
@@ -242,7 +250,7 @@ Default: `../data/user-stats.json`
 
 ### SU_PASSWORD
 
-Default: ``
+Default: `""`
 
 Superuser password to run some [commands](./commands.md#superuser-command). Must be filled.
 
@@ -278,7 +286,7 @@ Enable or disable user accounts. Requires valid [AUTH_LOGIN_SERVER_KEY_URL](#aut
 
 ### WELCOME_MESSAGES
 
-Default: ``
+Default: `""`
 
 The player will receive these messages after joining to the game. Parsed as array, use `%split%` as a delimiter and `%username%` to address the player.
 
