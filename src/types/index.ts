@@ -248,3 +248,20 @@ export interface CTFStorage {
 
   leaders: CTFLeadersStorage;
 }
+
+export interface LoginServerConfig {
+  /**
+   * Server scale factor.
+   */
+  sf: number;
+
+  /**
+   * AFK disconnect timeout in minutes.
+   */
+  afk?: number;
+
+  /**
+   * Auto-prefix for the bots name.
+   */
+  botsNamePrefix: string;
+}

@@ -1,15 +1,34 @@
 import { encodeUpgrades, ServerPackets, SERVER_PACKETS } from '@airbattle/protocol';
-import { RESPONSE_LOGIN, CONNECTIONS_SEND_PACKET } from '@/events';
+import { CONNECTIONS_SEND_PACKET, RESPONSE_LOGIN, TIMELINE_BEFORE_GAME_START } from '@/events';
 import { System } from '@/server/system';
-import { MainConnectionId } from '@/types';
+import { LoginServerConfig, MainConnectionId } from '@/types';
 
 export default class LoginResponse extends System {
+  /**
+   * Server config JSON string.
+   */
+  private serverConfiguration: string;
+
   constructor({ app }) {
     super({ app });
 
     this.listeners = {
       [RESPONSE_LOGIN]: this.onLoginResponse,
+      [TIMELINE_BEFORE_GAME_START]: this.prepareServerConfiguration,
     };
+  }
+
+  prepareServerConfiguration(): void {
+    const config: LoginServerConfig = {
+      sf: this.app.config.server.scaleFactor,
+      botsNamePrefix: this.app.config.botsNamePrefix,
+    };
+
+    if (this.app.config.afkDisconnectTimeout) {
+      config.afk = this.app.config.afkDisconnectTimeout;
+    }
+
+    this.serverConfiguration = JSON.stringify(config);
   }
 
   /**
@@ -20,7 +39,8 @@ export default class LoginResponse extends System {
   onLoginResponse(connectionId: MainConnectionId): void {
     const connection = this.storage.connectionList.get(connectionId);
     const player = this.storage.playerList.get(connection.meta.playerId);
-    const players = [];
+    const players: ServerPackets.LoginPlayer[] = [];
+    const bots: ServerPackets.LoginBot[] = [];
 
     /**
      * TODO: it is possible to keep the list up to date and not re-create it
@@ -40,6 +60,12 @@ export default class LoginResponse extends System {
         flag: p.flag.code,
         upgrades: encodeUpgrades(p.upgrades.speed, ~~p.shield.current, ~~p.inferno.current),
       });
+
+      if (this.storage.botIdList.has(p.id.current)) {
+        bots.push({
+          id: p.id.current,
+        });
+      }
     });
 
     this.emit(
@@ -54,6 +80,8 @@ export default class LoginResponse extends System {
         type: this.app.config.server.typeId,
         room: this.app.config.server.room,
         players,
+        serverConfiguration: this.serverConfiguration,
+        bots,
       } as ServerPackets.Login,
       connectionId
     );

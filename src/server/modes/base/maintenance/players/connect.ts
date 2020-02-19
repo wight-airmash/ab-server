@@ -1,10 +1,4 @@
-import {
-  GAME_TYPES,
-  PLAYER_LEVEL_UPDATE_TYPES,
-  ServerPackets,
-  SERVER_CUSTOM_TYPES,
-  SERVER_PACKETS,
-} from '@airbattle/protocol';
+import { GAME_TYPES, PLAYER_LEVEL_UPDATE_TYPES } from '@airbattle/protocol';
 import { Polygon } from 'collisions';
 import {
   CHAT_USERNAME_PLACEHOLDER,
@@ -47,7 +41,6 @@ import {
   TIMEOUT_ACK,
   TIMEOUT_BACKUP,
   VIEWPORTS_CREATE,
-  CONNECTIONS_SEND_PACKET,
 } from '@/events';
 import { CHANNEL_CONNECT_PLAYER, CHANNEL_MUTE } from '@/server/channels';
 import AliveStatus from '@/server/components/alive-status';
@@ -158,7 +151,15 @@ export default class GamePlayersConnect extends System {
     }
 
     const mainConnection = this.storage.connectionList.get(connectionId);
-    let uniqueName = name;
+    let uniqueName: string = name;
+
+    if (
+      mainConnection.meta.isBot === true &&
+      this.app.config.botsNamePrefix !== '' &&
+      uniqueName.indexOf(this.app.config.botsNamePrefix) !== 0
+    ) {
+      uniqueName = `${this.app.config.botsNamePrefix}${name}`;
+    }
 
     while (this.storage.playerNameList.has(uniqueName)) {
       uniqueName = `${name}#${getRandomInt(101, 999)}`;
@@ -339,7 +340,7 @@ export default class GamePlayersConnect extends System {
     /**
      * Players storage filling.
      */
-    this.storage.playerNameList.add(name);
+    this.storage.playerNameList.add(uniqueName);
     this.storage.playerList.set(player.id.current, player);
 
     /**
@@ -427,31 +428,6 @@ export default class GamePlayersConnect extends System {
      * Broadcasts.
      */
     this.emit(RESPONSE_LOGIN, connectionId);
-
-    /**
-     * Server configuration data
-     */
-    const config: any = {};
-
-    config.sf = this.app.config.server.scaleFactor;
-
-    if (this.app.config.afkDisconnectTimeout) {
-      config.afk = this.app.config.afkDisconnectTimeout;
-    }
-
-    this.emit(
-      CONNECTIONS_SEND_PACKET,
-      {
-        c: SERVER_PACKETS.SERVER_CUSTOM,
-        type: SERVER_CUSTOM_TYPES.SERVER_CONFIG,
-        data: JSON.stringify(config),
-      } as ServerPackets.ServerCustom,
-      connectionId
-    );
-
-    /**
-     * More broadcasts
-     */
     this.emit(BROADCAST_PLAYER_NEW, player.id.current);
     this.emit(RESPONSE_SEND_PING, connectionId);
     this.emit(PLAYERS_APPLY_SHIELD, player.id.current, PLAYERS_SPAWN_SHIELD_DURATION_MS);

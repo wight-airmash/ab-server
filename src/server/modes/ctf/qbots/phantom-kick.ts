@@ -67,6 +67,7 @@ export default class PhantomPlayerKick extends System {
           ~~player.shield.current,
           ~~player.inferno.current
         ),
+        isBot: false,
       } as ServerPackets.PlayerNew,
       recipients
     );
