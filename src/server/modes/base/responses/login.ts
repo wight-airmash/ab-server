@@ -1,15 +1,34 @@
 import { encodeUpgrades, ServerPackets, SERVER_PACKETS } from '@airbattle/protocol';
-import { CONNECTIONS_SEND_PACKET, RESPONSE_LOGIN } from '@/events';
+import { CONNECTIONS_SEND_PACKET, RESPONSE_LOGIN, TIMELINE_BEFORE_GAME_START } from '@/events';
 import { System } from '@/server/system';
 import { LoginServerConfig, MainConnectionId } from '@/types';
 
 export default class LoginResponse extends System {
+  /**
+   * Server config JSON string.
+   */
+  private serverConfiguration: string;
+
   constructor({ app }) {
     super({ app });
 
     this.listeners = {
       [RESPONSE_LOGIN]: this.onLoginResponse,
+      [TIMELINE_BEFORE_GAME_START]: this.prepareServerConfiguration,
     };
+  }
+
+  prepareServerConfiguration(): void {
+    const config: LoginServerConfig = {
+      sf: this.app.config.server.scaleFactor,
+      botsNamePrefix: this.app.config.botsNamePrefix,
+    };
+
+    if (this.app.config.afkDisconnectTimeout) {
+      config.afk = this.app.config.afkDisconnectTimeout;
+    }
+
+    this.serverConfiguration = JSON.stringify(config);
   }
 
   /**
@@ -49,18 +68,6 @@ export default class LoginResponse extends System {
       }
     });
 
-    /**
-     * Server configuration data
-     */
-    const config: LoginServerConfig = {
-      sf: this.app.config.server.scaleFactor,
-      botsNamePrefix: this.app.config.botsNamePrefix,
-    };
-
-    if (this.app.config.afkDisconnectTimeout) {
-      config.afk = this.app.config.afkDisconnectTimeout;
-    }
-
     this.emit(
       CONNECTIONS_SEND_PACKET,
       {
@@ -73,7 +80,7 @@ export default class LoginResponse extends System {
         type: this.app.config.server.typeId,
         room: this.app.config.server.room,
         players,
-        serverConfiguration: JSON.stringify(config),
+        serverConfiguration: this.serverConfiguration,
         bots,
       } as ServerPackets.Login,
       connectionId
