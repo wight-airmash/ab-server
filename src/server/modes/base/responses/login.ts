@@ -1,7 +1,7 @@
 import { encodeUpgrades, ServerPackets, SERVER_PACKETS } from '@airbattle/protocol';
-import { RESPONSE_LOGIN, CONNECTIONS_SEND_PACKET } from '@/events';
+import { CONNECTIONS_SEND_PACKET, RESPONSE_LOGIN } from '@/events';
 import { System } from '@/server/system';
-import { MainConnectionId } from '@/types';
+import { LoginServerConfig, MainConnectionId } from '@/types';
 
 export default class LoginResponse extends System {
   constructor({ app }) {
@@ -52,15 +52,14 @@ export default class LoginResponse extends System {
     /**
      * Server configuration data
      */
-    const config: any = {};
-
-    config.sf = this.app.config.server.scaleFactor;
+    const config: LoginServerConfig = {
+      sf: this.app.config.server.scaleFactor,
+      botsNamePrefix: this.app.config.botsNamePrefix,
+    };
 
     if (this.app.config.afkDisconnectTimeout) {
       config.afk = this.app.config.afkDisconnectTimeout;
     }
-
-    config.botsNamePrefix = this.app.config.botsNamePrefix;
 
     this.emit(
       CONNECTIONS_SEND_PACKET,
