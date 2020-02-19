@@ -4,7 +4,6 @@ import {
   COMMAND_DROP_UPGRADE,
   COMMAND_ELECTIONS,
   COMMAND_FLAG,
-  COMMAND_HORIZON,
   COMMAND_MATCH,
   COMMAND_PROFILE,
   COMMAND_RESPAWN,
@@ -53,9 +52,6 @@ export default class CommandMessageHandler extends System {
       match: COMMAND_MATCH,
       usurp: COMMAND_USURP,
       switch: COMMAND_SWITCH,
-
-      // Temporarily added debug commands. These commands will be removed in the future.
-      horizon: COMMAND_HORIZON,
     });
 
     this.listeners = {
