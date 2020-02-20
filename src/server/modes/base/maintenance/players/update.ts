@@ -185,6 +185,40 @@ export default class GamePlayersUpdate extends System {
     const now = Date.now();
     const { afkDisconnectTimeout } = this.app.config;
 
+    /**
+     * If two or more missed full frames occurred, we "forget"
+     * about all missed frames and compensate only the last one.
+     *
+     * This is not the most correct way, but it is acceptable and fast.
+     *
+     * Correct processing implies "restoring" the missed frames,
+     * i.e. starting cycles for each player with the number of iterations
+     * equal to the number of missed frames. The more frames are skipped,
+     * the greater after-load will be created, it may take more time
+     * for the server to recover the default frame rate value.
+     *
+     * const skippedFrames = Math.round(frameFactor);
+     * const lastFrameCompensationFactor -= Math.floor(frameFactor) - 1;
+     * let compensationFactor = frameFactor / skippedFrames;
+     *
+     * player => {
+     *   for (let frameIndex = 1; frameIndex <= skippedFrames; frameIndex += 1) {
+     *     compensationFactor = 1;
+     *
+     *     if (frameIndex === skippedFrames) {
+     *       compensationFactor = lastFrameCompensationFactor;
+     *     }
+     *
+     *     // update frameskip-sensitive player params
+     *   }
+     * }
+     */
+    let compensationFactor = frameFactor;
+
+    if (compensationFactor >= 2) {
+      compensationFactor -= Math.floor(frameFactor) - 1;
+    }
+
     this.storage.playerList.forEach(player => {
       /**
        * Disconnect if AFK timeout configured (non-zero) and player inactivity is past that limit
@@ -344,7 +378,7 @@ export default class GamePlayersUpdate extends System {
       player.energy.regen =
         SHIP_SPECS.energyRegen * UPGRADES_SPECS.ENERGY.factor[player.upgrades.energy];
 
-      let energyDiff = player.energy.regen * frameFactor;
+      let energyDiff = player.energy.regen * compensationFactor;
       let isUpdateHitbox = false;
       let isUpdateViewport = false;
 
@@ -374,7 +408,7 @@ export default class GamePlayersUpdate extends System {
 
         if (isBoost) {
           player.energy.regen = SHIP_SPECS.specialEnergyRegen;
-          energyDiff = SHIP_SPECS.specialEnergyRegen * frameFactor;
+          energyDiff = SHIP_SPECS.specialEnergyRegen * compensationFactor;
         }
       } else if (player.planetype.current === SHIPS_TYPES.GOLIATH) {
         /**
@@ -442,7 +476,7 @@ export default class GamePlayersUpdate extends System {
        * Health update.
        */
       if (player.health.current !== PLAYERS_HEALTH.MAX) {
-        player.health.current += frameFactor * SHIP_SPECS.healthRegen;
+        player.health.current += compensationFactor * SHIP_SPECS.healthRegen;
       }
 
       if (player.health.current > PLAYERS_HEALTH.MAX) {
@@ -470,11 +504,11 @@ export default class GamePlayersUpdate extends System {
         isUpdateHitbox = true;
 
         if (player.keystate.LEFT) {
-          player.rotation.current -= frameFactor * SHIP_SPECS.turnFactor;
+          player.rotation.current -= compensationFactor * SHIP_SPECS.turnFactor;
         }
 
         if (player.keystate.RIGHT) {
-          player.rotation.current += frameFactor * SHIP_SPECS.turnFactor;
+          player.rotation.current += compensationFactor * SHIP_SPECS.turnFactor;
         }
 
         player.rotation.current = ((player.rotation.current % PI_X2) + PI_X2) % PI_X2;
@@ -514,9 +548,9 @@ export default class GamePlayersUpdate extends System {
 
         if (flightDirection !== -999) {
           player.velocity.x +=
-            Math.sin(flightDirection) * SHIP_SPECS.accelFactor * boostFactor * frameFactor;
+            Math.sin(flightDirection) * SHIP_SPECS.accelFactor * boostFactor * compensationFactor;
           player.velocity.y -=
-            Math.cos(flightDirection) * SHIP_SPECS.accelFactor * boostFactor * frameFactor;
+            Math.cos(flightDirection) * SHIP_SPECS.accelFactor * boostFactor * compensationFactor;
         }
 
         velocityValue = Math.hypot(player.velocity.x, player.velocity.y);
@@ -551,8 +585,8 @@ export default class GamePlayersUpdate extends System {
           player.velocity.y > SHIP_SPECS.minSpeed ||
           player.velocity.y < -SHIP_SPECS.minSpeed
         ) {
-          player.velocity.x *= 1 - SHIP_SPECS.brakeFactor * frameFactor;
-          player.velocity.y *= 1 - SHIP_SPECS.brakeFactor * frameFactor;
+          player.velocity.x *= 1 - SHIP_SPECS.brakeFactor * compensationFactor;
+          player.velocity.y *= 1 - SHIP_SPECS.brakeFactor * compensationFactor;
 
           player.velocity.isMax = false;
           player.velocity.isMin = false;
@@ -574,11 +608,11 @@ export default class GamePlayersUpdate extends System {
          * Update player position.
          */
         player.position.x +=
-          frameFactor * startSpeedX +
-          0.5 * (player.velocity.x - startSpeedX) * frameFactor * frameFactor;
+          compensationFactor * startSpeedX +
+          0.5 * (player.velocity.x - startSpeedX) * compensationFactor * compensationFactor;
         player.position.y +=
-          frameFactor * startSpeedY +
-          0.5 * (player.velocity.y - startSpeedY) * frameFactor * frameFactor;
+          compensationFactor * startSpeedY +
+          0.5 * (player.velocity.y - startSpeedY) * compensationFactor * compensationFactor;
       }
 
       /**
