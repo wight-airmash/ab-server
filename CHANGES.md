@@ -1,5 +1,15 @@
 ## Future version (unversioned)
 
+## 5.6.0 (February 20, 2020)
+
+Improvements:
+
+- Add info about skipped frames since last performance measurement in [/server](./docs/commands.md#server) command. This may help players to determine the source of the cause of the freeze: server or player side.
+
+Bug fixes:
+
+- Prevent long distance teleporting after frame skipping (#93).
+
 ## 5.5.0 (February 19, 2020)
 
 Features:
