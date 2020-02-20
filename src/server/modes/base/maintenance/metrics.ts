@@ -7,8 +7,8 @@ import {
 import {
   BROADCAST_CHAT_SERVER_PUBLIC,
   SERVER_FRAMES_SKIPPED,
-  TIMELINE_CLOCK_SECOND,
   TIMELINE_CLOCK_HOUR,
+  TIMELINE_CLOCK_SECOND,
 } from '@/events';
 import { System } from '@/server/system';
 
@@ -33,9 +33,9 @@ export default class GameMetrics extends System {
     super({ app });
 
     this.listeners = {
-      [TIMELINE_CLOCK_SECOND]: this.onSecond,
-      [TIMELINE_CLOCK_HOUR]: this.onHour,
       [SERVER_FRAMES_SKIPPED]: this.onFramesSkipped,
+      [TIMELINE_CLOCK_HOUR]: this.onHour,
+      [TIMELINE_CLOCK_SECOND]: this.onSecond,
     };
   }
 
@@ -75,7 +75,8 @@ export default class GameMetrics extends System {
     if (this.app.metrics.collect === true) {
       const now = Date.now();
 
-      this.app.metrics.sample.sf = this.totalSkippedFrames;
+      this.app.metrics.sample.sf = this.totalSkippedFrames - this.app.metrics.sample.sft;
+      this.app.metrics.sample.sft = this.totalSkippedFrames;
       this.app.metrics.sample.ll =
         ~~((this.app.metrics.ticksTimeMs / (ticks - this.ticks)) * 100) / 100;
 
@@ -113,6 +114,7 @@ export default class GameMetrics extends System {
       this.app.metrics.lastSample.ppsIn = this.app.metrics.sample.ppsIn;
       this.app.metrics.lastSample.ppsOut = this.app.metrics.sample.ppsOut;
       this.app.metrics.lastSample.sf = this.app.metrics.sample.sf;
+      this.app.metrics.lastSample.sft = this.app.metrics.sample.sft;
 
       if (this.app.config.logs.samples === true) {
         this.log.info('Stats:', this.app.metrics.sample);

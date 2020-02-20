@@ -34,6 +34,11 @@ interface PerformanceSample {
   /**
    * Total frames skipped since the server started.
    */
+  sft: number;
+
+  /**
+   * Skipped frames since last performance measurement.
+   */
   sf: number;
 }
 
@@ -79,6 +84,7 @@ export class Metrics {
       cpu: 0,
       ram: 0,
       online: 0,
+      sft: 0,
       sf: 0,
     };
 
@@ -89,6 +95,7 @@ export class Metrics {
       cpu: 0,
       ram: 0,
       online: 0,
+      sft: 0,
       sf: 0,
     };
 

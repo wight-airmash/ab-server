@@ -38,6 +38,7 @@ export default class ServerCommandHandler extends System {
       `RAM: ${this.app.metrics.lastSample.ram} MB, `,
       `CPU: ${this.app.metrics.lastSample.cpu}%, `,
       `SF: ${this.app.config.server.scaleFactor}, `,
+      `frames skipped: ${this.app.metrics.lastSample.sf}, `,
       `uptime: ${this.app.metrics.uptime.human}, `,
       `v${this.app.config.version}`,
     ].join('');
@@ -115,7 +116,7 @@ export default class ServerCommandHandler extends System {
       BROADCAST_CHAT_SERVER_WHISPER,
       playerId,
       [
-        `Skipped frames: ${this.app.metrics.lastSample.sf}. `,
+        `Skipped frames: ${this.app.metrics.lastSample.sft}. `,
         `Connections: ${this.storage.connectionList.size} total, `,
         `${this.storage.mainConnectionIdList.size} main, `,
         `${this.storage.playerBackupConnectionList.size} backup, `,
