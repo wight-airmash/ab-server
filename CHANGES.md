@@ -1,5 +1,12 @@
 ## Future version (unversioned)
 
+## 5.7.0 (February 25, 2020)
+
+Improvements:
+
+- uWebSockets.js `EXPERIMENTAL_FASTCALL` environment variable (see its repository for details). Enabled (`1`) by default only in docker image. If you run a server directly, please update your .env or pass `EXPERIMENTAL_FASTCALL=1` in production to improve game server performance.
+- Configurable WebSockets compression with `WEBSOCKETS_COMPRESSION` variable. Enabled by default. Disabling will improve game server performance.
+
 ## 5.6.0 (February 20, 2020)
 
 Improvements:
