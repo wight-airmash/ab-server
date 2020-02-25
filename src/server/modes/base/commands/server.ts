@@ -116,6 +116,9 @@ export default class ServerCommandHandler extends System {
       BROADCAST_CHAT_SERVER_WHISPER,
       playerId,
       [
+        `Env: ${this.app.config.env} (${this.app.config.logs.level}), compression ${
+          this.app.config.compression ? 'enabled' : 'disabled'
+        }, TLS ${this.app.config.tls ? 'enabled' : 'disabled'}. `,
         `Skipped frames: ${this.app.metrics.lastSample.sft}. `,
         `Connections: ${this.storage.connectionList.size} total, `,
         `${this.storage.mainConnectionIdList.size} main, `,
@@ -156,8 +159,9 @@ export default class ServerCommandHandler extends System {
             });
           });
 
-          return `Precached spawn zones: ${total}, sets: ${this.storage.spawnZoneSet.size}.`;
+          return `Precached spawn zones: ${total}, sets: ${this.storage.spawnZoneSet.size}. `;
         })(),
+        `AFK disconnect timeout: ${this.app.config.afkDisconnectTimeout} m.`,
       ].join('')
     );
   }
