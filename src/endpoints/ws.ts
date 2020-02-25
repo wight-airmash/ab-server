@@ -1,8 +1,8 @@
-import { GAME_TYPES } from '@airbattle/protocol';
 import fs from 'fs';
 import { join as joinPath } from 'path';
 import querystring from 'querystring';
 import util from 'util';
+import { GAME_TYPES } from '@airbattle/protocol';
 import uws from 'uWebSockets.js';
 import { ConnectionMeta, IPv4, PlayerConnection } from '@/types';
 import Logger from '@/logger';

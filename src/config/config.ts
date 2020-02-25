@@ -1,7 +1,7 @@
-import { FLAGS_ISO_TO_CODE, GAME_TYPES } from '@airbattle/protocol';
-import dotenv from 'dotenv';
 import { mkdirSync, readFileSync } from 'fs';
 import { dirname, isAbsolute, resolve } from 'path';
+import { FLAGS_ISO_TO_CODE, GAME_TYPES } from '@airbattle/protocol';
+import dotenv from 'dotenv';
 import { IPv4 } from '@/types';
 import { has } from '@/support/objects';
 import {

@@ -1,6 +1,6 @@
-import { CTF_TEAMS } from '@airbattle/protocol';
 import { mkdirSync, readdirSync, unlinkSync, writeFile } from 'fs';
 import { join as joinPath, parse as parsePath } from 'path';
+import { CTF_TEAMS } from '@airbattle/protocol';
 import {
   HOURS_PER_DAY,
   MINUTES_PER_HOUR,
