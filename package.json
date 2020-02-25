@@ -22,8 +22,8 @@
     "watch": "tsc -w",
     "dev": "watch",
     "debug": "node --inspect dist/app.js",
-    "lint": "eslint . --ext .js,.mjs,.ts",
-    "lint-autofix": "eslint . --ext .js,.mjs,.ts --fix",
+    "lint": "eslint ./src --ext .js,.mjs,.ts",
+    "lint-autofix": "eslint ./src --ext .js,.mjs,.ts --fix",
     "lint-staged": "lint-staged"
   },
   "lint-staged": {
@@ -45,14 +45,14 @@
     "maxmind": "^4.1.0",
     "module-alias": "^2.2.2",
     "pino": "^5.16.0",
-    "uWebSockets.js": "github:uNetworking/uWebSockets.js#v17.1.0"
+    "uWebSockets.js": "github:uNetworking/uWebSockets.js#v17.2.0"
   },
   "devDependencies": {
     "@types/dotenv": "^8.2.0",
-    "@types/node": "^12.12.27",
+    "@types/node": "^12.12.28",
     "@types/pino": "^5.15.5",
-    "@typescript-eslint/eslint-plugin": "^2.20.0",
-    "@typescript-eslint/parser": "^2.20.0",
+    "@typescript-eslint/eslint-plugin": "^2.21.0",
+    "@typescript-eslint/parser": "^2.21.0",
     "eslint": "^6.8.0",
     "eslint-config-airbnb": "^18.0.1",
     "eslint-config-airbnb-base": "^14.0.0",
@@ -64,7 +64,7 @@
     "pino-pretty": "^3.6.0",
     "pre-commit": "^1.2.2",
     "prettier": "^1.19.1",
-    "typescript": "^3.7.5"
+    "typescript": "^3.8.2"
   },
   "_moduleAliases": {
     "@": "dist"
@@ -128,6 +128,18 @@
         {
           "js": "never",
           "ts": "never"
+        }
+      ],
+      "import/order": [
+        "error",
+        {
+          "groups": [
+            "builtin",
+            "external",
+            "parent",
+            "sibling",
+            "index"
+          ]
         }
       ],
       "@typescript-eslint/adjacent-overload-signatures": [
