@@ -76,6 +76,12 @@ Default: `false`
 
 Turn on/off endpoint TLS.
 
+### EXPERIMENTAL_FASTCALL
+
+Default: `undefined`
+
+It is preferable to set it `1` in the production, can affect performance. See uWebSockets.js. package repository for more info.
+
 ### HOST
 
 Default: `0.0.0.0`
