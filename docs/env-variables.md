@@ -290,6 +290,12 @@ Default: `true`
 
 Enable or disable user accounts. Requires valid [AUTH_LOGIN_SERVER_KEY_URL](#auth_login_server_key_url).
 
+### WEBSOCKETS_COMPRESSION
+
+Default: `true`
+
+Disabling will improve game server performance.
+
 ### WELCOME_MESSAGES
 
 Default: `""`

@@ -181,7 +181,7 @@ export default class Connections extends System {
         this.log.debug('WS buffer > 0', ws.getBufferedAmount());
       }
 
-      const result = ws.send(packet, true, true);
+      const result = ws.send(packet, true, this.app.config.compression);
 
       if (!result) {
         this.log.warn(`WS send failed (connection id${connectionId}).`);

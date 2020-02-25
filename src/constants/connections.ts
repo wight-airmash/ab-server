@@ -1,3 +1,4 @@
+import { SHARED_COMPRESSOR } from 'uWebSockets.js';
 import {
   BYTES_PER_KB,
   MS_PER_SEC,
@@ -5,6 +6,10 @@ import {
   SECONDS_PER_MINUTE,
   HOURS_PER_DAY,
 } from '@/constants/units';
+
+export const CONNECTIONS_WEBSOCKETS_COMPRESSION = true;
+
+export const CONNECTIONS_WEBSOCKETS_COMPRESSOR = SHARED_COMPRESSOR;
 
 export enum CONNECTIONS_STATUS {
   /**

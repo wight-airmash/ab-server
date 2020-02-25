@@ -2,8 +2,6 @@ import { mkdirSync, readFileSync } from 'fs';
 import { dirname, isAbsolute, resolve } from 'path';
 import { FLAGS_ISO_TO_CODE, GAME_TYPES } from '@airbattle/protocol';
 import dotenv from 'dotenv';
-import { IPv4 } from '@/types';
-import { has } from '@/support/objects';
 import {
   AUTH_LOGIN_SERVER_KEY_URL,
   BOTS_DEFAULT_IP_LIST,
@@ -14,6 +12,7 @@ import {
   CONNECTIONS_DEFAULT_MAX_PLAYERS_PER_IP,
   CONNECTIONS_FLOODING_AUTOBAN,
   CONNECTIONS_INVALID_PROTOCOL_AUTOKICK,
+  CONNECTIONS_WEBSOCKETS_COMPRESSION,
   CTF_QBOTS_FEATURES,
   LIMITS_ANY,
   LIMITS_CHAT,
@@ -43,6 +42,8 @@ import {
   UPGRADES_DEFAULT_MIN_CHANCE,
   USER_ACCOUNTS,
 } from '@/constants';
+import { has } from '@/support/objects';
+import { IPv4 } from '@/types';
 
 export interface GameServerConfigInterface {
   /**
@@ -73,12 +74,17 @@ export interface GameServerConfigInterface {
   port: number;
 
   /**
-   * Use TLS
+   * Use TLS.
    */
   tls: boolean;
   certs: {
     path: string;
   };
+
+  /**
+   * Use compression for websockets.
+   */
+  compression: boolean;
 
   admin: {
     active: boolean;
@@ -355,6 +361,8 @@ const config: GameServerConfigInterface = {
   certs: {
     path: resolvePath(strValue(process.env.CERTS_PATH, '../certs')),
   },
+
+  compression: boolValue(process.env.WEBSOCKETS_COMPRESSION, CONNECTIONS_WEBSOCKETS_COMPRESSION),
 
   admin: {
     active: boolValue(process.env.MODERATION_PANEL, SERVER_MODERATION_PANEL),

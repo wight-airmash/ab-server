@@ -3,9 +3,18 @@ import { join as joinPath } from 'path';
 import querystring from 'querystring';
 import util from 'util';
 import { GAME_TYPES } from '@airbattle/protocol';
-import uws from 'uWebSockets.js';
-import { ConnectionMeta, IPv4, PlayerConnection } from '@/types';
-import Logger from '@/logger';
+import uws, { DISABLED } from 'uWebSockets.js';
+import {
+  CHAT_SUPERUSER_MUTE_TIME_MS,
+  CONNECTIONS_IDLE_TIMEOUT_SEC,
+  CONNECTIONS_MAX_PAYLOAD_BYTES,
+  CONNECTIONS_PACKET_LOGIN_TIMEOUT_MS,
+  CONNECTIONS_PLAYERS_TO_CONNECTIONS_MULTIPLIER,
+  CONNECTIONS_STATUS,
+  CONNECTIONS_SUPERUSER_BAN_MS,
+  CONNECTIONS_WEBSOCKETS_COMPRESSOR,
+} from '@/constants';
+import GameServer from '@/core/server';
 import {
   CHAT_MUTE_BY_IP,
   CHAT_UNMUTE_BY_IP,
@@ -20,16 +29,8 @@ import {
   RESPONSE_PLAYER_BAN,
   TIMEOUT_LOGIN,
 } from '@/events';
-import GameServer from '@/core/server';
-import {
-  CHAT_SUPERUSER_MUTE_TIME_MS,
-  CONNECTIONS_IDLE_TIMEOUT_SEC,
-  CONNECTIONS_MAX_PAYLOAD_BYTES,
-  CONNECTIONS_PACKET_LOGIN_TIMEOUT_MS,
-  CONNECTIONS_PLAYERS_TO_CONNECTIONS_MULTIPLIER,
-  CONNECTIONS_STATUS,
-  CONNECTIONS_SUPERUSER_BAN_MS,
-} from '@/constants';
+import Logger from '@/logger';
+import { ConnectionMeta, IPv4, PlayerConnection } from '@/types';
 
 const readFile = util.promisify(fs.readFile);
 const readDir = util.promisify(fs.readdir);
@@ -76,7 +77,7 @@ export default class WsEndpoint {
 
     this.uws
       .ws('/*', {
-        compression: 1,
+        compression: this.app.config.compression ? CONNECTIONS_WEBSOCKETS_COMPRESSOR : DISABLED,
         maxPayloadLength: CONNECTIONS_MAX_PAYLOAD_BYTES,
         idleTimeout: CONNECTIONS_IDLE_TIMEOUT_SEC,
 
@@ -536,6 +537,10 @@ export default class WsEndpoint {
 
           this.log.info(
             `WS/HTTP server listening on ${this.app.config.host}:${this.app.config.port}.`
+          );
+
+          this.log.debug(
+            `WebSocket compression ${this.app.config.compression ? 'enabled' : 'disabled'}.`
           );
 
           return resolve();
