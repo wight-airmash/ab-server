@@ -464,7 +464,7 @@ export default class GamePlayersConnect extends System {
         BROADCAST_CHAT_SERVER_WHISPER,
         player.id.current,
         `Hi, ${uniqueName}! Your stats ${
-          hasUpgrades ? 'and upgrades' : ''
+          hasUpgrades ? 'and upgrades ' : ''
         }were recovered after disconnection.`
       );
     }
