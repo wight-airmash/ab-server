@@ -1,5 +1,15 @@
 ## Future version (unversioned)
 
+## 5.8.0 (February 28, 2020)
+
+Features:
+
+- CTF: team chat command `#dropnow`. Sometimes q-bots have a bug and they can't drop the flag, this command makes the bots to drop the flag at the time of the request. The bot must be within viewport of the player sending the command.
+
+Bug fixes:
+
+- CTF recovery text alert.
+
 ## 5.7.0 (February 25, 2020)
 
 Improvements:
