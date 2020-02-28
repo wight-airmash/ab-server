@@ -11,6 +11,7 @@ import {
   CHAT_TEAM,
   CHAT_WHISPER,
   CTF_BOT_CHAT_TEAM,
+  CTF_DROP_FLAG_NOW,
   RESPONSE_COMMAND_REPLY,
 } from '@/events';
 import { CHANNEL_CHAT } from '@/server/channels';
@@ -84,6 +85,10 @@ If you play on starma.sh, you can bind those commands in team radio menu (key x)
     return msg.endsWith('seconds till enemy shield');
   }
 
+  protected static isDropNowCommand(msg: string): boolean {
+    return msg === '#dropnow';
+  }
+
   onChatPublic(playerId: PlayerId, msg: string): void {
     if (!this.helpers.isPlayerConnected(playerId)) {
       return;
@@ -130,6 +135,10 @@ If you play on starma.sh, you can bind those commands in team radio menu (key x)
       this.emit(BROADCAST_CHAT_SERVER_WHISPER, playerId, this.responseQBotsHelp);
     } else if (GameChat.isShieldTimerAlert(msg) === false) {
       this.emit(BROADCAST_CHAT_TEAM, playerId, msg);
+
+      if (GameChat.isDropNowCommand(msg)) {
+        this.emit(CTF_DROP_FLAG_NOW, playerId);
+      }
     }
 
     if (this.storage.botIdList.has(playerId) === true) {

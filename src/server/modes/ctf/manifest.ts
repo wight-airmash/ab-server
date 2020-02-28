@@ -16,6 +16,7 @@ import InfernosPeriodic from '@/server/modes/ctf/periodic/infernos';
 import ExtraStatsPeriodic from '@/server/modes/ctf/periodic/player-stats';
 import ShieldsPeriodic from '@/server/modes/ctf/periodic/shields';
 import Elections from '@/server/modes/ctf/qbots/elections';
+import FlagDropFix from '@/server/modes/ctf/qbots/flag-drop-fix';
 import Leaders from '@/server/modes/ctf/qbots/leaders';
 import PhantomPlayerKick from '@/server/modes/ctf/qbots/phantom-kick';
 import Usurpation from '@/server/modes/ctf/qbots/usurpation';
@@ -74,6 +75,7 @@ export default class CTFGameManifest extends BaseGameManifest {
 
         // Q-bots.
         Elections,
+        FlagDropFix,
         Leaders,
         PhantomPlayerKick,
         Usurpation,
