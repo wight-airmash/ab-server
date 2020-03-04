@@ -28,6 +28,7 @@ Bots choose leader inside a team, who can give commands to bot.
 * `#auto` - auto select strategy between cap|recap|defend
 * `#assist <player | me>` - bots will assist to specified player, if `me` typed bots will assist you
 * `#drop` - bot, which currently have a flag will drop it to another player
+* `#dropnow` - sometimes q-bots have a bug and they can't drop the flag, this command makes the bots to drop the flag at the time of the request. The bot must be within a viewport of the player sending the command.
 * `#type` - choose type of plane for bots, only this types supported:
     * `predator` 
     * `mohawk`
