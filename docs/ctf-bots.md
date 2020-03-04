@@ -15,9 +15,14 @@
 
 Bots choose leader inside a team, who can give commands to bot.
 
+Q-bots start the re-election every 10 minutes. Their algorithm prefers to select players with fewer points who leave a `#yes` message, thus trying to give newcomers a chance to control the bots. The idea is interesting, but in practice the result is not good. The command gives a strong player a chance to get back the control. Of course, bounty is very approximate about the strength of the player, but this is the most understandable parameter for everyone.
+
 * If current leader is AFK you can start elections with:
     * send `#status` command
     * in next 10 seconds send `/elections` command
+* If current leader does something strange or nothing:
+    * send `#status` command
+    * send `/usurp` command. It allows you to take the leader position "without any questions" if the leader has fewer points. 
 
 * If you are leader and want to pass leadership to another player: `#leader <NICKNAME>`
 
