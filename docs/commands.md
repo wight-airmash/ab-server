@@ -6,6 +6,13 @@ Commands are executed via the chat interface.
 
 Update player country flag.
 
+Also, this custom flags supported:
+* `communist`
+* `confederate`
+* `imperial`
+* `rainbow`
+* `jolly`
+
 ### /votemute \<player name\>
 
 Vote to mute player.
@@ -17,6 +24,16 @@ Send a message to the team chat.
 ### /s \<message\>
 
 Say a message in the bubble.
+
+Also, you can send an emotion in the bubble:
+* `/tf`
+* `/pepe`
+* `/clap`
+* `/lol`
+* `/bro`
+* `/kappa`
+* `/cry`
+* `/rage`
 
 ### /w \<player name\> \<message\>
 
