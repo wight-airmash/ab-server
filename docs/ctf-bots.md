@@ -1,6 +1,7 @@
-# CTF Q-bots
+# CTF bots
 
-Source code of bots was miss, for now we only have [binaries](https://github.com/airmash-refugees/Q-bots)
+* Q-bots - are currently used on [airmash.online](https://airmash.online). Source code of bots was miss, for now we only have [binaries](https://github.com/airmash-refugees/Q-bots)
+* [Spatiebot](https://github.com/spatiebot/ab-bot) - Bot API + implementation based on the wight Airbattle API
 
 ## Commands
 
