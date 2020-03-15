@@ -1,17 +1,18 @@
 import { CTF_TEAMS } from '@airbattle/protocol';
+import { CTF_PLAYERS_SPAWN_ZONES } from '@/constants';
 import {
+  BROADCAST_PLAYER_RETEAM,
+  CTF_SHUFFLE_PLAYERS,
+  CTF_TEAMS_RESHUFFLED,
   PLAYERS_ASSIGN_SPAWN_POSITION,
   PLAYERS_ASSIGN_TEAM,
-  CTF_SHUFFLE_PLAYERS,
-  BROADCAST_PLAYER_RETEAM,
   PLAYERS_UPDATE_TEAM,
   TIMELINE_BEFORE_GAME_START,
 } from '@/events';
+import Entity from '@/server/entity';
 import { System } from '@/server/system';
 import { getRandomInt } from '@/support/numbers';
-import { CTF_PLAYERS_SPAWN_ZONES } from '@/constants';
 import { PlayerId } from '@/types';
-import Entity from '@/server/entity';
 
 interface ShuffleRateItem {
   id: PlayerId;
@@ -255,5 +256,7 @@ export default class GamePlayers extends System {
       BROADCAST_PLAYER_RETEAM,
       shuffleRateList.map(player => player.id)
     );
+
+    this.emit(CTF_TEAMS_RESHUFFLED);
   }
 }
