@@ -8,6 +8,7 @@ import {
 import {
   ERRORS_SPECTATE_INACTIVITY_HEALTH_REQUIRED,
   PLAYERS_ALIVE_UPDATE,
+  PLAYERS_SWITCHED_TO_SPECTATE,
   RESPONSE_GAME_SPECTATE,
   RESPONSE_SPECTATE_KILL,
   SPECTATE_EMIT_CHANNEL_EVENTS,
@@ -206,6 +207,7 @@ export default class GameSpectating extends System {
 
       this.emit(RESPONSE_SPECTATE_KILL, connectionId, spectatorId);
       this.emit(RESPONSE_GAME_SPECTATE, connectionId, playerId);
+      this.emit(PLAYERS_SWITCHED_TO_SPECTATE, playerId);
 
       this.log.debug(
         `Player id${spectatorId} switched to spectator mode, and is watching player id${playerId}.`

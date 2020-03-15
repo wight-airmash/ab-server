@@ -17,6 +17,7 @@ import {
   PLAYERS_EMIT_CHANNEL_RESPAWN,
   PLAYERS_REPEL_UPDATE,
   PLAYERS_RESPAWN,
+  PLAYERS_RESPAWNED,
   PLAYERS_SET_SHIP_TYPE,
   PLAYERS_UPGRADES_RESET,
   RESPONSE_SPECTATE_KILL,
@@ -179,7 +180,10 @@ export default class GamePlayersRespawn extends System {
       /**
        * No spectating anymore.
        */
+      let isSpectateBefore = false;
+
       if (player.spectate.isActive === true) {
+        isSpectateBefore = true;
         this.storage.playerInSpecModeList.delete(player.id.current);
         player.spectate.isActive = false;
 
@@ -195,6 +199,8 @@ export default class GamePlayersRespawn extends System {
       }
 
       player.delayed.RESPAWN = false;
+
+      this.emit(PLAYERS_RESPAWNED, player.id.current, isSpectateBefore);
 
       this.log.debug(`Player id${player.id.current} respawned.`);
     } else {
