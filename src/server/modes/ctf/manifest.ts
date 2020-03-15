@@ -1,9 +1,11 @@
 import Match from '@/server/components/game/match';
+import PlayersCommandHandler from '@/server/modes/base/commands/players';
 import BaseGameManifest from '@/server/modes/base/mainfest';
 import GameChat from '@/server/modes/base/maintenance/chat';
 import DropCommandHandler from '@/server/modes/ctf/commands/drop';
 import ElectionsCommandHandler from '@/server/modes/ctf/commands/elections';
 import MatchCommandHandler from '@/server/modes/ctf/commands/match';
+import CTFPlayersCommandHandler from '@/server/modes/ctf/commands/players';
 import SwitchCommandHandler from '@/server/modes/ctf/commands/switch';
 import UsurpCommandHandler from '@/server/modes/ctf/commands/usurp';
 import SpawnCampingGuard from '@/server/modes/ctf/guards/spawn-camping';
@@ -11,6 +13,7 @@ import CTFGameChat from '@/server/modes/ctf/maintenance/chat';
 import GameFlags from '@/server/modes/ctf/maintenance/flags';
 import GameMatches from '@/server/modes/ctf/maintenance/matches';
 import GamePlayers from '@/server/modes/ctf/maintenance/players';
+import GamePlayersStats from '@/server/modes/ctf/maintenance/players-stats';
 import GameRankings from '@/server/modes/ctf/maintenance/rankings';
 import InfernosPeriodic from '@/server/modes/ctf/periodic/infernos';
 import ExtraStatsPeriodic from '@/server/modes/ctf/periodic/player-stats';
@@ -31,14 +34,20 @@ export default class CTFGameManifest extends BaseGameManifest {
   constructor({ app }) {
     super({ app });
 
-    const GameChatSystem = [...this.app.systems].find(system => system.constructor === GameChat);
+    const loadedSystems = [...this.app.systems];
+    const GameChatSystem = loadedSystems.find(system => system.constructor === GameChat);
+    const PlayersCommandHandlerSystem = loadedSystems.find(
+      system => system.constructor === PlayersCommandHandler
+    );
 
     this.app.stopSystem(GameChatSystem);
+    this.app.stopSystem(PlayersCommandHandlerSystem);
 
     this.systems = [
       // Commands.
       DropCommandHandler,
       MatchCommandHandler,
+      CTFPlayersCommandHandler,
       SwitchCommandHandler,
 
       // Guards.
@@ -64,6 +73,7 @@ export default class CTFGameManifest extends BaseGameManifest {
       GameFlags,
       GameMatches,
       GamePlayers,
+      GamePlayersStats,
       GameRankings,
     ];
 
