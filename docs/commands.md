@@ -7,11 +7,12 @@ Commands are executed via the chat interface.
 Update player country flag.
 
 Also, this custom flags supported:
-* `communist`
-* `confederate`
-* `imperial`
-* `rainbow`
-* `jolly`
+
+- `communist`
+- `confederate`
+- `imperial`
+- `rainbow`
+- `jolly`
 
 ### /votemute \<player name\>
 
@@ -26,14 +27,15 @@ Send a message to the team chat.
 Say a message in the bubble.
 
 Also, you can send an emotion in the bubble:
-* `/tf`
-* `/pepe`
-* `/clap`
-* `/lol`
-* `/bro`
-* `/kappa`
-* `/cry`
-* `/rage`
+
+- `/tf`
+- `/pepe`
+- `/clap`
+- `/lol`
+- `/bro`
+- `/kappa`
+- `/cry`
+- `/rage`
 
 ### /w \<player name\> \<message\>
 
@@ -98,6 +100,10 @@ Run the leader elections if the current leader is AFK for 2 minutes in CTF. Work
 ### /usurp
 
 Take over the leader position in CTF. You must have higher score than the current leader. Works only with Q-bots.
+
+### /players [whisper]
+
+Info about the humans and bots currently playing. CTF stats data are grouped by teams and the results are broadcasted to the public chat indicating the player who requested the stats (muted players can't initiate broadcasting), limited by 1 message per 15 seconds. In CTF pass `whisper` parameter to get the results as a whisper message without public broadcasting.
 
 ### /server
 

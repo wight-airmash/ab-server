@@ -1,5 +1,15 @@
 ## Future version (unversioned)
 
+## 5.9.0 (March 15, 2020)
+
+Features:
+
+- [`/players`](./docs/commands.md#players) command (#86). Use it to get the stats about playing people and bots. CTF has a specific version of the command: the stats data are grouped by teams and the response is broadcasted to the public chat indicating the player who requested the stats (maximum one broadcast per 15 seconds; for the requests over the limit, a reply is sent as a whisper message). CTF command has an optional parameter: `/players [whisper]`, pass it to omit public broadcasting and get the response as a whisper message. Muted players can't initiate public chat broadcasting, they always get the results as a whisper message.
+
+Improvements:
+
+- Complete commands/bots documentation (#96).
+
 ## 5.8.0 (February 28, 2020)
 
 Features:
