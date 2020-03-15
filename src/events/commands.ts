@@ -8,6 +8,8 @@ export const COMMAND_FLAG = 'COMMAND_FLAG';
 
 export const COMMAND_MATCH = 'COMMAND_MATCH';
 
+export const COMMAND_PLAYERS = 'COMMAND_PLAYERS';
+
 export const COMMAND_PROFILE = 'COMMAND_PROFILE';
 
 export const COMMAND_RESPAWN = 'COMMAND_RESPAWN';

@@ -5,6 +5,7 @@ import {
   COMMAND_ELECTIONS,
   COMMAND_FLAG,
   COMMAND_MATCH,
+  COMMAND_PLAYERS,
   COMMAND_PROFILE,
   COMMAND_RESPAWN,
   COMMAND_SERVER,
@@ -41,6 +42,7 @@ export default class CommandMessageHandler extends System {
       upgrade: COMMAND_UPGRADE,
 
       // Custom commands.
+      players: COMMAND_PLAYERS,
       profile: COMMAND_PROFILE,
       server: COMMAND_SERVER,
       spectators: COMMAND_SPECTATORS,
