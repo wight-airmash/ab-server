@@ -38,6 +38,7 @@ import {
   CHANNEL_DEFAULT,
   CHANNEL_DISCONNECT_PLAYER,
   CHANNEL_MUTE,
+  CHANNEL_PLAYERS_STATS,
   CHANNEL_RESPAWN_PLAYER,
   CHANNEL_SPECTATE,
   CHANNEL_UPDATE_HORIZON,
@@ -132,15 +133,16 @@ export default class GameServer {
     this.events = new EventEmitter();
     this.channels = new Channels(
       { eventEmitter: this.events, log: this.log },
-      CHANNEL_DEFAULT,
+      CHANNEL_CHAT,
       CHANNEL_CONNECT_PLAYER,
+      CHANNEL_DEFAULT,
       CHANNEL_DISCONNECT_PLAYER,
+      CHANNEL_MUTE,
+      CHANNEL_PLAYERS_STATS,
       CHANNEL_RESPAWN_PLAYER,
       CHANNEL_SPECTATE,
-      CHANNEL_CHAT,
       CHANNEL_UPDATE_HORIZON,
-      CHANNEL_UPDATE_PLAYER_FLAG,
-      CHANNEL_MUTE
+      CHANNEL_UPDATE_PLAYER_FLAG
     );
     this.storage = new GameStorage();
 
