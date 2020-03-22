@@ -19,6 +19,7 @@ export default class ShieldsPeriodic extends System {
        */
       {
         interval: 105,
+        randomInterval: this.app.config.ctfRandomBaseShieldInterval,
         posX: -9300,
         posY: -1480,
         type: MOB_TYPES.SHIELD,
@@ -29,6 +30,7 @@ export default class ShieldsPeriodic extends System {
        */
       {
         interval: 105,
+        randomInterval: this.app.config.ctfRandomBaseShieldInterval,
         posX: 8350,
         posY: -935,
         type: MOB_TYPES.SHIELD,

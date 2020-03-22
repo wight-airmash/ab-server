@@ -63,3 +63,5 @@ export const CTF_QBOTS_FEATURES = true;
 export const CTF_SAVE_RESULTS_TO_FILES = false;
 
 export const CTF_PLAYERS_COMMAND_BROADCAST_DELAY_MS = 15 * MS_PER_SEC;
+
+export const CTF_BASE_SHIELD_RANDOM_INTERVAL_SEC = 30;

@@ -143,6 +143,18 @@ export interface PeriodicPowerupTemplate {
    * Respawn interval, seconds.
    */
   interval: number;
+
+  /**
+   * random(0, randomInterval) value added to a constant `interval`.
+   * May be used to make frontend timers useless.
+   *
+   * Seconds.
+   */
+  randomInterval?: number;
+
+  /**
+   * Spawn position.
+   */
   posX: number;
   posY: number;
 

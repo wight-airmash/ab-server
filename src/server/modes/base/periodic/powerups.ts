@@ -1,13 +1,15 @@
 import { MS_PER_SEC } from '@/constants';
 import {
   POWERUPS_ADD_PERIODIC,
-  TIMELINE_CLOCK_SECOND,
-  TIMELINE_GAME_MATCH_START,
   POWERUPS_DESPAWNED,
   POWERUPS_SPAWN,
+  TIMELINE_CLOCK_SECOND,
+  TIMELINE_GAME_MATCH_START,
 } from '@/events';
 import { System } from '@/server/system';
-import { PeriodicPowerupTemplate, PeriodicPowerup, MobId } from '@/types';
+import { getRandomInt } from '@/support/numbers';
+import { has } from '@/support/objects';
+import { MobId, PeriodicPowerup, PeriodicPowerupTemplate } from '@/types';
 
 export default class PowerupsPeriodic extends System {
   protected spawnedPowerups: Map<MobId, PeriodicPowerup> = new Map();
@@ -18,10 +20,10 @@ export default class PowerupsPeriodic extends System {
     super({ app });
 
     this.listeners = {
-      [TIMELINE_CLOCK_SECOND]: this.checkSpawn,
-      [TIMELINE_GAME_MATCH_START]: this.spawnPowerups,
       [POWERUPS_ADD_PERIODIC]: this.addPowerups,
       [POWERUPS_DESPAWNED]: this.onPowerupDespawned,
+      [TIMELINE_CLOCK_SECOND]: this.checkSpawn,
+      [TIMELINE_GAME_MATCH_START]: this.spawnPowerups,
     };
   }
 
@@ -72,6 +74,10 @@ export default class PowerupsPeriodic extends System {
 
       powerup.lastUpdate = Date.now();
       powerup.mobId = null;
+
+      if (has(powerup, 'randomInterval')) {
+        powerup.lastUpdate += getRandomInt(0, powerup.randomInterval) * MS_PER_SEC;
+      }
 
       this.spawnedPowerups.delete(mobId);
     }

@@ -42,6 +42,7 @@ import {
   UPGRADES_DEFAULT_MAX_CHANCE,
   UPGRADES_DEFAULT_MIN_CHANCE,
   USER_ACCOUNTS,
+  CTF_BASE_SHIELD_RANDOM_INTERVAL_SEC,
 } from '@/constants';
 import { has } from '@/support/objects';
 import { IPv4 } from '@/types';
@@ -258,6 +259,11 @@ export interface GameServerConfigInterface {
    * Save results to the files in dir ./cache/matches
    */
   ctfSaveMatchesResults: boolean;
+
+  /**
+   * Randomize periodic base shields.
+   */
+  ctfRandomBaseShieldInterval: number;
 
   /**
    * AFK disconnect timeout in minutes.
@@ -483,6 +489,11 @@ const config: GameServerConfigInterface = {
   ctfSaveMatchesResults: boolValue(
     process.env.CTF_SAVE_RESULTS_TO_FILES,
     CTF_SAVE_RESULTS_TO_FILES
+  ),
+
+  ctfRandomBaseShieldInterval: intValue(
+    process.env.CTF_BASE_SHIELD_RANDOM_INTERVAL,
+    CTF_BASE_SHIELD_RANDOM_INTERVAL_SEC
   ),
 
   afkDisconnectTimeout: floatValue(process.env.AFK_DISCONNECT_TIMEOUT, undefined),

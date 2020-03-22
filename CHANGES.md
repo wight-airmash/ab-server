@@ -1,5 +1,9 @@
 ## Future version (unversioned)
 
+Features:
+
+- Optional random spawn time drift of periodic powerups. The value is 30 seconds by default for CTF base shields to make timers useless, which means CTF base shields will spawn after 105 + randomInteger(0, 30) seconds after picked up. Random value updates after each picking. Use `CTF_BASE_SHIELD_RANDOM_INTERVAL` to change the max value of the random interval.
+
 Removed temporary features:
 
 - CTF games history.
