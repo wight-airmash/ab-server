@@ -60,4 +60,6 @@ export const CTF_USURP_DEBOUNCE_INTERVAL_MS = 60 * MS_PER_SEC;
 
 export const CTF_QBOTS_FEATURES = true;
 
+export const CTF_SAVE_RESULTS_TO_FILES = false;
+
 export const CTF_PLAYERS_COMMAND_BROADCAST_DELAY_MS = 15 * MS_PER_SEC;

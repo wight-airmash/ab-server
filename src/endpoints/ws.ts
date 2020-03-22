@@ -274,7 +274,7 @@ export default class WsEndpoint {
         res.end(`{"players":${this.app.storage.playerList.size}}`);
       })
 
-      .any('*', res => {
+      .any('/*', res => {
         res.writeStatus('404 Not Found').end('');
       });
 
@@ -341,72 +341,77 @@ export default class WsEndpoint {
         });
 
       if (this.app.config.server.typeId === GAME_TYPES.CTF) {
-        const matchesDir = joinPath(this.app.config.cache.path, 'matches');
-
-        /**
-         * Get the list of the matches history records.
-         * Temporary route.
-         */
-        this.uws
-          .post(`/${this.app.config.admin.route}/matches`, async res => {
-            readRequest(
-              res,
-              async (requestData: string) => {
-                const isAuth = await this.isModAuthorized(requestData);
-
-                if (isAuth === true) {
-                  try {
-                    const files = JSON.stringify(await readDir(matchesDir));
-
-                    res.writeHeader('Content-type', 'application/json');
-                    res.end(files);
-                  } catch (err) {
-                    this.log.error(`Error while reading ${matchesDir}`, err.stack);
-
-                    res.writeStatus('500 Internal Server Error').end('');
-                  }
-                } else {
-                  res.writeStatus('403 Forbidden').end('');
-                }
-              },
-              () => {
-                this.log.error('failed to parse /matches POST');
-              }
-            );
-          })
+        if (this.app.config.ctfSaveMatchesResults) {
+          const matchesDir = joinPath(this.app.config.cache.path, 'matches');
 
           /**
-           * Get the match record.
+           * Get the list of the matches history records.
            * Temporary route.
            */
-          .post(`/${this.app.config.admin.route}/matches/:timestamp`, async (res, req) => {
-            const timestamp = parseInt(req.getParameter(0), 10);
+          this.uws
+            .post(`/${this.app.config.admin.route}/matches`, async res => {
+              readRequest(
+                res,
+                async (requestData: string) => {
+                  const isAuth = await this.isModAuthorized(requestData);
 
-            readRequest(
-              res,
-              async (requestData: string) => {
-                const isAuth = await this.isModAuthorized(requestData);
+                  if (isAuth === true) {
+                    try {
+                      const files = JSON.stringify(await readDir(matchesDir));
 
-                if (isAuth === true) {
-                  try {
-                    const content = await readFile(joinPath(matchesDir, `${timestamp}.json`));
+                      res.writeHeader('Content-type', 'application/json');
+                      res.end(files);
+                    } catch (err) {
+                      this.log.error(`Error while reading ${matchesDir}`, err.stack);
 
-                    res.writeHeader('Content-type', 'application/json');
-                    res.end(content);
-                  } catch (err) {
-                    this.log.error(`Error while reading ${matchesDir}${timestamp}.json`, err.stack);
-
-                    res.writeStatus('404 Not Found').end('');
+                      res.writeStatus('500 Internal Server Error').end('');
+                    }
+                  } else {
+                    res.writeStatus('403 Forbidden').end('');
                   }
-                } else {
-                  res.writeStatus('403 Forbidden').end('');
+                },
+                () => {
+                  this.log.error('failed to parse /matches POST');
                 }
-              },
-              () => {
-                this.log.error('failed to parse /matches/:timestamp POST');
-              }
-            );
-          });
+              );
+            })
+
+            /**
+             * Get the match record.
+             * Temporary route.
+             */
+            .post(`/${this.app.config.admin.route}/matches/:timestamp`, async (res, req) => {
+              const timestamp = parseInt(req.getParameter(0), 10);
+
+              readRequest(
+                res,
+                async (requestData: string) => {
+                  const isAuth = await this.isModAuthorized(requestData);
+
+                  if (isAuth === true) {
+                    try {
+                      const content = await readFile(joinPath(matchesDir, `${timestamp}.json`));
+
+                      res.writeHeader('Content-type', 'application/json');
+                      res.end(content);
+                    } catch (err) {
+                      this.log.error(
+                        `Error while reading ${matchesDir}${timestamp}.json`,
+                        err.stack
+                      );
+
+                      res.writeStatus('404 Not Found').end('');
+                    }
+                  } else {
+                    res.writeStatus('403 Forbidden').end('');
+                  }
+                },
+                () => {
+                  this.log.error('failed to parse /matches/:timestamp POST');
+                }
+              );
+            });
+        }
       }
     }
   }

@@ -1,5 +1,9 @@
 ## Future version (unversioned)
 
+Removed temporary features:
+
+- CTF games history.
+
 ## 5.9.0 (March 15, 2020)
 
 Features:

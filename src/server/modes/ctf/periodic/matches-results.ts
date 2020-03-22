@@ -24,7 +24,7 @@ import { PlayerId } from '@/types';
 
 type Metrics = Map<PlayerId, number[]>;
 
-export default class ExtraStatsPeriodic extends System {
+export default class MatchesResultsPeriodic extends System {
   private readonly blueBase = {
     x: -8930,
     y: -1440,
@@ -77,11 +77,11 @@ export default class ExtraStatsPeriodic extends System {
   }
 
   protected getDistanceToBlueBase(posX: number, posY: number): number {
-    return ExtraStatsPeriodic.getDistanceToBase(posX, posY, this.blueBase.x, this.blueBase.y);
+    return MatchesResultsPeriodic.getDistanceToBase(posX, posY, this.blueBase.x, this.blueBase.y);
   }
 
   protected getDistanceToRedBase(posX: number, posY: number): number {
-    return ExtraStatsPeriodic.getDistanceToBase(posX, posY, this.redBase.x, this.redBase.y);
+    return MatchesResultsPeriodic.getDistanceToBase(posX, posY, this.redBase.x, this.redBase.y);
   }
 
   protected clearMetricSamples(): void {

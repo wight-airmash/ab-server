@@ -14,6 +14,7 @@ import {
   CONNECTIONS_INVALID_PROTOCOL_AUTOKICK,
   CONNECTIONS_WEBSOCKETS_COMPRESSION,
   CTF_QBOTS_FEATURES,
+  CTF_SAVE_RESULTS_TO_FILES,
   LIMITS_ANY,
   LIMITS_CHAT,
   LIMITS_CHAT_DECREASE_WEIGHT,
@@ -254,6 +255,11 @@ export interface GameServerConfigInterface {
   ctfQBotsFeatures: boolean;
 
   /**
+   * Save results to the files in dir ./cache/matches
+   */
+  ctfSaveMatchesResults: boolean;
+
+  /**
    * AFK disconnect timeout in minutes.
    */
   afkDisconnectTimeout: number;
@@ -473,6 +479,11 @@ const config: GameServerConfigInterface = {
   },
 
   ctfQBotsFeatures: boolValue(process.env.CTF_QBOTS_FEATURES, CTF_QBOTS_FEATURES),
+
+  ctfSaveMatchesResults: boolValue(
+    process.env.CTF_SAVE_RESULTS_TO_FILES,
+    CTF_SAVE_RESULTS_TO_FILES
+  ),
 
   afkDisconnectTimeout: floatValue(process.env.AFK_DISCONNECT_TIMEOUT, undefined),
 
