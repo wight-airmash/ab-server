@@ -119,6 +119,11 @@ export default class ServerCommandHandler extends System {
         `Env: ${this.app.config.env} (${this.app.config.logs.level}), compression ${
           this.app.config.compression ? 'enabled' : 'disabled'
         }, TLS ${this.app.config.tls ? 'enabled' : 'disabled'}. `,
+        `Fastcall: ${
+          typeof process.env.EXPERIMENTAL_FASTCALL === 'undefined'
+            ? 'undefined'
+            : process.env.EXPERIMENTAL_FASTCALL
+        }. `,
         `Skipped frames: ${this.app.metrics.lastSample.sft}. `,
         `Connections: ${this.storage.connectionList.size} total, `,
         `${this.storage.mainConnectionIdList.size} main, `,
