@@ -62,6 +62,6 @@ export default class KickPlayer extends System {
       connectionId
     );
 
-    this.emit(CONNECTIONS_DISCONNECT_PLAYER, connectionId);
+    this.emit(CONNECTIONS_DISCONNECT_PLAYER, playerId);
   }
 }

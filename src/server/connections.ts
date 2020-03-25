@@ -1,6 +1,10 @@
 import { marshalServerMessage, unmarshalClientMessage } from '@airbattle/protocol';
 import { ProtocolPacket } from '@airbattle/protocol/dist/packets';
-import { LIMITS_ANY_WEIGHT, SERVER_MIN_MOB_ID } from '@/constants';
+import {
+  CONNECTIONS_AUTO_CLOSE_SECOND_DELAY_MS,
+  LIMITS_ANY_WEIGHT,
+  SERVER_MIN_MOB_ID,
+} from '@/constants';
 import {
   CONNECTIONS_BREAK,
   CONNECTIONS_CHECK_PACKET_LIMITS,
@@ -15,7 +19,7 @@ import {
 } from '@/events';
 import { CHANNEL_DISCONNECT_PLAYER } from '@/server/channels';
 import { System } from '@/server/system';
-import { ConnectionId } from '@/types';
+import { ConnectionId, PlayerConnection, PlayerId } from '@/types';
 
 export default class Connections extends System {
   constructor({ app }) {
@@ -67,8 +71,7 @@ export default class Connections extends System {
    */
   onConnectionClosed(connectionId: ConnectionId): void {
     const connection = this.storage.connectionList.get(connectionId);
-
-    this.channel(CHANNEL_DISCONNECT_PLAYER).delay(PLAYERS_REMOVE, connection.meta.playerId);
+    let secondConnectionId: ConnectionId = null;
 
     /**
      * Stop timers.
@@ -85,6 +88,9 @@ export default class Connections extends System {
      * Remove all connection data.
      */
     if (connection.meta.isMain === true) {
+      this.channel(CHANNEL_DISCONNECT_PLAYER).delay(PLAYERS_REMOVE, connection.meta.playerId);
+      secondConnectionId = this.storage.playerBackupConnectionList.get(connection.meta.playerId);
+
       this.storage.mainConnectionIdList.delete(connectionId);
       this.storage.humanConnectionIdList.delete(connectionId);
       this.storage.botConnectionIdList.delete(connectionId);
@@ -115,21 +121,31 @@ export default class Connections extends System {
         this.log.debug(`Team id${connection.meta.teamId} connection id${connectionId} removed.`);
       }
     } else if (connection.meta.isBackup === true) {
+      secondConnectionId = this.storage.playerMainConnectionList.get(connection.meta.playerId);
+
       this.storage.playerBackupConnectionList.delete(connection.meta.playerId);
     }
 
     this.storage.connectionList.delete(connectionId);
 
     delete connection.meta;
+
+    /**
+     * In case a player has closed one connection itself,
+     * but for some reason left alive the second one.
+     */
+    if (typeof secondConnectionId !== 'undefined') {
+      setTimeout(() => {
+        this.onBreakConnection(secondConnectionId);
+      }, CONNECTIONS_AUTO_CLOSE_SECOND_DELAY_MS);
+    }
   }
 
-  onDisconnectPlayer(connectionId: ConnectionId): void {
+  onDisconnectPlayer(playerId: PlayerId): void {
     try {
-      const ws = this.storage.connectionList.get(connectionId);
+      this.log.debug(`Disconnecting player...`, { playerId });
 
-      ws.close();
-
-      this.log.debug(`Connection id${connectionId} was closed.`);
+      this.onBreakConnection(this.storage.playerMainConnectionList.get(playerId));
     } catch (err) {
       this.log.error('onDisconnectPlayer', err.stack);
     }
@@ -137,11 +153,41 @@ export default class Connections extends System {
 
   onBreakConnection(connectionId: ConnectionId): void {
     try {
+      if (!this.storage.connectionList.has(connectionId)) {
+        return;
+      }
+
       const ws = this.storage.connectionList.get(connectionId);
+      let ws2: PlayerConnection = null;
+      let ws2Id: ConnectionId = null;
 
-      ws.close();
+      if (ws.meta.playerId !== null) {
+        if (ws.meta.isMain) {
+          ws2Id = this.storage.playerBackupConnectionList.get(ws.meta.playerId);
+        } else {
+          ws2Id = this.storage.playerMainConnectionList.get(ws.meta.playerId);
+        }
 
-      this.log.debug(`Connection id${connectionId} was broken.`);
+        ws2 = this.storage.connectionList.get(ws2Id);
+      }
+
+      try {
+        this.log.debug(`Breaking connection...`, { connectionId });
+
+        ws.close();
+      } catch (err) {
+        this.log.debug(`onBreakConnection first connection`, err.stack);
+      }
+
+      if (typeof ws2 !== 'undefined') {
+        try {
+          this.log.debug(`Breaking connection...`, { connectionId: ws2Id });
+
+          ws2.close();
+        } catch (err) {
+          this.log.debug(`onBreakConnection second connection`, err.stack);
+        }
+      }
     } catch (err) {
       this.log.error('onBreakConnection', err.stack);
     }

@@ -97,6 +97,10 @@ export default class PacketRouter extends System {
   }
 
   onRouteMessage(msg: ProtocolPacket, connectionId: ConnectionId): void {
+    if (!this.storage.connectionList.has(connectionId)) {
+      return;
+    }
+
     const connection = this.storage.connectionList.get(connectionId);
 
     if (connection.meta.status !== CONNECTIONS_STATUS.ESTABLISHED) {

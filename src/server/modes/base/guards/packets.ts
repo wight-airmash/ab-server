@@ -46,12 +46,14 @@ export default class PacketsGuard extends System {
       return;
     }
 
-    if (connection.meta.playerId !== null) {
-      if (this.helpers.isPlayerConnected(connection.meta.playerId)) {
+    const { playerId } = connection.meta;
+
+    if (playerId !== null) {
+      if (this.helpers.isPlayerConnected(playerId)) {
         const secondConnectionId =
           connection.meta.isBackup === true
-            ? this.storage.playerMainConnectionList.get(connection.meta.playerId)
-            : this.storage.playerBackupConnectionList.get(connection.meta.playerId);
+            ? this.storage.playerMainConnectionList.get(playerId)
+            : this.storage.playerBackupConnectionList.get(playerId);
         const secondConnection = this.storage.connectionList.get(secondConnectionId);
 
         if (secondConnection.meta.status > CONNECTIONS_STATUS.ESTABLISHED) {
@@ -119,9 +121,9 @@ export default class PacketsGuard extends System {
       );
     }
 
-    if (connection.meta.playerId !== null) {
+    if (playerId !== null) {
       setTimeout(() => {
-        this.emit(CONNECTIONS_DISCONNECT_PLAYER, connectionId);
+        this.emit(CONNECTIONS_DISCONNECT_PLAYER, playerId);
       }, 100);
     } else {
       setTimeout(() => {

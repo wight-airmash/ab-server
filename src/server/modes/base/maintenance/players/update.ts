@@ -33,6 +33,7 @@ import {
   BROADCAST_PLAYER_UPDATE,
   COLLISIONS_ADD_OBJECT,
   CTF_PLAYER_DROP_FLAG,
+  ERRORS_AFK_DISCONNECT,
   PLAYERS_EMIT_CHANNEL_FLAG,
   PLAYERS_REPEL_UPDATE,
   PLAYERS_UPDATE,
@@ -41,8 +42,6 @@ import {
   RESPONSE_COMMAND_REPLY,
   TIMELINE_CLOCK_SECOND,
   VIEWPORTS_UPDATE_POSITION,
-  ERRORS_AFK_DISCONNECT,
-  CONNECTIONS_BREAK,
 } from '@/events';
 import { CHANNEL_UPDATE_PLAYER_FLAG } from '@/server/channels';
 import Acceleration from '@/server/components/acceleration';
@@ -228,10 +227,8 @@ export default class GamePlayersUpdate extends System {
         now - player.times.lastMove > afkDisconnectTimeout * 60 * 1000
       ) {
         const mainConnectionId = this.storage.playerMainConnectionList.get(player.id.current);
-        const backupConnectionId = this.storage.playerBackupConnectionList.get(player.id.current);
 
         this.emit(ERRORS_AFK_DISCONNECT, mainConnectionId);
-        this.emit(CONNECTIONS_BREAK, backupConnectionId);
 
         return;
       }
