@@ -1,4 +1,5 @@
-import { TIMEOUT_ACK, PLAYERS_KICK } from '@/events';
+import { CONNECTIONS_PACKET_ACK_TIMEOUT_MS } from '@/constants';
+import { PLAYERS_KICK, TIMEOUT_ACK } from '@/events';
 import { System } from '@/server/system';
 import { ConnectionId } from '@/types';
 
@@ -19,8 +20,16 @@ export default class AckTimeoutHandler extends System {
     const connection = this.storage.connectionList.get(connectionId);
 
     if (connection.meta.isBot === false && this.app.config.invalidProtocolAutoKick.ack === true) {
-      this.log.info(`No Ack request. Kick player id${connection.meta.playerId}.`);
-      this.emit(PLAYERS_KICK, connection.meta.playerId);
+      const now = Date.now();
+
+      if (connection.meta.lastMessageMs > now - CONNECTIONS_PACKET_ACK_TIMEOUT_MS) {
+        this.log.info(`No Ack request. Kick player id${connection.meta.playerId}.`);
+        this.emit(PLAYERS_KICK, connection.meta.playerId);
+      } else {
+        connection.meta.timeouts.ack = setTimeout(() => {
+          this.emit(TIMEOUT_ACK, connectionId);
+        }, CONNECTIONS_PACKET_ACK_TIMEOUT_MS);
+      }
     }
   }
 }
