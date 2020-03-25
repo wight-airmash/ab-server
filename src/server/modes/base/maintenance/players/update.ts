@@ -2,6 +2,7 @@ import { CTF_TEAMS, FLAGS_ISO_TO_CODE } from '@airbattle/protocol';
 import { Polygon } from 'collisions';
 import {
   COLLISIONS_OBJECT_TYPES,
+  CONNECTIONS_IDLE_TIMEOUT_MS,
   CONNECTIONS_LAGGING_DEFINE_VALUE_MS,
   CONNECTIONS_LAG_PACKETS_TO_DISCONNECT,
   LIMITS_ANY_DECREASE_WEIGHT,
@@ -254,7 +255,15 @@ export default class GamePlayersUpdate extends System {
         lastPacketReceivedAt = backupConnection.meta.lastMessageMs;
       }
 
-      if (now - lastPacketReceivedAt > CONNECTIONS_LAGGING_DEFINE_VALUE_MS) {
+      const lastReceivedPacketInterval = now - lastPacketReceivedAt;
+
+      if (lastReceivedPacketInterval > CONNECTIONS_IDLE_TIMEOUT_MS) {
+        this.emit(CONNECTIONS_DISCONNECT_PLAYER, player.id.current);
+
+        return;
+      }
+
+      if (lastReceivedPacketInterval > CONNECTIONS_LAGGING_DEFINE_VALUE_MS) {
         mainConnection.meta.lagging = true;
 
         if (hasBackupConnection) {
@@ -323,6 +332,8 @@ export default class GamePlayersUpdate extends System {
            * just disconnect the player (no kick alert).
            */
           this.emit(CONNECTIONS_DISCONNECT_PLAYER, player.id.current);
+
+          return;
         }
       }
 
