@@ -21,6 +21,7 @@ import {
 import { System } from '@/server/system';
 import { has } from '@/support/objects';
 import { ConnectionId, MainConnectionId, PlayerConnection, PlayerId } from '@/types';
+import { numberToHumanReadable } from '@/support/numbers';
 
 export default class ServerCommandHandler extends System {
   constructor({ app }) {
@@ -112,6 +113,20 @@ export default class ServerCommandHandler extends System {
    * @param playerId
    */
   protected responseServerDebug(playerId: PlayerId): void {
+    let packetInOut = '';
+
+    if (this.app.metrics.packets.inM !== 0) {
+      packetInOut = `${this.app.metrics.packets.inM}M `;
+    }
+
+    packetInOut += `${numberToHumanReadable(this.app.metrics.packets.in)}/`;
+
+    if (this.app.metrics.packets.outM !== 0) {
+      packetInOut += `${this.app.metrics.packets.outM}M `;
+    }
+
+    packetInOut += `${numberToHumanReadable(this.app.metrics.packets.out)}`;
+
     this.emit(
       BROADCAST_CHAT_SERVER_WHISPER,
       playerId,
@@ -125,6 +140,8 @@ export default class ServerCommandHandler extends System {
             : process.env.EXPERIMENTAL_FASTCALL
         }. `,
         `Skipped frames: ${this.app.metrics.lastSample.sft}. `,
+        `Packets in/out: ${packetInOut}. `,
+        `Lag packets: ${numberToHumanReadable(this.app.metrics.lagPackets)}. `,
         `Connections: ${this.storage.connectionList.size} total, `,
         `${this.storage.mainConnectionIdList.size} main, `,
         `${this.storage.playerBackupConnectionList.size} backup, `,
@@ -166,7 +183,8 @@ export default class ServerCommandHandler extends System {
 
           return `Precached spawn zones: ${total}, sets: ${this.storage.spawnZoneSet.size}. `;
         })(),
-        `AFK disconnect timeout: ${this.app.config.afkDisconnectTimeout} m.`,
+        `AFK disconnect timeout: ${this.app.config.afkDisconnectTimeout} m. `,
+        `Max online: ${this.app.metrics.players.max} players.`,
       ].join('')
     );
   }

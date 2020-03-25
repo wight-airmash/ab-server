@@ -42,3 +42,14 @@ export const median = (dataset: number[]): number => {
 
   return ~~((sortedSet[middleIndex - 1] + sortedSet[middleIndex]) / 2);
 };
+
+export const numberToHumanReadable = (value: number): string => {
+  const l1000 = value % 1000;
+  const hds = (value - l1000) / 1000;
+
+  if (hds === 0) {
+    return `${value}`;
+  }
+
+  return `${hds}K`;
+};

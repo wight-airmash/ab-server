@@ -6,11 +6,14 @@ import {
 } from '@/constants';
 import {
   BROADCAST_CHAT_SERVER_PUBLIC,
+  PLAYERS_CREATED,
   SERVER_FRAMES_SKIPPED,
   TIMELINE_CLOCK_HOUR,
+  TIMELINE_CLOCK_MINUTE,
   TIMELINE_CLOCK_SECOND,
 } from '@/events';
 import { System } from '@/server/system';
+import { median } from '@/support/numbers';
 
 export default class GameMetrics extends System {
   private seconds = 0;
@@ -29,12 +32,18 @@ export default class GameMetrics extends System {
 
   private lastHourSkippedFrames = 0;
 
+  private lastHourMaxPlayers = 0;
+
+  private lastHourPlayersSamples: number[] = [];
+
   constructor({ app }) {
     super({ app });
 
     this.listeners = {
+      [PLAYERS_CREATED]: this.onPlayerCreated,
       [SERVER_FRAMES_SKIPPED]: this.onFramesSkipped,
       [TIMELINE_CLOCK_HOUR]: this.onHour,
+      [TIMELINE_CLOCK_MINUTE]: this.onMinute,
       [TIMELINE_CLOCK_SECOND]: this.onSecond,
     };
   }
@@ -59,7 +68,50 @@ export default class GameMetrics extends System {
     }
   }
 
+  convertPacketsAmount(): void {
+    if (this.app.metrics.packets.in >= 1e6) {
+      const lm = this.app.metrics.packets.in % 1e6;
+      const m = (this.app.metrics.packets.in - lm) / 1e6;
+
+      this.app.metrics.packets.inM += m;
+      this.app.metrics.packets.in -= m * 1e6;
+    }
+
+    if (this.app.metrics.packets.out >= 1e6) {
+      const lm = this.app.metrics.packets.out % 1e6;
+      const m = (this.app.metrics.packets.out - lm) / 1e6;
+
+      this.app.metrics.packets.outM += m;
+      this.app.metrics.packets.out -= m * 1e6;
+    }
+  }
+
+  onPlayerCreated(): void {
+    if (this.storage.playerList.size > this.app.metrics.players.max) {
+      this.app.metrics.players.max = this.storage.playerList.size;
+    }
+
+    if (this.storage.playerList.size > this.lastHourMaxPlayers) {
+      this.lastHourMaxPlayers = this.storage.playerList.size;
+    }
+  }
+
+  onMinute(): void {
+    this.lastHourPlayersSamples.push(this.storage.playerList.size);
+  }
+
   onHour(): void {
+    this.convertPacketsAmount();
+
+    this.log.info('Packets stats:', this.app.metrics.packets);
+    this.log.info('Online players in the last hour:', {
+      max: this.lastHourMaxPlayers,
+      avg: median(this.lastHourPlayersSamples),
+    });
+
+    this.lastHourMaxPlayers = this.storage.playerList.size;
+    this.lastHourPlayersSamples = [];
+
     if (this.lastHourSkippedFrames !== 0) {
       this.log.warn(`${this.lastHourSkippedFrames} frames were skipped in the last hour.`);
       this.lastHourSkippedFrames = 0;
