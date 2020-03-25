@@ -101,6 +101,8 @@ export default class WsEndpoint {
             userId: null,
             lastMessageMs: now,
             createdAt: now,
+            lagging: false,
+            lagPackets: 0,
 
             periodic: {
               ping: null,
@@ -112,6 +114,7 @@ export default class WsEndpoint {
               backup: null,
               pong: null,
               respawn: null,
+              lagging: null,
             },
 
             pending: {

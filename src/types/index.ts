@@ -104,6 +104,9 @@ export interface ConnectionMeta {
 
   lastMessageMs: number;
   createdAt: number;
+  lagging: boolean;
+  lagPackets: number;
+
   periodic: {
     ping: NodeJS.Timeout;
   };
@@ -114,6 +117,7 @@ export interface ConnectionMeta {
     backup: NodeJS.Timeout;
     pong: NodeJS.Timeout;
     respawn: NodeJS.Timeout;
+    lagging: NodeJS.Timeout;
   };
 
   pending: {

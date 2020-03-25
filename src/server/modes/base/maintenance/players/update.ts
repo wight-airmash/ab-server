@@ -2,6 +2,8 @@ import { CTF_TEAMS, FLAGS_ISO_TO_CODE } from '@airbattle/protocol';
 import { Polygon } from 'collisions';
 import {
   COLLISIONS_OBJECT_TYPES,
+  CONNECTIONS_LAGGING_DEFINE_VALUE_MS,
+  CONNECTIONS_LAG_PACKETS_TO_DISCONNECT,
   LIMITS_ANY_DECREASE_WEIGHT,
   LIMITS_DEBUG_DECREASE_WEIGHT,
   LIMITS_KEY_DECREASE_WEIGHT,
@@ -32,6 +34,7 @@ import {
   BROADCAST_PLAYER_FLAG,
   BROADCAST_PLAYER_UPDATE,
   COLLISIONS_ADD_OBJECT,
+  CONNECTIONS_DISCONNECT_PLAYER,
   CTF_PLAYER_DROP_FLAG,
   ERRORS_AFK_DISCONNECT,
   PLAYERS_EMIT_CHANNEL_FLAG,
@@ -222,83 +225,105 @@ export default class GamePlayersUpdate extends System {
       /**
        * Disconnect if AFK timeout configured (non-zero) and player inactivity is past that limit
        */
+      const mainConnectionId = this.storage.playerMainConnectionList.get(player.id.current);
+
+      if (!this.storage.connectionList.has(mainConnectionId)) {
+        return;
+      }
+
+      const backupConnectionId = this.storage.playerBackupConnectionList.get(player.id.current);
+
       if (
         afkDisconnectTimeout > 0 &&
         now - player.times.lastMove > afkDisconnectTimeout * 60 * 1000
       ) {
-        const mainConnectionId = this.storage.playerMainConnectionList.get(player.id.current);
-
         this.emit(ERRORS_AFK_DISCONNECT, mainConnectionId);
 
         return;
       }
 
-      player.repel.current = false;
+      /**
+       * Detect lagging.
+       */
+      const mainConnection = this.storage.connectionList.get(mainConnectionId);
+      const hasBackupConnection = this.storage.connectionList.has(backupConnectionId);
+      const backupConnection = this.storage.connectionList.get(backupConnectionId);
+      let lastPacketReceivedAt = mainConnection.meta.lastMessageMs;
+
+      if (hasBackupConnection && backupConnection.meta.lastMessageMs > lastPacketReceivedAt) {
+        lastPacketReceivedAt = backupConnection.meta.lastMessageMs;
+      }
+
+      if (now - lastPacketReceivedAt > CONNECTIONS_LAGGING_DEFINE_VALUE_MS) {
+        mainConnection.meta.lagging = true;
+
+        if (hasBackupConnection) {
+          backupConnection.meta.lagging = true;
+        }
+      }
 
       /**
        * Update limits.
        */
-      if (
-        this.isUpdatePerSecondLimits === true &&
-        this.storage.playerMainConnectionList.has(player.id.current)
-      ) {
-        const c = this.storage.connectionList.get(
-          this.storage.playerMainConnectionList.get(player.id.current)
-        );
+      if (this.isUpdatePerSecondLimits) {
+        let { lagPackets } = mainConnection.meta;
 
-        c.meta.limits.any =
-          c.meta.limits.any < LIMITS_ANY_DECREASE_WEIGHT
-            ? 0
-            : c.meta.limits.any - LIMITS_ANY_DECREASE_WEIGHT;
+        {
+          const { limits } = mainConnection.meta;
 
-        c.meta.limits.key =
-          c.meta.limits.key < LIMITS_KEY_DECREASE_WEIGHT
-            ? 0
-            : c.meta.limits.key - LIMITS_KEY_DECREASE_WEIGHT;
+          limits.any =
+            limits.any < LIMITS_ANY_DECREASE_WEIGHT ? 0 : limits.any - LIMITS_ANY_DECREASE_WEIGHT;
 
-        c.meta.limits.chat =
-          c.meta.limits.chat < this.app.config.packetsLimit.chatLeak
-            ? 0
-            : c.meta.limits.chat - this.app.config.packetsLimit.chatLeak;
+          limits.key =
+            limits.key < LIMITS_KEY_DECREASE_WEIGHT ? 0 : limits.key - LIMITS_KEY_DECREASE_WEIGHT;
 
-        c.meta.limits.respawn =
-          c.meta.limits.respawn < LIMITS_RESPAWN_DECREASE_WEIGHT
-            ? 0
-            : c.meta.limits.respawn - LIMITS_RESPAWN_DECREASE_WEIGHT;
+          limits.chat =
+            limits.chat < this.app.config.packetsLimit.chatLeak
+              ? 0
+              : limits.chat - this.app.config.packetsLimit.chatLeak;
 
-        c.meta.limits.spectate =
-          c.meta.limits.spectate < LIMITS_SPECTATE_DECREASE_WEIGHT
-            ? 0
-            : c.meta.limits.spectate - LIMITS_SPECTATE_DECREASE_WEIGHT;
+          limits.respawn =
+            limits.respawn < LIMITS_RESPAWN_DECREASE_WEIGHT
+              ? 0
+              : limits.respawn - LIMITS_RESPAWN_DECREASE_WEIGHT;
 
-        c.meta.limits.su =
-          c.meta.limits.su < LIMITS_SU_DECREASE_WEIGHT
-            ? 0
-            : c.meta.limits.su - LIMITS_SU_DECREASE_WEIGHT;
+          limits.spectate =
+            limits.spectate < LIMITS_SPECTATE_DECREASE_WEIGHT
+              ? 0
+              : limits.spectate - LIMITS_SPECTATE_DECREASE_WEIGHT;
 
-        c.meta.limits.debug =
-          c.meta.limits.debug < LIMITS_DEBUG_DECREASE_WEIGHT
-            ? 0
-            : c.meta.limits.debug - LIMITS_DEBUG_DECREASE_WEIGHT;
-      }
+          limits.su =
+            limits.su < LIMITS_SU_DECREASE_WEIGHT ? 0 : limits.su - LIMITS_SU_DECREASE_WEIGHT;
 
-      if (
-        this.isUpdatePerSecondLimits === true &&
-        this.storage.playerBackupConnectionList.has(player.id.current)
-      ) {
-        const c = this.storage.connectionList.get(
-          this.storage.playerBackupConnectionList.get(player.id.current)
-        );
+          limits.debug =
+            limits.debug < LIMITS_DEBUG_DECREASE_WEIGHT
+              ? 0
+              : limits.debug - LIMITS_DEBUG_DECREASE_WEIGHT;
+        }
 
-        c.meta.limits.any =
-          c.meta.limits.any < LIMITS_ANY_DECREASE_WEIGHT
-            ? 0
-            : c.meta.limits.any - LIMITS_ANY_DECREASE_WEIGHT;
+        if (hasBackupConnection) {
+          const { limits } = backupConnection.meta;
 
-        c.meta.limits.key =
-          c.meta.limits.key < LIMITS_KEY_DECREASE_WEIGHT
-            ? 0
-            : c.meta.limits.key - LIMITS_KEY_DECREASE_WEIGHT;
+          lagPackets += backupConnection.meta.lagPackets;
+
+          limits.any =
+            limits.any < LIMITS_ANY_DECREASE_WEIGHT ? 0 : limits.any - LIMITS_ANY_DECREASE_WEIGHT;
+
+          limits.key =
+            limits.key < LIMITS_KEY_DECREASE_WEIGHT ? 0 : limits.key - LIMITS_KEY_DECREASE_WEIGHT;
+        }
+
+        if (lagPackets > CONNECTIONS_LAG_PACKETS_TO_DISCONNECT) {
+          this.log.info('Disconnect player due to lag packets amount.', {
+            playerId: player.id.current,
+          });
+
+          /**
+           * So that it doesn't look like a punishment for a bad connection,
+           * just disconnect the player (no kick alert).
+           */
+          this.emit(CONNECTIONS_DISCONNECT_PLAYER, player.id.current);
+        }
       }
 
       /**
@@ -309,6 +334,8 @@ export default class GamePlayersUpdate extends System {
 
         return;
       }
+
+      player.repel.current = false;
 
       if (
         player.keystate.FIRE ||

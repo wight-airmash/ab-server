@@ -74,6 +74,28 @@ export class Metrics {
    */
   public uptime: Uptime;
 
+  /**
+   * Packets amount.
+   */
+  public packets = {
+    // Converted into millions from time to time.
+    in: 0,
+    out: 0,
+
+    // Millions.
+    inM: 0,
+    outM: 0,
+  };
+
+  public players = {
+    max: 0,
+  };
+
+  /**
+   * Packets amount, that was received, but dropped because of player lags.
+   */
+  public lagPackets = 0;
+
   constructor() {
     this.ticksTimeMs = 0;
     this.collect = false;

@@ -1,6 +1,6 @@
 import { CLIENT_PACKETS } from '@airbattle/protocol';
 import { ProtocolPacket } from '@airbattle/protocol/dist/packets';
-import { CONNECTIONS_STATUS } from '@/constants';
+import { CONNECTIONS_STATUS, LIMITS_ANY_WEIGHT } from '@/constants';
 import {
   ERRORS_PACKET_FLOODING_DETECTED,
   ROUTE_ACK,
@@ -105,6 +105,16 @@ export default class PacketRouter extends System {
 
     if (connection.meta.status !== CONNECTIONS_STATUS.ESTABLISHED) {
       return;
+    }
+
+    if (connection.meta.lagging) {
+      if (msg.c === CLIENT_PACKETS.ACK || msg.c === CLIENT_PACKETS.KEY) {
+        connection.meta.limits.any -= LIMITS_ANY_WEIGHT;
+        connection.meta.lagPackets += 1;
+        this.app.metrics.lagPackets += 1;
+
+        return;
+      }
     }
 
     if (connection.meta.isBackup === true) {

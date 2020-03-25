@@ -2,6 +2,7 @@ import { marshalServerMessage, unmarshalClientMessage } from '@airbattle/protoco
 import { ProtocolPacket } from '@airbattle/protocol/dist/packets';
 import {
   CONNECTIONS_AUTO_CLOSE_SECOND_DELAY_MS,
+  CONNECTIONS_LAGGING_SAFE_TIMEOUT_MS,
   LIMITS_ANY_WEIGHT,
   SERVER_MIN_MOB_ID,
 } from '@/constants';
@@ -35,7 +36,25 @@ export default class Connections extends System {
     };
   }
 
+  clearLaggingStatus(connectionId: ConnectionId): void {
+    if (!this.storage.connectionList.has(connectionId)) {
+      return;
+    }
+
+    const connection = this.storage.connectionList.get(connectionId);
+
+    connection.meta.lagging = false;
+    connection.meta.timeouts.lagging = null;
+
+    this.log.debug('Connection lagging safe time end.', {
+      connectionId,
+      limits: connection.meta.limits,
+    });
+  }
+
   onPacketReceived(msg: ArrayBuffer, connectionId: ConnectionId): void {
+    this.app.metrics.packets.in += 1;
+
     if (this.app.metrics.collect === true) {
       this.app.metrics.sample.ppsIn += 1;
     }
@@ -46,7 +65,19 @@ export default class Connections extends System {
     connection.meta.limits.any += LIMITS_ANY_WEIGHT;
 
     if (connection.meta.isBot === false) {
-      this.emit(CONNECTIONS_CHECK_PACKET_LIMITS, connection);
+      if (connection.meta.lagging) {
+        if (connection.meta.timeouts.lagging === null) {
+          this.log.debug('Connection is lagging, safe time start.', {
+            connectionId,
+          });
+
+          connection.meta.timeouts.lagging = setTimeout(() => {
+            this.clearLaggingStatus(connectionId);
+          }, CONNECTIONS_LAGGING_SAFE_TIMEOUT_MS);
+        }
+      } else {
+        this.emit(CONNECTIONS_CHECK_PACKET_LIMITS, connection);
+      }
     }
 
     try {
@@ -134,7 +165,7 @@ export default class Connections extends System {
      * In case a player has closed one connection itself,
      * but for some reason left alive the second one.
      */
-    if (typeof secondConnectionId !== 'undefined') {
+    if (typeof secondConnectionId !== 'undefined' && secondConnectionId !== null) {
       setTimeout(() => {
         this.onBreakConnection(secondConnectionId);
       }, CONNECTIONS_AUTO_CLOSE_SECOND_DELAY_MS);
@@ -179,7 +210,7 @@ export default class Connections extends System {
         this.log.debug(`onBreakConnection first connection`, err.stack);
       }
 
-      if (typeof ws2 !== 'undefined') {
+      if (typeof ws2 !== 'undefined' && ws2 !== null) {
         try {
           this.log.debug(`Breaking connection...`, { connectionId: ws2Id });
 
@@ -212,6 +243,8 @@ export default class Connections extends System {
   }
 
   protected send(packet: ArrayBuffer, connectionId: ConnectionId): void {
+    this.app.metrics.packets.out += 1;
+
     if (this.app.metrics.collect === true) {
       this.app.metrics.sample.ppsOut += 1;
     }
