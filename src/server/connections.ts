@@ -2,7 +2,7 @@ import { marshalServerMessage, unmarshalClientMessage } from '@airbattle/protoco
 import { ProtocolPacket } from '@airbattle/protocol/dist/packets';
 import {
   CONNECTIONS_AUTO_CLOSE_SECOND_DELAY_MS,
-  CONNECTIONS_LAGGING_SAFE_TIMEOUT_MS,
+  CONNECTIONS_LAGGING_DROP_INTERVAL_MS,
   LIMITS_ANY_WEIGHT,
   SERVER_MIN_MOB_ID,
 } from '@/constants';
@@ -46,7 +46,7 @@ export default class Connections extends System {
     connection.meta.lagging = false;
     connection.meta.timeouts.lagging = null;
 
-    this.log.debug('Connection lagging safe time end.', {
+    this.log.debug('Connection lagging packets dropping end.', {
       connectionId,
       limits: connection.meta.limits,
     });
@@ -67,13 +67,13 @@ export default class Connections extends System {
     if (connection.meta.isBot === false) {
       if (connection.meta.lagging) {
         if (connection.meta.timeouts.lagging === null) {
-          this.log.debug('Connection is lagging, safe time start.', {
+          this.log.debug('Connection is lagging, packets dropping start.', {
             connectionId,
           });
 
           connection.meta.timeouts.lagging = setTimeout(() => {
             this.clearLaggingStatus(connectionId);
-          }, CONNECTIONS_LAGGING_SAFE_TIMEOUT_MS);
+          }, CONNECTIONS_LAGGING_DROP_INTERVAL_MS);
         }
       } else {
         this.emit(CONNECTIONS_CHECK_PACKET_LIMITS, connection);
