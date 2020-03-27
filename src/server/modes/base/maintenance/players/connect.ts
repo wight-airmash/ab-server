@@ -44,6 +44,7 @@ import {
 } from '@/events';
 import { CHANNEL_CONNECT_PLAYER, CHANNEL_MUTE } from '@/server/channels';
 import AliveStatus from '@/server/components/alive-status';
+import Bot from '@/server/components/bot';
 import Captures from '@/server/components/captures';
 import Damage from '@/server/components/damage';
 import Deaths from '@/server/components/deaths';
@@ -208,7 +209,8 @@ export default class GamePlayersConnect extends System {
       new Su(),
       new Ip(mainConnection.meta.ip),
       new Repel(),
-      new Stats()
+      new Stats(),
+      new Bot(mainConnection.meta.isBot)
     );
 
     player.attach(new Team(player.id.current));
@@ -255,7 +257,7 @@ export default class GamePlayersConnect extends System {
       if (recover.ip === player.ip.current && recover.expired >= Date.now()) {
         isRecovered = true;
 
-        if (this.storage.gameEntity.match.current === recover.data.match) {
+        if (this.storage.gameEntity.match.current === recover.data.match && !player.bot.current) {
           isAssignTeamNeeded = false;
         }
 

@@ -39,10 +39,27 @@ export default class GamePlayers extends System {
   }
 
   onAssignPlayerTeam(player: Entity): void {
-    const blueTeam = this.storage.connectionIdByTeam.get(CTF_TEAMS.BLUE).size;
-    const redTeam = this.storage.connectionIdByTeam.get(CTF_TEAMS.RED).size;
+    let blueTeam = 0;
+    let redTeam = 0;
 
-    this.log.debug(`Team connections: ${blueTeam}/${redTeam}`);
+    if (player.bot.current) {
+      this.storage.botIdList.forEach(botId => {
+        const bot = this.storage.playerList.get(botId);
+
+        if (bot.team.current === CTF_TEAMS.BLUE) {
+          blueTeam += 1;
+        } else {
+          redTeam += 1;
+        }
+      });
+
+      this.log.debug(`Bots team connections: ${blueTeam}/${redTeam}`);
+    } else {
+      blueTeam = this.storage.connectionIdByTeam.get(CTF_TEAMS.BLUE).size;
+      redTeam = this.storage.connectionIdByTeam.get(CTF_TEAMS.RED).size;
+
+      this.log.debug(`Team connections: ${blueTeam}/${redTeam}`);
+    }
 
     if (blueTeam > redTeam) {
       player.team.current = CTF_TEAMS.RED;
