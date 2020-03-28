@@ -64,11 +64,23 @@ Path to the certificates directory. Relative (to `app.js` [root](#app-root)) or 
 
 Must contain `privkey.pem` and `fullchain.pem` files (if `ENDPOINTS_TLS` is `true`).
 
+### CTF_BASE_SHIELD_RANDOM_INTERVAL
+
+Default: `30`
+
+The maximum number of seconds that can be randomly added to the basic interval of the base shield respawning.
+
 ### CTF_QBOTS_FEATURES
 
 Default: `true`
 
 Turn on/off features like [/usurp](./commands#usurp) or [/elections](./commands#elections) applicable only to Q-bots in CTF. Affects only CTF mode.
+
+### CTF_SAVE_RESULTS_TO_FILES
+
+Default: `false`
+
+Save CTF results into files in `./cache/matches`. Also adds API, available to moderators for downloading data (see `endpoints/ws.ts`). It is recommended to use only for debugging.
 
 ### ENDPOINTS_TLS
 

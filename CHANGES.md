@@ -1,8 +1,17 @@
 ## Future version (unversioned)
 
+## 5.10.0 (March 28, 2020)
+
 Features:
 
-- Optional random spawn time drift of periodic powerups. The value is 30 seconds by default for CTF base shields to make timers useless, which means CTF base shields will spawn after 105 + randomInteger(0, 30) seconds after picked up. Random value updates after each picking. Use `CTF_BASE_SHIELD_RANDOM_INTERVAL` to change the max value of the random interval.
+- Optional random spawn time drift of periodic powerups. The value is 30 seconds by default for CTF base shields to make timers useless, which means CTF base shields will spawn after 90 + randomInteger(0, 30) seconds after picked up. Random value updates after each picking. Use `CTF_BASE_SHIELD_RANDOM_INTERVAL` to change the max value of the random interval.
+
+Improvements:
+
+- Players' connection lag detecting (#104). Server tries to detect the player is lagging and don't kick it if so, the kicks because of flooding should be much less now. A new reason for disconnecting has been added ("info" log level): "Disconnect player due to lag packets amount". "Lag packets" is a new metrics (check in debug command), after player stops lagging, there is a short "grace" period for flooding through its connection. Every packet the server receives during this period counts as lag packet and drops. There is a limit for such packets per connection (for safety reason). After player reaches this limit, its connection will be closed.
+- Connections closing methods refactoring. Now the server forcefully closes the second (main or backup) connection if the first one was closed. Improved cleaning from idle connections.
+- CTF: the bots are evenly distributed among the teams (#102).
+- CTF: ignore spectator in shuffle (#101).
 
 Removed temporary features:
 
