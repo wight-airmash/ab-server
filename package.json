@@ -23,20 +23,8 @@
     "dev": "watch",
     "debug": "node --inspect dist/app.js",
     "lint": "eslint ./src --ext .js,.mjs,.ts",
-    "lint-autofix": "eslint ./src --ext .js,.mjs,.ts --fix",
-    "lint-staged": "lint-staged"
+    "lint-autofix": "eslint ./src --ext .js,.mjs,.ts --fix"
   },
-  "lint-staged": {
-    "src/**/*.(js|ts|mjs)": [
-      "eslint --fix",
-      "git add"
-    ],
-    "*.(json)": [
-      "prettier --config ./package.json --write",
-      "git add"
-    ]
-  },
-  "pre-commit": "lint-staged",
   "dependencies": {
     "@airbattle/protocol": "github:wight-airmash/ab-protocol#v6.0.0",
     "collisions": "github:wight-airmash/ab-collisions",
@@ -60,9 +48,7 @@
     "eslint-import-resolver-alias": "^1.1.2",
     "eslint-plugin-import": "^2.20.1",
     "eslint-plugin-prettier": "^3.1.2",
-    "lint-staged": "^9.5.0",
     "pino-pretty": "^3.6.1",
-    "pre-commit": "^1.2.2",
     "prettier": "^2.0.2",
     "typescript": "^3.8.3"
   },
