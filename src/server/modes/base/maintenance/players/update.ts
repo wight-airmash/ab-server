@@ -222,7 +222,7 @@ export default class GamePlayersUpdate extends System {
       compensationFactor -= Math.floor(frameFactor) - 1;
     }
 
-    this.storage.playerList.forEach(player => {
+    this.storage.playerList.forEach((player) => {
       /**
        * Disconnect if AFK timeout configured (non-zero) and player inactivity is past that limit
        */
@@ -249,25 +249,28 @@ export default class GamePlayersUpdate extends System {
       const mainConnection = this.storage.connectionList.get(mainConnectionId);
       const hasBackupConnection = this.storage.connectionList.has(backupConnectionId);
       const backupConnection = this.storage.connectionList.get(backupConnectionId);
-      let lastPacketReceivedAt = mainConnection.meta.lastMessageMs;
 
-      if (hasBackupConnection && backupConnection.meta.lastMessageMs > lastPacketReceivedAt) {
-        lastPacketReceivedAt = backupConnection.meta.lastMessageMs;
-      }
+      if (!mainConnection.meta.isBot) {
+        let lastPacketReceivedAt = mainConnection.meta.lastMessageMs;
 
-      const lastReceivedPacketInterval = now - lastPacketReceivedAt;
+        if (hasBackupConnection && backupConnection.meta.lastMessageMs > lastPacketReceivedAt) {
+          lastPacketReceivedAt = backupConnection.meta.lastMessageMs;
+        }
 
-      if (lastReceivedPacketInterval > CONNECTIONS_IDLE_TIMEOUT_MS) {
-        this.emit(CONNECTIONS_DISCONNECT_PLAYER, player.id.current);
+        const lastReceivedPacketInterval = now - lastPacketReceivedAt;
 
-        return;
-      }
+        if (lastReceivedPacketInterval > CONNECTIONS_IDLE_TIMEOUT_MS) {
+          this.emit(CONNECTIONS_DISCONNECT_PLAYER, player.id.current);
 
-      if (lastReceivedPacketInterval > CONNECTIONS_LAGGING_DEFINE_VALUE_MS) {
-        mainConnection.meta.lagging = true;
+          return;
+        }
 
-        if (hasBackupConnection) {
-          backupConnection.meta.lagging = true;
+        if (lastReceivedPacketInterval > CONNECTIONS_LAGGING_DEFINE_VALUE_MS) {
+          mainConnection.meta.lagging = true;
+
+          if (hasBackupConnection) {
+            backupConnection.meta.lagging = true;
+          }
         }
       }
 
@@ -872,7 +875,7 @@ export default class GamePlayersUpdate extends System {
            * Add projectile to each player viewport, who will get the fire message.
            * Otherwise there will be phantom projectiles.
            */
-          this.storage.broadcast.get(player.id.current).forEach(connectionId => {
+          this.storage.broadcast.get(player.id.current).forEach((connectionId) => {
             if (!this.storage.connectionList.has(connectionId)) {
               return;
             }
