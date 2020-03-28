@@ -102,7 +102,7 @@ export default class GameMatches extends System {
         this.emit(BROADCAST_GAME_FLAG, CTF_TEAMS.BLUE);
         this.emit(BROADCAST_GAME_FLAG, CTF_TEAMS.RED);
 
-        this.storage.playerList.forEach(player => {
+        this.storage.playerList.forEach((player) => {
           player.delayed.RESPAWN = true;
           player.times.activePlayingBlue = 0;
           player.times.activePlayingRed = 0;
@@ -156,7 +156,7 @@ export default class GameMatches extends System {
 
       const matchDuration = Date.now() - this.storage.gameEntity.match.start;
 
-      this.storage.playerList.forEach(player => {
+      this.storage.playerList.forEach((player) => {
         if (player.planestate.flagspeed === true) {
           player.planestate.flagspeed = false;
           this.emit(BROADCAST_PLAYER_UPDATE, player.id.current);
@@ -199,6 +199,11 @@ export default class GameMatches extends System {
       });
 
       this.emit(BROADCAST_CHAT_SERVER_PUBLIC, `Game time: ${msToHumanReadable(matchDuration)}.`);
+      this.emit(
+        BROADCAST_CHAT_SERVER_PUBLIC,
+        'Switch to spectate mode if you are not going to play the next game or be on the map till reshuffle if you are.'
+      );
+
       this.emit(TIMELINE_GAME_MATCH_END);
     }
   }

@@ -6,6 +6,7 @@ import {
   BROADCAST_CHAT_SERVER_WHISPER,
   CTF_PLAYER_SWITCHED,
   CTF_TEAMS_RESHUFFLED,
+  CTF_TEAM_CAPTURED_FLAG,
   PLAYERS_CREATED,
   PLAYERS_REMOVED,
   PLAYERS_RESPAWNED,
@@ -34,6 +35,7 @@ export default class GamePlayersStats extends System {
 
       // Events.
       [CTF_PLAYER_SWITCHED]: this.setStatsOutdated,
+      [CTF_TEAM_CAPTURED_FLAG]: this.onTeamCaptured,
       [CTF_TEAMS_RESHUFFLED]: this.setStatsOutdated,
       [PLAYERS_CREATED]: this.setStatsOutdated,
       [PLAYERS_REMOVED]: this.setStatsOutdated,
@@ -67,7 +69,7 @@ export default class GamePlayersStats extends System {
       botsSpec: 0,
     };
 
-    this.storage.playerList.forEach(player => {
+    this.storage.playerList.forEach((player) => {
       let stats = null;
 
       if (player.team.current === CTF_TEAMS.BLUE) {
@@ -92,13 +94,11 @@ export default class GamePlayersStats extends System {
     });
 
     this.isStatsOutdated = false;
-    this.cachedResponseMessage = `Blue/red: ${blueTeam.humans -
-      blueTeam.humansSpec}/${redTeam.humans - redTeam.humansSpec} humans playing, ${blueTeam.bots -
-      blueTeam.botsSpec}/${redTeam.bots -
-      redTeam.botsSpec} bots playing. Total players playing: ${blueTeam.humans +
-      blueTeam.bots -
-      blueTeam.humansSpec -
-      blueTeam.botsSpec}/${redTeam.humans + redTeam.bots - redTeam.humansSpec - redTeam.botsSpec}.`;
+    this.cachedResponseMessage = `${blueTeam.humans - blueTeam.humansSpec} vs ${
+      redTeam.humans - redTeam.humansSpec
+    } humans, ${blueTeam.bots - blueTeam.botsSpec} vs ${redTeam.bots - redTeam.botsSpec} bots, ${
+      blueTeam.humans + blueTeam.bots - blueTeam.humansSpec - blueTeam.botsSpec
+    } vs ${redTeam.humans + redTeam.bots - redTeam.humansSpec - redTeam.botsSpec} total.`;
 
     return this.cachedResponseMessage;
   }
@@ -132,6 +132,16 @@ export default class GamePlayersStats extends System {
 
       this.emit(BROADCAST_CHAT_PUBLIC, playerId, '/players');
       this.emit(BROADCAST_CHAT_SERVER_PUBLIC, responseMessage);
+    }
+  }
+
+  onTeamCaptured(): void {
+    const now = Date.now();
+
+    if (this.lastPublicBroadcastAt <= now - CTF_PLAYERS_COMMAND_BROADCAST_DELAY_MS) {
+      this.lastPublicBroadcastAt = now;
+
+      this.emit(BROADCAST_CHAT_SERVER_PUBLIC, this.getResponseMessage());
     }
   }
 }
