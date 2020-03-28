@@ -98,7 +98,7 @@ typings/
 dist/**/*
 
 # Certificates
-certs/*.pem
+certs/**/*.pem
 
 # Server cache
 cache/**/*
