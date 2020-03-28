@@ -18,7 +18,7 @@ export default class ShieldsPeriodic extends System {
        * Blue base shield.
        */
       {
-        interval: 105,
+        interval: 90,
         randomInterval: this.app.config.ctfRandomBaseShieldInterval,
         posX: -9300,
         posY: -1480,
@@ -29,7 +29,7 @@ export default class ShieldsPeriodic extends System {
        * Red base shield.
        */
       {
-        interval: 105,
+        interval: 90,
         randomInterval: this.app.config.ctfRandomBaseShieldInterval,
         posX: 8350,
         posY: -935,
