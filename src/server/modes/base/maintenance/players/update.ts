@@ -222,7 +222,7 @@ export default class GamePlayersUpdate extends System {
       compensationFactor -= Math.floor(frameFactor) - 1;
     }
 
-    this.storage.playerList.forEach((player) => {
+    this.storage.playerList.forEach(player => {
       /**
        * Disconnect if AFK timeout configured (non-zero) and player inactivity is past that limit
        */
@@ -875,7 +875,7 @@ export default class GamePlayersUpdate extends System {
            * Add projectile to each player viewport, who will get the fire message.
            * Otherwise there will be phantom projectiles.
            */
-          this.storage.broadcast.get(player.id.current).forEach((connectionId) => {
+          this.storage.broadcast.get(player.id.current).forEach(connectionId => {
             if (!this.storage.connectionList.has(connectionId)) {
               return;
             }

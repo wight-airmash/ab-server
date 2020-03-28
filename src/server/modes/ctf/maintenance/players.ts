@@ -44,7 +44,7 @@ export default class GamePlayers extends System {
     let redTeam = 0;
 
     if (player.bot.current) {
-      this.storage.botIdList.forEach((botId) => {
+      this.storage.botIdList.forEach(botId => {
         const bot = this.storage.playerList.get(botId);
 
         if (bot.team.current === CTF_TEAMS.BLUE) {
@@ -116,7 +116,7 @@ export default class GamePlayers extends System {
     let recaptures = 0;
     let recapturesPlayers = 0;
 
-    this.storage.playerList.forEach((player) => {
+    this.storage.playerList.forEach(player => {
       kills += player.kills.current;
       deaths += player.deaths.current;
       damage += player.damage.current;
@@ -180,7 +180,7 @@ export default class GamePlayers extends System {
       recapturesPlayers = 1;
     }
 
-    this.storage.playerList.forEach((player) => {
+    this.storage.playerList.forEach(player => {
       if (player.bot.current) {
         return;
       }
@@ -303,7 +303,7 @@ export default class GamePlayers extends System {
     let blueTeamBots = 0;
     let redTeamBots = 0;
 
-    this.storage.botIdList.forEach((botId) => {
+    this.storage.botIdList.forEach(botId => {
       const bot = this.storage.playerList.get(botId);
       const botTeam = bot.team.current;
 

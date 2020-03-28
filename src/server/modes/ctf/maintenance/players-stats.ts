@@ -69,7 +69,7 @@ export default class GamePlayersStats extends System {
       botsSpec: 0,
     };
 
-    this.storage.playerList.forEach((player) => {
+    this.storage.playerList.forEach(player => {
       let stats = null;
 
       if (player.team.current === CTF_TEAMS.BLUE) {

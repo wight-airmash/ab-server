@@ -158,8 +158,10 @@ export default class ServerCommandHandler extends System {
         `${this.storage.playerList.size} players, `,
         `${this.storage.botIdList.size} bots, `,
         `${this.storage.playerInSpecModeList.size} spectators, `,
-        `${this.storage.mobList.size -
-          (this.storage.nextServiceMobId - SERVER_MIN_SERVICE_MOB_ID - 1)} other mobs, `,
+        `${
+          this.storage.mobList.size -
+          (this.storage.nextServiceMobId - SERVER_MIN_SERVICE_MOB_ID - 1)
+        } other mobs, `,
         `${this.storage.nextServiceMobId - SERVER_MIN_SERVICE_MOB_ID - 1} service mobs, `,
         `${this.storage.repelList.size} repels, `,
         `${this.storage.projectileIdList.size} projectiles, `,
