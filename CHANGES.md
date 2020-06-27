@@ -1,6 +1,6 @@
 ## Future version (unversioned)
 
-## 6.0.0 (June 27, 2020)
+## 6.0.1 (June 27, 2020)
 
 Performance update.
 
