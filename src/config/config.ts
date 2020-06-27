@@ -6,15 +6,15 @@ import {
   AUTH_LOGIN_SERVER_KEY_URL,
   BOTS_DEFAULT_IP_LIST,
   BOTS_DEFAULT_NAME_PREFIX,
+  BOTS_IP_LIST_ENABLED,
   BOTS_SERVER_BOT_FLAG,
   BOTS_SERVER_BOT_NAME,
-  BOTS_WHITELIST_ENABLED,
   CONNECTIONS_DEFAULT_MAX_PLAYERS_PER_IP,
   CONNECTIONS_FLOODING_AUTOBAN,
   CONNECTIONS_INVALID_PROTOCOL_AUTOKICK,
   CONNECTIONS_WEBSOCKETS_COMPRESSION,
+  CTF_BASE_SHIELD_RANDOM_INTERVAL_SEC,
   CTF_QBOTS_FEATURES,
-  CTF_SAVE_RESULTS_TO_FILES,
   LIMITS_ANY,
   LIMITS_CHAT,
   LIMITS_CHAT_DECREASE_WEIGHT,
@@ -23,11 +23,13 @@ import {
   METRICS_LOG_SAMPLES,
   PLAYERS_ALLOW_NON_ASCII_USERNAMES,
   POWERUPS_SPAWN_CHANCE,
+  POWERUPS_SPAWN_LIMIT,
   SERVER_DEFAULT_ENVIRONMENT,
   SERVER_DEFAULT_GEO_DB_PATH,
   SERVER_DEFAULT_HOST,
   SERVER_DEFAULT_LOG_LEVEL,
   SERVER_DEFAULT_LOG_TO_CONSOLE,
+  SERVER_DEFAULT_PATH,
   SERVER_DEFAULT_PORT,
   SERVER_DEFAULT_PROWLERS_ALWAYS_VISIBLE_FOR_TEAMMATES,
   SERVER_DEFAULT_ROOM,
@@ -42,10 +44,9 @@ import {
   UPGRADES_DEFAULT_MAX_CHANCE,
   UPGRADES_DEFAULT_MIN_CHANCE,
   USER_ACCOUNTS,
-  CTF_BASE_SHIELD_RANDOM_INTERVAL_SEC,
-} from '@/constants';
-import { has } from '@/support/objects';
-import { IPv4 } from '@/types';
+} from '../constants';
+import { has } from '../support/objects';
+import { IPv4 } from '../types';
 
 export interface GameServerConfigInterface {
   /**
@@ -65,43 +66,91 @@ export interface GameServerConfigInterface {
    */
   rootDir: string;
 
-  /**
-   * Server host/IP.
-   */
-  host: string;
+  server: {
+    typeId: number;
 
-  /**
-   * Server port.
-   */
-  port: number;
+    /**
+     * Server base version.
+     */
+    version: string;
 
-  /**
-   * Use TLS.
-   */
-  tls: boolean;
-  certs: {
-    path: string;
-  };
+    /**
+     * Version variation.
+     */
+    edition: string;
 
-  /**
-   * Use compression for websockets.
-   */
-  compression: boolean;
+    /**
+     * Server host/IP.
+     */
+    host: string;
 
-  admin: {
-    active: boolean;
-    route: string;
-    htmlPath: string;
-    passwordsPath: string;
+    /**
+     * Server port.
+     */
+    port: number;
+
+    /**
+     * Server URL path.
+     */
+    basePath: string;
+
+    /**
+     * Use TLS.
+     */
+    tls: boolean;
+    certs: {
+      path: string;
+    };
+
+    /**
+     * Use compression for websockets.
+     */
+    compression: boolean;
+
+    /**
+     * Server type: FFA, CTF, BTR.
+     */
+    type: string;
+
+    /**
+     * Server room name.
+     */
+    room: string;
+
+    /**
+     * Server zoom. Available values: `SERVER_SCALE_FACTOR_VALID_VALUE`.
+     */
+    scaleFactor: number;
+
+    /**
+     * Server info bot.
+     */
+    bot: {
+      name: string;
+
+      flag: string;
+
+      flagId: number;
+
+      /**
+       * Welcome messages.
+       */
+      welcome: string[];
+    };
   };
 
   logs: {
     level: string;
 
     /**
-     * Path to log file.
+     * Path to the log file.
      */
     path: string;
+
+    /**
+     * Path to the public chat log file.
+     */
+    chat: string;
 
     /**
      * Log to console.
@@ -118,7 +167,40 @@ export interface GameServerConfigInterface {
     path: string;
   };
 
-  auth: {
+  connections: {
+    maxPlayersPerIP: number;
+
+    /**
+     * Leaky buckets parameters.
+     */
+    packetLimits: {
+      any: number;
+      key: number;
+      chat: number;
+      chatLeak: number;
+    };
+
+    /**
+     * Permit automatic kicks based on invalid protocol implementation.
+     */
+    invalidProtocolAutoKick: {
+      ack: boolean;
+      pong: boolean;
+      backup: boolean;
+    };
+
+    /**
+     * Permit automatic bans based on network events (i.e. packet flooding).
+     */
+    autoBan: boolean;
+
+    /**
+     * AFK disconnect timeout in minutes.
+     */
+    afkDisconnectTimeout: number;
+  };
+
+  accounts: {
     /**
      * Allow players to use accounts.
      */
@@ -128,49 +210,20 @@ export interface GameServerConfigInterface {
      * URL of the public key server.
      */
     loginKeyServer: string;
-  };
-
-  userStats: {
-    path: string;
-  };
-
-  server: {
-    typeId: number;
 
     /**
-     * Server type: FFA, CTF, BTR.
+     * User stats DB.
      */
-    type: string;
-
-    /**
-     * Server room name.
-     */
-    room: string;
-
-    /**
-     * Server zoom. Available values: `SERVER_SCALE_FACTOR_VALID_VALUE`.
-     */
-    scaleFactor: number;
+    userStats: {
+      path: string;
+    };
   };
 
-  /**
-   * Server info bot.
-   */
-  bot: {
-    name: string;
-
-    flag: string;
-
-    flagId: number;
-  };
-
-  /**
-   * Master server. Inactive currently.
-   */
-  master: {
-    host: string;
-    secret: string;
-    tls: boolean;
+  admin: {
+    active: boolean;
+    route: string;
+    htmlPath: string;
+    passwordsPath: string;
   };
 
   /**
@@ -184,36 +237,39 @@ export interface GameServerConfigInterface {
   metricsInterval: number;
 
   /**
-   * Enable whitelist.
-   * If disabled (false) every player is considered as bot.
-   * Bots have no limits, use only during development.
-   */
-  whitelist: boolean;
-
-  botsIP: IPv4[];
-
-  /**
    * Admin password.
    */
   suPassword: string;
 
-  /**
-   * Random shields and infernos default spawn chance [0..1].
-   */
-  powerupSpawnChance: number;
+  powerups: {
+    /**
+     * Random shields and infernos spawn chance [0..1].
+     */
+    chance: number;
 
-  /**
-   * Upgrades min chance to drop.
-   */
-  upgradesDropMinChance: number;
+    /**
+     *
+     * Sets the maximum number of spawn events
+     * per minute (predefined powerups are not affected).
+     * Defined as a percentage of the total amount of chunks, [0..1].
+     */
+    limit: number;
+  };
 
-  /**
-   * Upgrades max chance to drop.
-   * >= upgradesDropMinChance
-   *
-   * Set min = 0 and max = 0 to disable upgrades drop.
-   */
-  upgradesDropMaxChance: number;
+  upgrades: {
+    /**
+     * Upgrades min chance to drop.
+     */
+    minChance: number;
+
+    /**
+     * Upgrades max chance to drop.
+     * >= upgradesDropMinChance
+     *
+     * Set min = 0 and max = 0 to disable upgrades drop.
+     */
+    maxChance: number;
+  };
 
   /**
    * If true prowlers are always visible for teammates.
@@ -222,63 +278,35 @@ export interface GameServerConfigInterface {
 
   allowNonAsciiUsernames: boolean;
 
-  maxPlayersPerIP: number;
+  ctf: {
+    /**
+     * Enable special CTF Q-bots features.
+     */
+    qBotsFeatures: boolean;
 
-  welcomeMessages: string[];
-
-  /**
-   * Permit automatic bans based on network events (i.e. packet flooding).
-   */
-  autoBan: boolean;
-
-  /**
-   * Leaky buckets parameters.
-   */
-  packetsLimit: {
-    any: number;
-    key: number;
-    chat: number;
-    chatLeak: number;
+    /**
+     * Randomize periodic base shields.
+     */
+    randomBaseShieldInterval: number;
   };
 
-  /**
-   * Permit automatic kicks based on invalid protocol implementation.
-   */
-  invalidProtocolAutoKick: {
-    ack: boolean;
-    pong: boolean;
-    backup: boolean;
+  bots: {
+    /**
+     * Enable or disable allowed IP list.
+     * Bots have less restrictions and don't have an access to the server bot.
+     */
+    enabled: boolean;
+
+    /**
+     * Allowed IP list.
+     */
+    ipList: IPv4[];
+
+    /**
+     * Auto add prefix to the bot name.
+     */
+    prefix: string;
   };
-
-  /**
-   * Enable special CTF Q-bots features.
-   */
-  ctfQBotsFeatures: boolean;
-
-  /**
-   * Save results to the files in dir ./cache/matches
-   */
-  ctfSaveMatchesResults: boolean;
-
-  /**
-   * Randomize periodic base shields.
-   */
-  ctfRandomBaseShieldInterval: number;
-
-  /**
-   * AFK disconnect timeout in minutes.
-   */
-  afkDisconnectTimeout: number;
-
-  /**
-   * Auto add prefix to the bot name.
-   */
-  botsNamePrefix: string;
-
-  /**
-   * Server version.
-   */
-  version: string;
 }
 
 const appRootDir = resolve(__dirname, '../');
@@ -351,12 +379,36 @@ const parseWelcomeMessages = (value: string | undefined, def: string[]): string[
   return def;
 };
 
+const parseServerPath = (value: string | undefined, def = '/'): string => {
+  let result = def;
+
+  if (typeof value === 'string' && value.length > 0) {
+    const parts = value.split('/');
+    const validParts = parts.filter(part => part !== '');
+
+    result = `/${validParts.join('/')}`;
+  }
+
+  if (result === '/') {
+    return '';
+  }
+
+  return result;
+};
+
 let logsPath = process.env.LOG_FILE || '';
+let chatLogsPath = process.env.LOG_CHAT_FILE || '';
 
 if (typeof process.env.LOG_FILE === 'string' && process.env.LOG_FILE.length === 0) {
   logsPath = '';
 } else {
   logsPath = resolvePath(strValue(process.env.LOG_FILE, '../logs/airbattle.log'));
+}
+
+if (typeof process.env.LOG_CHAT_FILE === 'string' && process.env.LOG_CHAT_FILE.length === 0) {
+  chatLogsPath = '';
+} else {
+  chatLogsPath = resolvePath(strValue(process.env.LOG_CHAT_FILE, '../logs/chat.log'));
 }
 
 const config: GameServerConfigInterface = {
@@ -366,15 +418,91 @@ const config: GameServerConfigInterface = {
   cwd: process.cwd(),
   rootDir: appRootDir,
 
-  host: strValue(process.env.HOST, SERVER_DEFAULT_HOST),
-  port: intValue(process.env.PORT, SERVER_DEFAULT_PORT),
+  server: {
+    typeId: 0,
 
-  tls: boolValue(process.env.ENDPOINTS_TLS, SERVER_DEFAULT_TLS),
-  certs: {
-    path: resolvePath(strValue(process.env.CERTS_PATH, '../certs')),
+    version,
+    edition: strValue(process.env.SERVER_EDITION, 'main'),
+
+    host: strValue(process.env.HOST, SERVER_DEFAULT_HOST),
+    port: intValue(process.env.PORT, SERVER_DEFAULT_PORT),
+    basePath: parseServerPath(process.env.BASE_PATH, SERVER_DEFAULT_PATH),
+
+    compression: boolValue(process.env.WEBSOCKETS_COMPRESSION, CONNECTIONS_WEBSOCKETS_COMPRESSION),
+
+    tls: boolValue(process.env.ENDPOINTS_TLS, SERVER_DEFAULT_TLS),
+
+    certs: {
+      path: resolvePath(strValue(process.env.CERTS_PATH, '../certs')),
+    },
+
+    type: strValue(process.env.SERVER_TYPE, SERVER_DEFAULT_TYPE),
+    room: strValue(process.env.SERVER_ROOM, SERVER_DEFAULT_ROOM),
+    scaleFactor: intValue(process.env.SCALE_FACTOR, SERVER_DEFAULT_SCALE_FACTOR),
+
+    bot: {
+      name: strValue(process.env.SERVER_BOT_NAME, BOTS_SERVER_BOT_NAME),
+      flag: strValue(process.env.SERVER_BOT_FLAG, BOTS_SERVER_BOT_FLAG),
+      flagId: 0,
+      welcome: parseWelcomeMessages(process.env.WELCOME_MESSAGES, SERVER_WELCOME_MESSAGES),
+    },
   },
 
-  compression: boolValue(process.env.WEBSOCKETS_COMPRESSION, CONNECTIONS_WEBSOCKETS_COMPRESSION),
+  logs: {
+    level: strValue(process.env.LOG_LEVEL, SERVER_DEFAULT_LOG_LEVEL),
+    path: logsPath,
+    chat: chatLogsPath,
+    console: boolValue(process.env.LOG_TO_CONSOLE, SERVER_DEFAULT_LOG_TO_CONSOLE),
+    samples: boolValue(process.env.LOG_PERFORMANCE_SAMPLES, METRICS_LOG_SAMPLES),
+  },
+
+  cache: {
+    path: resolvePath(strValue(process.env.CACHE_PATH, '../cache')),
+  },
+
+  connections: {
+    maxPlayersPerIP: intValue(
+      process.env.MAX_PLAYERS_PER_IP,
+      CONNECTIONS_DEFAULT_MAX_PLAYERS_PER_IP
+    ),
+
+    packetLimits: {
+      any: intValue(process.env.PACKETS_LIMIT_ANY, LIMITS_ANY),
+      key: intValue(process.env.PACKETS_LIMIT_KEY, LIMITS_KEY),
+      chat: intValue(process.env.PACKETS_LIMIT_CHAT, LIMITS_CHAT),
+      chatLeak: intValue(process.env.PACKETS_LIMIT_CHAT_LEAK, LIMITS_CHAT_DECREASE_WEIGHT),
+    },
+
+    invalidProtocolAutoKick: {
+      ack: boolValue(
+        process.env.INVALID_PROTOCOL_AUTOKICK_ACK,
+        CONNECTIONS_INVALID_PROTOCOL_AUTOKICK
+      ),
+
+      pong: boolValue(
+        process.env.INVALID_PROTOCOL_AUTOKICK_PONG,
+        CONNECTIONS_INVALID_PROTOCOL_AUTOKICK
+      ),
+
+      backup: boolValue(
+        process.env.INVALID_PROTOCOL_AUTOKICK_BACKUP,
+        CONNECTIONS_INVALID_PROTOCOL_AUTOKICK
+      ),
+    },
+
+    autoBan: boolValue(process.env.PACKETS_FLOODING_AUTOBAN, CONNECTIONS_FLOODING_AUTOBAN),
+
+    afkDisconnectTimeout: floatValue(process.env.AFK_DISCONNECT_TIMEOUT, undefined),
+  },
+
+  accounts: {
+    active: boolValue(process.env.USER_ACCOUNTS, USER_ACCOUNTS),
+    loginKeyServer: strValue(process.env.AUTH_LOGIN_SERVER_KEY_URL, AUTH_LOGIN_SERVER_KEY_URL),
+
+    userStats: {
+      path: resolvePath(strValue(process.env.STATS_PATH, '../data/user-stats.json')),
+    },
+  },
 
   admin: {
     active: boolValue(process.env.MODERATION_PANEL, SERVER_MODERATION_PANEL),
@@ -385,66 +513,21 @@ const config: GameServerConfigInterface = {
     ),
   },
 
-  logs: {
-    level: strValue(process.env.LOG_LEVEL, SERVER_DEFAULT_LOG_LEVEL),
-    path: logsPath,
-    console: boolValue(process.env.LOG_TO_CONSOLE, SERVER_DEFAULT_LOG_TO_CONSOLE),
-    samples: boolValue(process.env.LOG_PERFORMANCE_SAMPLES, METRICS_LOG_SAMPLES),
-  },
-
-  cache: {
-    path: resolvePath(strValue(process.env.CACHE_PATH, '../cache')),
-  },
-
-  auth: {
-    active: boolValue(process.env.USER_ACCOUNTS, USER_ACCOUNTS),
-    loginKeyServer: strValue(process.env.AUTH_LOGIN_SERVER_KEY_URL, AUTH_LOGIN_SERVER_KEY_URL),
-  },
-
-  userStats: {
-    path: resolvePath(strValue(process.env.STATS_PATH, '../data/user-stats.json')),
-  },
-
-  server: {
-    typeId: 0,
-    type: strValue(process.env.SERVER_TYPE, SERVER_DEFAULT_TYPE),
-    room: strValue(process.env.SERVER_ROOM, SERVER_DEFAULT_ROOM),
-    scaleFactor: intValue(process.env.SCALE_FACTOR, SERVER_DEFAULT_SCALE_FACTOR),
-  },
-
-  bot: {
-    name: strValue(process.env.SERVER_BOT_NAME, BOTS_SERVER_BOT_NAME),
-    flag: strValue(process.env.SERVER_BOT_FLAG, BOTS_SERVER_BOT_FLAG),
-    flagId: 0,
-  },
-
-  master: {
-    host: strValue(process.env.MASTER_HOST),
-    secret: strValue(process.env.MASTER_SECRET),
-    tls: boolValue(process.env.MASTER_TLS, false),
-  },
-
   geoBasePath: resolvePath(SERVER_DEFAULT_GEO_DB_PATH),
 
   metricsInterval: METRICS_LOG_INTERVAL_SEC,
 
-  whitelist: boolValue(process.env.WHITELIST_ENABLED, BOTS_WHITELIST_ENABLED),
-
-  botsIP: parseBotsIP(process.env.BOTS_IP, BOTS_DEFAULT_IP_LIST),
-
   suPassword: strValue(process.env.SU_PASSWORD, SERVER_DEFAULT_SU_PASSWORD),
 
-  powerupSpawnChance: floatValue(process.env.POWERUPS_SPAWN_CHANCE, POWERUPS_SPAWN_CHANCE),
+  powerups: {
+    chance: floatValue(process.env.POWERUPS_SPAWN_CHANCE, POWERUPS_SPAWN_CHANCE),
+    limit: floatValue(process.env.POWERUPS_SPAWN_LIMIT, POWERUPS_SPAWN_LIMIT),
+  },
 
-  upgradesDropMinChance: floatValue(
-    process.env.UPGRADES_DROP_MIN_CHANCE,
-    UPGRADES_DEFAULT_MIN_CHANCE
-  ),
-
-  upgradesDropMaxChance: floatValue(
-    process.env.UPGRADES_DROP_MAX_CHANCE,
-    UPGRADES_DEFAULT_MAX_CHANCE
-  ),
+  upgrades: {
+    minChance: floatValue(process.env.UPGRADES_DROP_MIN_CHANCE, UPGRADES_DEFAULT_MIN_CHANCE),
+    maxChance: floatValue(process.env.UPGRADES_DROP_MAX_CHANCE, UPGRADES_DEFAULT_MAX_CHANCE),
+  },
 
   visibleTeamProwlers: boolValue(
     process.env.PROWLERS_ALWAYS_VISIBLE_FOR_TEAMMATES,
@@ -456,51 +539,20 @@ const config: GameServerConfigInterface = {
     PLAYERS_ALLOW_NON_ASCII_USERNAMES
   ),
 
-  maxPlayersPerIP: intValue(process.env.MAX_PLAYERS_PER_IP, CONNECTIONS_DEFAULT_MAX_PLAYERS_PER_IP),
-
-  welcomeMessages: parseWelcomeMessages(process.env.WELCOME_MESSAGES, SERVER_WELCOME_MESSAGES),
-
-  autoBan: boolValue(process.env.PACKETS_FLOODING_AUTOBAN, CONNECTIONS_FLOODING_AUTOBAN),
-
-  packetsLimit: {
-    any: intValue(process.env.PACKETS_LIMIT_ANY, LIMITS_ANY),
-    key: intValue(process.env.PACKETS_LIMIT_KEY, LIMITS_KEY),
-    chat: intValue(process.env.PACKETS_LIMIT_CHAT, LIMITS_CHAT),
-    chatLeak: intValue(process.env.PACKETS_LIMIT_CHAT_LEAK, LIMITS_CHAT_DECREASE_WEIGHT),
+  bots: {
+    enabled: boolValue(process.env.WHITELIST_ENABLED, BOTS_IP_LIST_ENABLED),
+    ipList: parseBotsIP(process.env.BOTS_IP, BOTS_DEFAULT_IP_LIST),
+    prefix: strValue(process.env.BOTS_NAME_PREFIX, BOTS_DEFAULT_NAME_PREFIX),
   },
 
-  invalidProtocolAutoKick: {
-    ack: boolValue(
-      process.env.INVALID_PROTOCOL_AUTOKICK_ACK,
-      CONNECTIONS_INVALID_PROTOCOL_AUTOKICK
-    ),
-    pong: boolValue(
-      process.env.INVALID_PROTOCOL_AUTOKICK_PONG,
-      CONNECTIONS_INVALID_PROTOCOL_AUTOKICK
-    ),
-    backup: boolValue(
-      process.env.INVALID_PROTOCOL_AUTOKICK_BACKUP,
-      CONNECTIONS_INVALID_PROTOCOL_AUTOKICK
+  ctf: {
+    qBotsFeatures: boolValue(process.env.CTF_QBOTS_FEATURES, CTF_QBOTS_FEATURES),
+
+    randomBaseShieldInterval: intValue(
+      process.env.CTF_BASE_SHIELD_RANDOM_INTERVAL,
+      CTF_BASE_SHIELD_RANDOM_INTERVAL_SEC
     ),
   },
-
-  ctfQBotsFeatures: boolValue(process.env.CTF_QBOTS_FEATURES, CTF_QBOTS_FEATURES),
-
-  ctfSaveMatchesResults: boolValue(
-    process.env.CTF_SAVE_RESULTS_TO_FILES,
-    CTF_SAVE_RESULTS_TO_FILES
-  ),
-
-  ctfRandomBaseShieldInterval: intValue(
-    process.env.CTF_BASE_SHIELD_RANDOM_INTERVAL,
-    CTF_BASE_SHIELD_RANDOM_INTERVAL_SEC
-  ),
-
-  afkDisconnectTimeout: floatValue(process.env.AFK_DISCONNECT_TIMEOUT, undefined),
-
-  botsNamePrefix: strValue(process.env.BOTS_NAME_PREFIX, BOTS_DEFAULT_NAME_PREFIX),
-
-  version,
 };
 
 config.server.type = config.server.type.toLocaleUpperCase();
@@ -511,25 +563,30 @@ if (has(GAME_TYPES, config.server.type)) {
   config.server.typeId = -1;
 }
 
-config.bot.flag = config.bot.flag.toLocaleUpperCase();
+config.server.bot.flag = config.server.bot.flag.toLocaleUpperCase();
 
-if (!has(FLAGS_ISO_TO_CODE, config.bot.flag)) {
-  config.bot.flag = BOTS_SERVER_BOT_FLAG;
+if (!has(FLAGS_ISO_TO_CODE, config.server.bot.flag)) {
+  config.server.bot.flag = BOTS_SERVER_BOT_FLAG;
 }
 
-config.bot.flagId = FLAGS_ISO_TO_CODE[config.bot.flag];
+config.server.bot.flagId = FLAGS_ISO_TO_CODE[config.server.bot.flag];
 
-if (config.bot.name.length === 0 || config.bot.name.length > 20) {
-  config.bot.name = BOTS_SERVER_BOT_NAME;
+if (config.server.bot.name.length === 0 || config.server.bot.name.length > 20) {
+  config.server.bot.name = BOTS_SERVER_BOT_NAME;
 }
 
-if (config.afkDisconnectTimeout === undefined) {
-  config.afkDisconnectTimeout = config.server.typeId === GAME_TYPES.BTR ? 10 : 0;
+if (config.connections.afkDisconnectTimeout === undefined) {
+  config.connections.afkDisconnectTimeout = config.server.typeId === GAME_TYPES.BTR ? 10 : 0;
 }
 
-mkdirSync(config.certs.path, { recursive: true });
+mkdirSync(config.server.certs.path, { recursive: true });
 mkdirSync(dirname(config.logs.path), { recursive: true });
+
+if (config.logs.chat.length > 0) {
+  mkdirSync(dirname(config.logs.chat), { recursive: true });
+}
+
 mkdirSync(config.cache.path, { recursive: true });
-mkdirSync(dirname(config.userStats.path), { recursive: true });
+mkdirSync(dirname(config.accounts.userStats.path), { recursive: true });
 
 export default config;

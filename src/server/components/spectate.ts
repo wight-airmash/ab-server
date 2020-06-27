@@ -1,4 +1,4 @@
-import Component from '@/server/component';
+import Component from '../component';
 
 export default class Spectate extends Component {
   public isActive = false;

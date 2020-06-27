@@ -1,6 +1,11 @@
-import { MIN_SAFE_TICKER_INTERVAL_NS, NS_PER_MS, NS_PER_SEC, SERVER_FPS } from '@/constants';
-import GameServer from '@/core/server';
-import { LoopParams } from '@/types/loop-params';
+import {
+  MIN_SAFE_TICKER_INTERVAL_NS,
+  NS_PER_MS,
+  NS_PER_SEC,
+  SERVER_FRAMES_COUNTER_LIMIT,
+} from '../constants';
+import { GameLoopCallback, GameServerBootstrapInterface } from '../types';
+import GameServerBootstrap from './bootstrap';
 
 /**
  * The game ticker for running game loop.
@@ -9,65 +14,62 @@ export default class GameTicker {
   /**
    * When the ticker started to work.
    */
-  protected startTime: [number, number] | null;
+  private startTime: [number, number] | null;
 
   /**
    * Ticker interval in nanoseconds. 60 frames per second by default.
    */
-  protected intervalNs: number;
+  private intervalNs: number;
 
   /**
    * Interval value when setTimeout is possible to use instead of setImmediate.
    */
-  protected minSafeIntervalNs: number;
+  private minSafeIntervalNs: number;
 
   /**
    * Current interval for setTimeout.
    */
-  protected timeOutIntervalMs: number;
+  private timeoutIntervalMs: number;
 
   /**
    * Number of ticker iterations from the start ticking or last reset.
    */
-  protected counter: number;
+  private counter: number;
 
   /**
    * The time when the last execution of the loop function was completed.
    */
-  protected lastTickMs: number;
-
-  /**
-   * Max value of the counter before reset.
-   * In theory it's Number.MAX_SAFE_INTEGER.
-   */
-  protected counterLimit: number;
+  private lastTickMs: number;
 
   /**
    * Reference to the immediate tick running.
    */
-  protected immediateRef: NodeJS.Immediate | null;
+  private immediateRef: NodeJS.Immediate | null;
 
   /**
    * Reference to the timeout tick running.
    */
-  protected timeoutRef: NodeJS.Timeout | null;
+  private timeoutRef: NodeJS.Timeout | null;
 
   /**
    * Reference to the app.
    */
-  protected app: GameServer;
+  private app: GameServerBootstrap;
 
   /**
    * Total frames skipped from the start.
    */
   public skippedFrames: number;
 
+  /**
+   * Time at the start of loop function call.
+   */
+  public now: number;
+
   constructor({ app, interval }) {
     this.app = app;
     this.updateInterval(interval);
 
-    // 60 frames * 60 seconds * 60 minutes * 24 hours * 100 days.
-    this.counterLimit = SERVER_FPS * 60 * 60 * 24 * 100;
     this.immediateRef = null;
     this.startTime = null;
     this.skippedFrames = 0;
@@ -77,9 +79,14 @@ export default class GameTicker {
   updateInterval(interval: number): void {
     this.intervalNs = interval;
     this.minSafeIntervalNs = MIN_SAFE_TICKER_INTERVAL_NS;
-    this.timeOutIntervalMs = 1;
+    this.timeoutIntervalMs = 1;
     this.startTime = process.hrtime();
     this.counter = 1;
+  }
+
+  resetCounter(value = 1): void {
+    this.startTime = process.hrtime();
+    this.counter = value;
   }
 
   /**
@@ -87,28 +94,18 @@ export default class GameTicker {
    *
    * @param loop game loop function
    */
-  tick(loop: (x: LoopParams) => void): void {
-    if (this.startTime === null) {
-      this.startTime = process.hrtime();
-    }
-
-    if (this.counter > this.counterLimit) {
-      this.app.log.info('Reset ticker counter & startTime.');
-      this.startTime = process.hrtime();
-      this.counter = 1;
-    }
-
+  tick(loop: GameLoopCallback, context?: GameServerBootstrapInterface): void {
     const [s, ns] = process.hrtime(this.startTime);
     const diffTime = s * NS_PER_SEC + ns;
 
     if (diffTime < this.intervalNs * this.counter) {
       if (this.intervalNs * this.counter - diffTime > this.minSafeIntervalNs) {
         this.timeoutRef = setTimeout((): void => {
-          this.tick(loop);
-        }, this.timeOutIntervalMs);
+          this.tick(loop, context);
+        }, this.timeoutIntervalMs);
       } else {
         this.immediateRef = setImmediate((): void => {
-          this.tick(loop);
+          this.tick(loop, context);
         });
       }
     } else {
@@ -119,27 +116,33 @@ export default class GameTicker {
        * Skip frame if since last frame past more than 2×frames time.
        */
       if (diffTime < this.intervalNs * (this.counter + 1)) {
-        const startTimeMs = Date.now();
+        this.now = Date.now();
 
-        loop({
-          frame: this.counter,
-          frameFactor: this.skippedFrames + diffTime / (this.intervalNs * this.counter),
-          timeFromStart: diffTime,
-          skippedFrames: this.skippedFrames,
-        });
+        loop.call(
+          context,
+          this.counter,
+          this.skippedFrames + diffTime / (this.intervalNs * this.counter),
+          diffTime,
+          this.skippedFrames
+        );
 
-        this.lastTickMs = Date.now() - startTimeMs;
+        this.lastTickMs = Date.now() - this.now;
         this.app.metrics.ticksTimeMs += this.lastTickMs;
         this.skippedFrames = 0;
 
         if (this.lastTickMs * NS_PER_MS > this.intervalNs) {
-          this.app.log.debug('Frame is longer than 16.6ms.', {
+          this.app.log.debug('Frame is longer than 16.6ms: %o', {
             counter: this.counter,
             lastTick: this.lastTickMs,
           });
         }
+
+        if (this.counter > SERVER_FRAMES_COUNTER_LIMIT) {
+          this.app.log.info('Reset ticker counter & startTime.');
+          this.resetCounter(0);
+        }
       } else {
-        this.app.log.debug('Frame skipped.', {
+        this.app.log.debug('Frame skipped: %o', {
           diffTime,
           interval: this.intervalNs,
           counter: this.counter,
@@ -153,7 +156,7 @@ export default class GameTicker {
       this.counter += 1;
 
       this.immediateRef = setImmediate((): void => {
-        this.tick(loop);
+        this.tick(loop, context);
       });
     }
   }
@@ -163,8 +166,9 @@ export default class GameTicker {
    *
    * @param loop function to run every tick
    */
-  start(loop: (x: LoopParams) => void): void {
-    this.tick(loop);
+  start(loop: GameLoopCallback, context?: GameServerBootstrapInterface): void {
+    this.resetCounter();
+    this.tick(loop, context);
   }
 
   /**
@@ -178,8 +182,5 @@ export default class GameTicker {
     if (this.timeoutRef) {
       clearTimeout(this.timeoutRef);
     }
-
-    this.startTime = null;
-    this.counter = 1;
   }
 }

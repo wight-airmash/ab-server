@@ -2,15 +2,19 @@
 
 Game server.
 
-Features:
+Docs:
 
-- [in-game commands](./docs/commands.md).
+- [In-game commands](./docs/commands.md).
+- [Environment variables](./docs/env-variables.md).
+- [JSON API](./docs/api.md).
+- [Aircrafts damage](./docs/damage.md).
+- [CTF mode Q-bots](./docs/ctf-bots.md) (not a server part).
 
 ## Installation
 
 Requirements:
 
-- Node.js 12 (works on older versions too, but compatibility isn't guaranteed).
+- Node.js 12.
 - uWebSockets.js is C++ lib and distributed in binary files for the most popular operation systems, so it is unlikely, but you may have to compile it from source if you use an unpopular OS.
 
 Development:
@@ -74,12 +78,14 @@ Set `MODERATION_PANEL` to `false` to turn moderation panel off. To change panel 
 .env.production is default .env file for docker image.
 
 1. Build an image.
-   `docker build -t airbattle-server .`
+   `docker build --target production-image --pull -t airbattle-server .`
 2. Run. Don't forget to pass envirounment variables and mount the volumes you need. Example:
 
    `docker run -v /host/logs:/app/logs -v /host/data:/app/data -p 3501:3501 -e SERVER_TYPE=FFA -e SU_PASSWORD=mypass airbattle-server`
 
    If you want to use TLS also mount `/app/certs` to the host directory with `privkey.pem` and `fullchain.pem`, and set ENDPOINTS_TLS=true.
+
+Use `development-image` stage to build development image.
 
 ### Run directly or behind the proxy
 

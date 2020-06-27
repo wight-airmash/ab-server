@@ -1,7 +1,8 @@
-import { HOURS_PER_DAY, MINUTES_PER_HOUR, MS_PER_SEC, SECONDS_PER_MINUTE } from '@/constants';
+import { HOURS_PER_DAY, MINUTES_PER_HOUR, MS_PER_SEC, SECONDS_PER_MINUTE } from '../constants';
 
-export const msToHumanReadable = (time: number): string => {
+export const msToHumanReadable = (ms: number): string => {
   const humanTimeParts = [];
+  const time = ms > 0 ? ms : 0;
 
   const seconds = Math.floor((time / MS_PER_SEC) % SECONDS_PER_MINUTE);
   const minutes = Math.floor((time / (MS_PER_SEC * SECONDS_PER_MINUTE)) % MINUTES_PER_HOUR);

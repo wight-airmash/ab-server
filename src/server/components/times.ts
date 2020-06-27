@@ -1,8 +1,8 @@
-import Component from '@/server/component';
+import Component from '../component';
 
 export default class Times extends Component {
   /**
-   * Similar to connection.meta.createdAt, but for the player entity.
+   * Similar to connection.createdAt, but for the player entity.
    */
   public createdAt: number;
 

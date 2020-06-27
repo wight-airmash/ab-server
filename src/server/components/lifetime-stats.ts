@@ -1,4 +1,4 @@
-import Component from '@/server/component';
+import Component from '../component';
 
 export default class LifetimeStats extends Component {
   public earnings = 0;

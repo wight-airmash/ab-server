@@ -1,4 +1,4 @@
-import Entity from '@/server/entity';
+import Entity from './entity';
 
 export default abstract class Component {
   public key: string;

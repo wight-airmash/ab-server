@@ -115,7 +115,7 @@ Server upgrades drop range: min and max chance value (the final value depends on
 
 ### /server powerups
 
-Server powerups spawn chance.
+Server powerups config.
 
 ### /server debug
 
@@ -124,6 +124,26 @@ Server debug info.
 ### /server limits
 
 Values of the player limits.
+
+### /server network
+
+Debug server network.
+
+### /server performance
+
+Debug server performance.
+
+### /server frames
+
+Dropped frames stats.
+
+### /lags
+
+Information about when the server detected lags on the player side and when was last frame drop.
+
+### /welcome
+
+Repeat server welcome messages.
 
 ### /su \<password\>
 
@@ -149,9 +169,13 @@ Set the min value of the upgrades drop chance.
 
 Set the max value of the upgrades drop chance.
 
-### /server powerups \<value\>
+### /server powerups chance \<value\>
 
-Set the chance value of the powerups spawn.
+Set the chance value of the powerups spawn, [0, 1].
+
+### /server powerups limit \<value\>
+
+Set the limit value of the powerups spawn, [0, 1].
 
 ### /server whitelist
 

@@ -1,4 +1,4 @@
-import { MS_PER_SEC, SECONDS_PER_MINUTE } from '@/constants/units';
+import { MS_PER_SEC, SECONDS_PER_MINUTE } from './units';
 
 /**
  * Only one message (all types, inc. whisper) will be handled per these ticks.
@@ -21,3 +21,5 @@ export const CHAT_MIN_PLAYER_PLAYTIME_TO_VOTEMUTE_MS = 60 * MS_PER_SEC;
 export const CHAT_FIRST_MESSAGE_SAFE_DELAY_MS = 2 * MS_PER_SEC;
 
 export const CHAT_USERNAME_PLACEHOLDER = '%username%';
+
+export const CHAT_SAY_LIFETIME_MS = 4 * MS_PER_SEC;

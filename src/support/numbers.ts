@@ -1,5 +1,12 @@
+/**
+ *
+ * @param min minimum (inclusive)
+ * @param max maximum (inclusive)
+ */
 export const getRandomInt = (min: number, max: number): number => {
-  return Math.floor(Math.random() * (Math.floor(max) - Math.ceil(min) + 1)) + Math.ceil(min);
+  const intMin = Math.ceil(min);
+
+  return Math.floor(Math.random() * (Math.floor(max) - intMin + 1)) + intMin;
 };
 
 export const getRandomNumber = (min: number, max: number): number => {
@@ -44,12 +51,17 @@ export const median = (dataset: number[]): number => {
 };
 
 export const numberToHumanReadable = (value: number): string => {
-  const l1000 = value % 1000;
-  const hds = (value - l1000) / 1000;
+  if (value > 99999) {
+    const m = Math.round((value / 1e6) * 100) / 100;
 
-  if (hds === 0) {
-    return `${value}`;
+    return `${m}M`;
   }
 
-  return `${hds}K`;
+  if (value > 999) {
+    const k = Math.round((value / 1000) * 10) / 10;
+
+    return `${k}K`;
+  }
+
+  return `${value}`;
 };

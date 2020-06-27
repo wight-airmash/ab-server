@@ -1,33 +1,41 @@
 import { KeyObject } from 'crypto';
-import { SERVER_MIN_MOB_ID, SERVER_MIN_SERVICE_MOB_ID } from '@/constants';
-import Entity from '@/server/entity';
+import { SERVER_MIN_MOB_ID, SERVER_MIN_SERVICE_MOB_ID } from '../constants';
 import {
   BackupConnectionId,
+  BroadcastStorage,
   ConnectionId,
+  ConnectionMeta,
   CTFStorage,
+  Flag,
+  FlagZone,
+  Game,
   HitboxCacheItem,
   IPv4,
   MainConnectionId,
   MobId,
-  PlayerConnection,
+  Mountain,
+  Player,
   PlayerId,
   PlayerName,
   PlayerNameHistoryItem,
   PlayerRecoverItem,
+  Powerup,
   PowerupSpawnChunk,
+  Projectile,
   RankingsStorage,
+  Repel,
   SpawnZones,
   TeamId,
   UnmuteTime,
-  UserId,
+  UsersStorage,
   Viewports,
-} from '@/types';
+} from '../types';
 
 export class GameStorage {
   /**
    * Game entity.
    */
-  public gameEntity: Entity;
+  public gameEntity: Game;
 
   /**
    * Ship hitboxes cache.
@@ -72,14 +80,9 @@ export class GameStorage {
   public nextServiceMobId = SERVER_MIN_SERVICE_MOB_ID;
 
   /**
-   * Used to generate connection identifiers.
+   * All meta connections (main and backup).
    */
-  public nextConnectionId = 1;
-
-  /**
-   * All connections (main and backup).
-   */
-  public connectionList: Map<ConnectionId, PlayerConnection> = new Map();
+  public connectionList: Map<ConnectionId, ConnectionMeta> = new Map();
 
   /**
    * All main connection ids map.
@@ -144,34 +147,38 @@ export class GameStorage {
   /**
    * Player entities.
    */
-  public playerList: Map<PlayerId, Entity> = new Map();
+  public playerList: Map<PlayerId, Player> = new Map();
+
+  /**
+   * List of players who broadcast /say messages.
+   */
+  public playerIdSayBroadcastList: Set<PlayerId> = new Set();
 
   /**
    * Mob entities (not players and the mobs which have its own storage,
    * like repels and viewports).
    */
-  public mobList: Map<MobId, Entity> = new Map();
+  public mobList: Map<
+    MobId,
+    Player | Repel | Powerup | Flag | FlagZone | Projectile | Mountain
+  > = new Map();
 
-  /**
-   * User entities.
-   */
-  public userList: Map<UserId, Entity> = new Map();
-
-  /**
-   * Logged-in user ids.
-   */
-  public onlineUserIdList: Set<UserId> = new Set();
+  public users: UsersStorage = {
+    list: new Map(),
+    online: new Set(),
+    hasChanges: false,
+  };
 
   /**
    * Repel is a mob with the same as its owner id.
    */
-  public repelList: Map<PlayerId, Entity> = new Map();
+  public repelList: Map<PlayerId, Repel> = new Map();
 
   /**
    * Who currently sees the mob.
    * It can also be used to determine who is nearby.
    */
-  public broadcast: Map<MobId, Set<MainConnectionId>> = new Map();
+  public broadcast: BroadcastStorage = new Map();
 
   /**
    * Players in spectator mode.
@@ -230,7 +237,7 @@ export class GameStorage {
   /**
    * Bots IPs.
    */
-  public ipWhiteList: Set<IPv4> = new Set();
+  public ipBotList: Set<IPv4> = new Set();
 
   /**
    * Spawn zone set maps an index and ship type to a collection of pre-generated spawn zones.
@@ -282,4 +289,6 @@ export class GameStorage {
     outdated: false,
     byBounty: [],
   };
+
+  public gameModeAPIResponse = '';
 }

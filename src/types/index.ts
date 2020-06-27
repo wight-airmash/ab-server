@@ -1,7 +1,8 @@
 import { MOB_TYPES } from '@airbattle/protocol';
 import { Polygon } from 'collisions';
 import { WebSocket } from 'uWebSockets.js';
-import { CONNECTIONS_STATUS } from '@/constants';
+import { CONNECTIONS_STATUS } from '../constants';
+import { User } from './entities';
 
 export interface HitboxCacheItem {
   width: number;
@@ -37,6 +38,23 @@ export interface PowerupSpawnChunk {
    * Predefined spawn zones.
    */
   zones: SpawnZones;
+
+  id: number;
+
+  x: number;
+
+  y: number;
+
+  width: number;
+
+  height: number;
+
+  /**
+   * Shield/inferno spawn chance ratio [0, 1]. 0 - only infernos, 1 - only shields.
+   */
+  chanceRatio: number;
+
+  chanceFactor: number;
 }
 
 export type ConnectionId = number;
@@ -76,9 +94,17 @@ export interface PlayerNameHistoryItem {
 }
 
 export interface Viewport {
+  id: PlayerId;
+
+  /**
+   * This redundant value is necessary for optimization.
+   * Do not use it to check the connection status,
+   * it doesn't update after initialization.
+   */
+  connectionId: MainConnectionId;
+
   hitbox: Polygon;
   subs: Set<ViewportId>;
-  joined: Set<MobId>;
   current: Set<MobId>;
   leaved: Set<MobId>;
   horizonX: number;
@@ -87,12 +113,14 @@ export interface Viewport {
 
 export type Viewports = Map<ViewportId, Viewport>;
 
-export interface ConnectionMeta {
+export interface WorkerConnectionMeta {
   id: ConnectionId;
-
   ip: IPv4;
+  createdAt: number;
   headers: { [title: string]: string };
+}
 
+export interface ConnectionMeta extends WorkerConnectionMeta {
   isBackup: boolean;
   isMain: boolean;
   status: CONNECTIONS_STATUS;
@@ -102,10 +130,24 @@ export interface ConnectionMeta {
   teamId: TeamId;
   userId: UserId;
 
-  lastMessageMs: number;
-  createdAt: number;
-  lagging: boolean;
-  lagPackets: number;
+  /**
+   * ms.
+   */
+  lastPacketAt: number;
+
+  lagging: {
+    isActive: boolean;
+    /**
+     * ms.
+     */
+    lastAt: number;
+    /**
+     * ms.
+     */
+    lastDuration: number;
+    detects: number;
+    packets: number;
+  };
 
   periodic: {
     ping: NodeJS.Timeout;
@@ -139,7 +181,7 @@ export interface ConnectionMeta {
 }
 
 export interface PlayerConnection extends WebSocket {
-  meta?: ConnectionMeta;
+  meta?: WorkerConnectionMeta;
 }
 
 export interface PeriodicPowerupTemplate {
@@ -170,6 +212,7 @@ export interface PeriodicPowerupTemplate {
 
 export interface PeriodicPowerup extends PeriodicPowerupTemplate {
   mobId: MobId;
+  chunkId: number;
 
   /**
    * ms.
@@ -217,9 +260,33 @@ export interface SpawnZonesTemplate {
   [key: number]: SpawnZone[];
 }
 
+export type BroadcastStorage = Map<MobId, Set<MainConnectionId>>;
+
+export interface UsersStorage {
+  /**
+   * User entities.
+   */
+  list: Map<UserId, User>;
+
+  /**
+   * Logged-in user ids.
+   */
+  online: Set<UserId>;
+
+  /**
+   * Is users data unsaved.
+   */
+  hasChanges: boolean;
+}
+
+export interface BountyRankingItem {
+  id: PlayerId;
+  score: number;
+}
+
 export interface RankingsStorage {
   outdated: boolean;
-  byBounty: PlayerId[];
+  byBounty: BountyRankingItem[];
 }
 
 export interface CTFLeadersStorage {
@@ -281,3 +348,62 @@ export interface LoginServerConfig {
    */
   botsNamePrefix: string;
 }
+
+export interface AdminPlayersListItem {
+  id: PlayerId;
+  name: PlayerName;
+  captures: number;
+  isSpectate: boolean;
+  kills: number;
+  deaths: number;
+  score: number;
+  lastMove: number;
+  ping: number;
+  flag: string;
+  isMuted: boolean;
+  isBot: boolean;
+}
+
+export interface AdminActionPlayer {
+  id: PlayerId;
+  name: PlayerName;
+  ip: IPv4;
+}
+
+export type GameLoopCallbackLegacy = (
+  /**
+   * Frame index.
+   */
+  frame: number,
+
+  /**
+   * Frame index.
+   */
+  frameFactor: number,
+
+  /**
+   * Ns since previous not skipped tick.
+   */
+  nsFromTheTickerStart: number,
+
+  /**
+   * Number of skipped frames since previous tick.
+   */
+  skippedFrames: number
+) => void;
+
+export interface GameLoopCallback {
+  /**
+   * @param frame Frame index.
+   * @param frameFactor Frame factor.
+   * @param nsFromTheTickerStart Ns since previous not skipped tick.
+   * @param skippedFrames Number of skipped frames since previous tick.
+   */
+  (frame: number, frameFactor: number, nsFromTheTickerStart: number, skippedFrames: number): void;
+}
+
+export interface GameServerBootstrapInterface {
+  mainLoop: GameLoopCallback;
+}
+
+export * from './entities';

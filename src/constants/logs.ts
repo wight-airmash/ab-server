@@ -1,8 +1,8 @@
-import { MS_PER_SEC, SECONDS_PER_MINUTE } from '@/constants/units';
+import { MS_PER_SEC, SECONDS_PER_MINUTE } from './units';
 
 export const LOGS_FLUSH_INTERVAL_MS = 2 * MS_PER_SEC;
 
-export const LOGS_LOOP_LATENCY_ALERT_VALUE_MS = 10;
+export const LOGS_LOOP_LATENCY_ALERT_VALUE_MS = 14;
 
 export const LOGS_PERFORMANCE_ALERT_DELAY_MS = 1 * SECONDS_PER_MINUTE * MS_PER_SEC;
 

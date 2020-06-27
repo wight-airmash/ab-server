@@ -1,6 +1,6 @@
 import { randomBytes } from 'crypto';
 
-const generateRandomString = (lengthChars: number): string => {
+export const generateRandomString = (lengthChars: number): string => {
   return randomBytes(lengthChars / 2).toString('hex');
 };
 

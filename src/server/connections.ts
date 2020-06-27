@@ -1,38 +1,37 @@
-import { marshalServerMessage, unmarshalClientMessage } from '@airbattle/protocol';
-import { ProtocolPacket } from '@airbattle/protocol/dist/packets';
+import { CLIENT_PACKETS, unmarshalClientMessage } from '@airbattle/protocol';
 import {
   CONNECTIONS_AUTO_CLOSE_SECOND_DELAY_MS,
   CONNECTIONS_LAGGING_DROP_INTERVAL_MS,
+  CONNECTIONS_STATUS,
   LIMITS_ANY_WEIGHT,
   SERVER_MIN_MOB_ID,
-} from '@/constants';
+} from '../constants';
 import {
-  CONNECTIONS_BREAK,
   CONNECTIONS_CHECK_PACKET_LIMITS,
+  CONNECTIONS_CLOSE,
   CONNECTIONS_CLOSED,
+  CONNECTIONS_DISCONNECT,
   CONNECTIONS_DISCONNECT_PLAYER,
   CONNECTIONS_KICK,
   CONNECTIONS_PACKET_RECEIVED,
-  CONNECTIONS_SEND_PACKET,
   ERRORS_PACKET_DECODE_FAILED,
   PLAYERS_REMOVE,
   ROUTE_PACKET,
-} from '@/events';
-import { CHANNEL_DISCONNECT_PLAYER } from '@/server/channels';
-import { System } from '@/server/system';
-import { ConnectionId, PlayerConnection, PlayerId } from '@/types';
+} from '../events';
+import { CHANNEL_DISCONNECT_PLAYER } from '../events/channels';
+import { ConnectionId, ConnectionMeta, PlayerId } from '../types';
+import { System } from './system';
 
 export default class Connections extends System {
   constructor({ app }) {
     super({ app });
 
     this.listeners = {
-      [CONNECTIONS_PACKET_RECEIVED]: this.onPacketReceived,
-      [CONNECTIONS_SEND_PACKET]: this.onSendPacket,
-      [ERRORS_PACKET_DECODE_FAILED]: this.onPacketDecodeFailed,
       [CONNECTIONS_CLOSED]: this.onConnectionClosed,
       [CONNECTIONS_DISCONNECT_PLAYER]: this.onDisconnectPlayer,
-      [CONNECTIONS_BREAK]: this.onBreakConnection,
+      [CONNECTIONS_DISCONNECT]: this.onBreakConnection,
+      [CONNECTIONS_PACKET_RECEIVED]: this.onPacketReceived,
+      [ERRORS_PACKET_DECODE_FAILED]: this.onPacketDecodeFailed,
     };
   }
 
@@ -43,35 +42,43 @@ export default class Connections extends System {
 
     const connection = this.storage.connectionList.get(connectionId);
 
-    connection.meta.lagging = false;
-    connection.meta.timeouts.lagging = null;
+    connection.lagging.isActive = false;
+    connection.lagging.detects += 1;
+    connection.lagging.lastDuration = Date.now() - connection.lagging.lastAt;
+    connection.timeouts.lagging = null;
 
-    this.log.debug('Connection lagging packets dropping end.', {
+    this.log.debug('Connection lagging packets dropping end: %o', {
       connectionId,
-      limits: connection.meta.limits,
+      limits: connection.limits,
     });
   }
 
   onPacketReceived(msg: ArrayBuffer, connectionId: ConnectionId): void {
     this.app.metrics.packets.in += 1;
+    this.app.metrics.transfer.inB += msg.byteLength;
 
-    if (this.app.metrics.collect === true) {
+    if (this.app.metrics.collect) {
       this.app.metrics.sample.ppsIn += 1;
+      this.app.metrics.sample.tIn += msg.byteLength;
     }
 
     const connection = this.storage.connectionList.get(connectionId);
 
-    connection.meta.lastMessageMs = Date.now();
-    connection.meta.limits.any += LIMITS_ANY_WEIGHT;
+    if (connection.status !== CONNECTIONS_STATUS.ESTABLISHED) {
+      return;
+    }
 
-    if (connection.meta.isBot === false) {
-      if (connection.meta.lagging) {
-        if (connection.meta.timeouts.lagging === null) {
-          this.log.debug('Connection is lagging, packets dropping start.', {
+    connection.lastPacketAt = Date.now();
+    connection.limits.any += LIMITS_ANY_WEIGHT;
+
+    if (!connection.isBot) {
+      if (connection.lagging.isActive) {
+        if (connection.timeouts.lagging === null) {
+          this.log.debug('Connection is lagging, packets dropping start: %o', {
             connectionId,
           });
 
-          connection.meta.timeouts.lagging = setTimeout(() => {
+          connection.timeouts.lagging = setTimeout(() => {
             this.clearLaggingStatus(connectionId);
           }, CONNECTIONS_LAGGING_DROP_INTERVAL_MS);
         }
@@ -83,9 +90,21 @@ export default class Connections extends System {
     try {
       const decodedMsg = unmarshalClientMessage(msg);
 
+      if (connection.lagging.isActive) {
+        if (decodedMsg.c === CLIENT_PACKETS.ACK || decodedMsg.c === CLIENT_PACKETS.KEY) {
+          connection.limits.any -= LIMITS_ANY_WEIGHT;
+          connection.lagging.packets += 1;
+          this.app.metrics.lagPackets += 1;
+
+          if (decodedMsg.c === CLIENT_PACKETS.ACK) {
+            return;
+          }
+        }
+      }
+
       this.emit(ROUTE_PACKET, decodedMsg, connectionId);
     } catch (err) {
-      this.log.warn('Message decoding failed.', err.stack);
+      this.log.warn('Message decoding failed: %o', { error: err.stack });
 
       this.emit(ERRORS_PACKET_DECODE_FAILED, connectionId);
     }
@@ -102,64 +121,70 @@ export default class Connections extends System {
    */
   onConnectionClosed(connectionId: ConnectionId): void {
     const connection = this.storage.connectionList.get(connectionId);
+    const { ip } = connection;
     let secondConnectionId: ConnectionId = null;
+
+    if (connection.status > CONNECTIONS_STATUS.OPENED) {
+      const connectionsPerIP = this.storage.connectionByIPCounter.get(ip) - 1;
+
+      if (connectionsPerIP === 0) {
+        this.storage.connectionByIPCounter.delete(ip);
+      } else {
+        this.storage.connectionByIPCounter.set(ip, connectionsPerIP);
+      }
+    }
+
+    this.storage.connectionList.delete(connectionId);
 
     /**
      * Stop timers.
      */
-    Object.keys(connection.meta.timeouts).forEach(timeout => {
-      clearTimeout(connection.meta.timeouts[timeout]);
+    Object.keys(connection.timeouts).forEach(timeout => {
+      clearTimeout(connection.timeouts[timeout]);
     });
 
-    Object.keys(connection.meta.periodic).forEach(periodic => {
-      clearTimeout(connection.meta.periodic[periodic]);
+    Object.keys(connection.periodic).forEach(periodic => {
+      clearTimeout(connection.periodic[periodic]);
     });
 
     /**
      * Remove all connection data.
      */
-    if (connection.meta.isMain === true) {
-      this.channel(CHANNEL_DISCONNECT_PLAYER).delay(PLAYERS_REMOVE, connection.meta.playerId);
-      secondConnectionId = this.storage.playerBackupConnectionList.get(connection.meta.playerId);
+    if (connection.isMain) {
+      this.channel(CHANNEL_DISCONNECT_PLAYER).delay(PLAYERS_REMOVE, connection.playerId);
+      secondConnectionId = this.storage.playerBackupConnectionList.get(connection.playerId);
 
       this.storage.mainConnectionIdList.delete(connectionId);
       this.storage.humanConnectionIdList.delete(connectionId);
       this.storage.botConnectionIdList.delete(connectionId);
-      this.storage.playerMainConnectionList.delete(connection.meta.playerId);
+      this.storage.playerMainConnectionList.delete(connection.playerId);
 
-      if (this.storage.connectionByIPList.has(connection.meta.ip)) {
-        const ipConnections = this.storage.connectionByIPList.get(connection.meta.ip);
+      if (this.storage.connectionByIPList.has(connection.ip)) {
+        const ipConnections = this.storage.connectionByIPList.get(connection.ip);
 
         ipConnections.delete(connectionId);
 
         if (ipConnections.size === 0) {
-          this.storage.connectionByIPList.delete(connection.meta.ip);
+          this.storage.connectionByIPList.delete(connection.ip);
         }
       }
 
-      if (
-        connection.meta.teamId !== null &&
-        this.storage.connectionIdByTeam.has(connection.meta.teamId)
-      ) {
-        const teamConnections = this.storage.connectionIdByTeam.get(connection.meta.teamId);
+      if (connection.teamId !== null && this.storage.connectionIdByTeam.has(connection.teamId)) {
+        const teamConnections = this.storage.connectionIdByTeam.get(connection.teamId);
 
         teamConnections.delete(connectionId);
 
-        if (teamConnections.size === 0 && connection.meta.teamId >= SERVER_MIN_MOB_ID) {
-          this.storage.connectionIdByTeam.delete(connection.meta.teamId);
+        if (teamConnections.size === 0 && connection.teamId >= SERVER_MIN_MOB_ID) {
+          this.storage.connectionIdByTeam.delete(connection.teamId);
         }
-
-        this.log.debug(`Team id${connection.meta.teamId} connection id${connectionId} removed.`);
       }
-    } else if (connection.meta.isBackup === true) {
-      secondConnectionId = this.storage.playerMainConnectionList.get(connection.meta.playerId);
+    } else if (connection.isBackup) {
+      secondConnectionId = this.storage.playerMainConnectionList.get(connection.playerId);
 
-      this.storage.playerBackupConnectionList.delete(connection.meta.playerId);
+      this.storage.playerBackupConnectionList.delete(connection.playerId);
     }
 
     this.storage.connectionList.delete(connectionId);
-
-    delete connection.meta;
 
     /**
      * In case a player has closed one connection itself,
@@ -174,11 +199,11 @@ export default class Connections extends System {
 
   onDisconnectPlayer(playerId: PlayerId): void {
     try {
-      this.log.debug(`Disconnecting player...`, { playerId });
+      this.log.debug('Disconnecting player: %o', { playerId });
 
       this.onBreakConnection(this.storage.playerMainConnectionList.get(playerId));
     } catch (err) {
-      this.log.error('onDisconnectPlayer', err.stack);
+      this.log.error('Error while player disconnecting: %o', { error: err.stack });
     }
   }
 
@@ -189,84 +214,37 @@ export default class Connections extends System {
       }
 
       const ws = this.storage.connectionList.get(connectionId);
-      let ws2: PlayerConnection = null;
-      let ws2Id: ConnectionId = null;
+      let ws2: ConnectionMeta = null;
+      let connectionId2: ConnectionId = null;
 
-      if (ws.meta.playerId !== null) {
-        if (ws.meta.isMain) {
-          ws2Id = this.storage.playerBackupConnectionList.get(ws.meta.playerId);
+      if (ws.playerId !== null) {
+        if (ws.isMain) {
+          connectionId2 = this.storage.playerBackupConnectionList.get(ws.playerId);
         } else {
-          ws2Id = this.storage.playerMainConnectionList.get(ws.meta.playerId);
+          connectionId2 = this.storage.playerMainConnectionList.get(ws.playerId);
         }
 
-        ws2 = this.storage.connectionList.get(ws2Id);
+        ws2 = this.storage.connectionList.get(connectionId2);
       }
 
       try {
-        this.log.debug(`Breaking connection...`, { connectionId });
-
-        ws.close();
+        this.emit(CONNECTIONS_CLOSE, connectionId);
       } catch (err) {
-        this.log.debug(`onBreakConnection first connection`, err.stack);
+        this.log.debug('Connection 1 breaking error: %o', { connectionId, error: err.stack });
       }
 
       if (typeof ws2 !== 'undefined' && ws2 !== null) {
         try {
-          this.log.debug(`Breaking connection...`, { connectionId: ws2Id });
-
-          ws2.close();
+          this.emit(CONNECTIONS_CLOSE, connectionId2);
         } catch (err) {
-          this.log.debug(`onBreakConnection second connection`, err.stack);
+          this.log.debug('Connection 2 breaking error: %o', {
+            connectionId: connectionId2,
+            error: err.stack,
+          });
         }
       }
     } catch (err) {
-      this.log.error('onBreakConnection', err.stack);
-    }
-  }
-
-  onSendPacket(
-    msg: ProtocolPacket,
-    connectionId: ConnectionId | ConnectionId[],
-    exceptions: ConnectionId[] = null
-  ): void {
-    const packet = marshalServerMessage(msg);
-
-    if (Array.isArray(connectionId)) {
-      for (let index = 0; index < connectionId.length; index += 1) {
-        if (exceptions === null || !exceptions.includes(connectionId[index])) {
-          this.send(packet, connectionId[index]);
-        }
-      }
-    } else {
-      this.send(packet, connectionId);
-    }
-  }
-
-  protected send(packet: ArrayBuffer, connectionId: ConnectionId): void {
-    this.app.metrics.packets.out += 1;
-
-    if (this.app.metrics.collect === true) {
-      this.app.metrics.sample.ppsOut += 1;
-    }
-
-    try {
-      if (!this.storage.connectionList.has(connectionId)) {
-        return;
-      }
-
-      const ws = this.storage.connectionList.get(connectionId);
-
-      if (ws.getBufferedAmount() !== 0) {
-        this.log.debug('WS buffer > 0', ws.getBufferedAmount());
-      }
-
-      const result = ws.send(packet, true, this.app.config.compression);
-
-      if (!result) {
-        this.log.warn(`WS send failed (connection id${connectionId}).`);
-      }
-    } catch (err) {
-      this.log.error('Send packet error:', err.stack);
+      this.log.error('Connection breaking error: %o', { connectionId, error: err.stack });
     }
   }
 }

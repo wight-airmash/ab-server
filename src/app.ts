@@ -1,17 +1,17 @@
-import 'module-alias/register';
-import config from '@/config';
-import Logger from '@/logger';
-import GameServer from '@/core/server';
+import config from './config';
+import GameServerBootstrap from './core/bootstrap';
+import Logger from './logger';
 
-const log = new Logger({
-  level: config.logs.level,
-  path: config.logs.path,
-  isStdout: config.logs.console,
-});
+const log = new Logger();
 
-log.info(`Initiating ${config.server.type.toUpperCase()} game server named ${config.server.room}.`);
+log.info(
+  'Initiating %s game server named "%s", v%s.',
+  config.server.type.toUpperCase(),
+  config.server.room,
+  config.server.version
+);
 
-const gameServer = new GameServer({
+const gameServer = new GameServerBootstrap({
   config,
   log,
 });
@@ -19,5 +19,5 @@ const gameServer = new GameServer({
 (async () => {
   await gameServer.init();
 
-  gameServer.run();
+  gameServer.start();
 })();

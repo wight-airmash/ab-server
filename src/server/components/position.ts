@@ -1,4 +1,4 @@
-import Component from '@/server/component';
+import Component from '../component';
 
 export default class Position extends Component {
   public currentX: number;
@@ -8,6 +8,8 @@ export default class Position extends Component {
   public lowX: number;
 
   public lowY: number;
+
+  public chunk = 0;
 
   constructor(x: number, y: number) {
     super();

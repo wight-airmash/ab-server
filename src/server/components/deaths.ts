@@ -1,5 +1,5 @@
-import Component from '@/server/component';
-import { PlayerId } from '@/types';
+import { PlayerId } from '../../types';
+import Component from '../component';
 
 export default class Deaths extends Component {
   public current: number;

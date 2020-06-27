@@ -1,5 +1,5 @@
 import { FLAGS_ISO_TO_CODE } from '@airbattle/protocol';
-import Component from '@/server/component';
+import Component from '../component';
 
 export default class Flag extends Component {
   public countryCode: string;

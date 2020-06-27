@@ -1,4 +1,4 @@
-import Component from '@/server/component';
+import Component from '../component';
 
 export default class PlaneState extends Component {
   public boost: boolean;

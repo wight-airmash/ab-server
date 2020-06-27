@@ -12,7 +12,6 @@ sandbox
 npm-debug.log
 .git
 .gitignore
-.env.example
 README.md
 CHANGES.md
 LICENSE

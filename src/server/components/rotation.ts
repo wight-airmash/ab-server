@@ -1,4 +1,4 @@
-import Component from '@/server/component';
+import Component from '../component';
 
 export default class Rotation extends Component {
   public currentAngle: number;

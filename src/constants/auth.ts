@@ -1,4 +1,4 @@
-import { MS_PER_SEC } from '@/constants/units';
+import { MS_PER_SEC } from './units';
 
 /**
  * Used to obtain public key on server startup, so user token on login can be verified.

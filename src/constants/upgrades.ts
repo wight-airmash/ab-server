@@ -1,5 +1,5 @@
 import { GAME_TYPES } from '@airbattle/protocol';
-import { MS_PER_SEC } from '@/constants';
+import { MS_PER_SEC } from './units';
 
 export const UPGRADES_DEFAULT_MIN_CHANCE = 0.3;
 
@@ -54,12 +54,12 @@ export const UPGRADES_OWNER_INACTIVITY_TIMEOUT_MS = 3 * MS_PER_SEC;
 
 export const UPGRADES_DEFAULT_DROP_CHANCE = {
   [GAME_TYPES.FFA]: {
-    min: 0.35,
-    max: 0.65,
+    min: 0.5,
+    max: 0.5,
   },
   [GAME_TYPES.CTF]: {
     min: 0.5,
-    max: 0.8,
+    max: 0.5,
   },
   [GAME_TYPES.BTR]: {
     min: 1.0,

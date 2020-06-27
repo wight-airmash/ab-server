@@ -1,45 +1,36 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import pino from 'pino';
-import { LOGS_FLUSH_INTERVAL_MS } from '@/constants';
-import config from '@/config';
+import config from '../config';
+import { LOGS_FLUSH_INTERVAL_MS } from '../constants';
 
-interface LoggerConfig {
-  /**
-   * Log level.
-   */
-  level: string;
-
-  /**
-   * Log directory or file path.
-   */
-  path: string;
-
-  /**
-   * Log to console.
-   */
-  isStdout: boolean;
-}
+type LogLevelMethod = (msgOrObj: any, ...args: any[]) => void;
 
 class Logger {
-  protected fileLogger: null | pino.Logger;
+  private fileLogger: pino.Logger = null;
 
-  protected consoleLogger: null | pino.Logger;
+  private chatFileLogger: pino.Logger = null;
 
-  protected finalHandlers: Function[] = [];
+  private consoleLogger: pino.Logger = null;
 
-  constructor({ level, path, isStdout }: LoggerConfig) {
-    this.consoleLogger = null;
-    this.fileLogger = null;
+  private finalHandlers: Function[] = [];
 
+  public debug: LogLevelMethod;
+
+  public info: LogLevelMethod;
+
+  public warn: LogLevelMethod;
+
+  public error: LogLevelMethod;
+
+  public fatal: LogLevelMethod;
+
+  constructor() {
+    const { level, path, console: isStdout, chat } = config.logs;
     const isDev = config.env === 'development';
 
     const loggerConfig = {
       level,
       base: null,
-      redact: {
-        paths: ['session'],
-        censor: '[private]',
-      },
       prettyPrint: {
         colorize: true,
         translateTime: true,
@@ -54,7 +45,7 @@ class Logger {
       finalLogger.info(`${evt} caught`);
 
       if (err) {
-        finalLogger.error(err, 'error caused exit');
+        finalLogger.error('error caused exit %o', { error: err.stack });
       }
     };
 
@@ -63,8 +54,28 @@ class Logger {
         loggerConfig.prettyPrint.colorize = false;
       }
 
-      this.fileLogger = pino(loggerConfig, isDev ? pino.destination(path) : pino.extreme(path));
+      this.fileLogger = pino(
+        loggerConfig,
+        isDev ? pino.destination(path) : pino.destination({ dest: path, sync: false })
+      );
       this.finalHandlers.push(pino.final(this.fileLogger, finalHandler));
+    }
+
+    if (chat.length > 0) {
+      if (loggerConfig.prettyPrint) {
+        loggerConfig.prettyPrint.colorize = false;
+      }
+
+      this.chatFileLogger = pino(
+        {
+          ...loggerConfig,
+          level: 'info',
+          nestedKey: 'log',
+          messageKey: 'chat',
+        },
+        isDev ? pino.destination(chat) : pino.destination({ dest: chat, sync: false })
+      );
+      this.finalHandlers.push(pino.final(this.chatFileLogger, finalHandler));
     }
 
     if (isStdout) {
@@ -72,16 +83,42 @@ class Logger {
         loggerConfig.prettyPrint.colorize = true;
       }
 
-      this.consoleLogger = pino(loggerConfig, isDev ? pino.destination() : pino.extreme());
+      this.consoleLogger = pino(
+        loggerConfig,
+        isDev ? pino.destination() : pino.destination({ sync: false })
+      );
       this.finalHandlers.push(pino.final(this.consoleLogger, finalHandler));
     }
 
+    let logHandler: LogLevelMethod = null;
+
+    if (this.fileLogger !== null && this.consoleLogger !== null) {
+      logHandler = this.logToFileAndConcole;
+    } else if (this.fileLogger !== null && this.consoleLogger === null) {
+      logHandler = this.logToFile;
+    } else if (this.fileLogger === null && this.consoleLogger !== null) {
+      logHandler = this.logToConcole;
+    } else {
+      // eslint-disable-next-line
+      logHandler = (level: string, msgOrObj: any, ...args: any[]): void => {};
+    }
+
+    this.debug = logHandler.bind(this, 'debug');
+    this.info = logHandler.bind(this, 'info');
+    this.warn = logHandler.bind(this, 'warn');
+    this.error = logHandler.bind(this, 'error');
+    this.fatal = logHandler.bind(this, 'fatal');
+
     if (path.length > 0) {
-      this.debug('Start logging to file.');
+      this.debug('Start logging to file %s.', path);
+    }
+
+    if (chat.length > 0) {
+      this.debug('Start chat logging to file %s.', chat);
     }
 
     if (isStdout) {
-      this.consoleLogger.debug('Start logging to console.');
+      this.debug('Start logging to console.');
     }
 
     setInterval((): void => {
@@ -95,11 +132,46 @@ class Logger {
     this.finalHandlers.forEach(handler => {
       handler(err, msg);
     });
-
-    process.exit(Error ? 1 : 0);
   }
 
-  protected flush(): void {
+  chatPublic(playerId: number, message: string): void {
+    if (this.chatFileLogger !== null) {
+      this.chatFileLogger.info(
+        {
+          playerId,
+          message,
+        },
+        'public'
+      );
+    }
+  }
+
+  chatTeam(playerId: number, teamId: number, message: string): void {
+    if (this.chatFileLogger !== null) {
+      this.chatFileLogger.info(
+        {
+          playerId,
+          teamId,
+          message,
+        },
+        'team'
+      );
+    }
+  }
+
+  chatSay(playerId: number, message: string): void {
+    if (this.chatFileLogger !== null) {
+      this.chatFileLogger.info(
+        {
+          playerId,
+          message,
+        },
+        'say'
+      );
+    }
+  }
+
+  private flush(): void {
     if (this.fileLogger !== null) {
       this.fileLogger.flush();
     }
@@ -107,36 +179,23 @@ class Logger {
     if (this.consoleLogger !== null) {
       this.consoleLogger.flush();
     }
-  }
 
-  protected log(level: string, msgOrObj: any, ...args: any[]): void {
-    if (this.fileLogger !== null) {
-      this.fileLogger[level](msgOrObj, ...args);
-    }
-
-    if (this.consoleLogger !== null) {
-      this.consoleLogger[level](msgOrObj, ...args);
+    if (this.chatFileLogger !== null) {
+      this.chatFileLogger.flush();
     }
   }
 
-  debug(msgOrObj: any, ...args: any[]): void {
-    this.log('debug', msgOrObj, ...args);
+  private logToFileAndConcole(level: string, msgOrObj: any, ...args: any[]): void {
+    this.fileLogger[level](msgOrObj, ...args);
+    this.consoleLogger[level](msgOrObj, ...args);
   }
 
-  info(msgOrObj: any, ...args: any[]): void {
-    this.log('info', msgOrObj, ...args);
+  private logToFile(level: string, msgOrObj: any, ...args: any[]): void {
+    this.fileLogger[level](msgOrObj, ...args);
   }
 
-  warn(msgOrObj: any, ...args: any[]): void {
-    this.log('warn', msgOrObj, ...args);
-  }
-
-  error(msgOrObj: any, ...args: any[]): void {
-    this.log('error', msgOrObj, ...args);
-  }
-
-  fatal(msgOrObj: any, ...args: any[]): void {
-    this.log('fatal', msgOrObj, ...args);
+  private logToConcole(level: string, msgOrObj: any, ...args: any[]): void {
+    this.consoleLogger[level](msgOrObj, ...args);
   }
 }
 

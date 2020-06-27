@@ -1,6 +1,4 @@
-import { CLIENT_PACKETS } from '@airbattle/protocol';
-import { ProtocolPacket } from '@airbattle/protocol/dist/packets';
-import { CONNECTIONS_STATUS, LIMITS_ANY_WEIGHT } from '@/constants';
+import { CLIENT_PACKETS, ProtocolPacket } from '@airbattle/protocol';
 import {
   ERRORS_PACKET_FLOODING_DETECTED,
   ROUTE_ACK,
@@ -9,7 +7,6 @@ import {
   ROUTE_COMMAND,
   ROUTE_HORIZON,
   ROUTE_KEY,
-  ROUTE_LOCALPING,
   ROUTE_LOGIN,
   ROUTE_NOT_FOUND,
   ROUTE_PACKET,
@@ -19,9 +16,9 @@ import {
   ROUTE_TEAMCHAT,
   ROUTE_VOTEMUTE,
   ROUTE_WHISPER,
-} from '@/events';
-import { System } from '@/server/system';
-import { ConnectionId } from '@/types';
+} from '../events';
+import { ConnectionId } from '../types';
+import { System } from './system';
 
 export default class PacketRouter extends System {
   /**
@@ -65,8 +62,6 @@ export default class PacketRouter extends System {
 
       [CLIENT_PACKETS.KEY]: ROUTE_KEY,
 
-      [CLIENT_PACKETS.LOCALPING]: ROUTE_LOCALPING,
-
       [CLIENT_PACKETS.LOGIN]: ROUTE_LOGIN,
 
       [CLIENT_PACKETS.PONG]: ROUTE_PONG,
@@ -103,21 +98,7 @@ export default class PacketRouter extends System {
 
     const connection = this.storage.connectionList.get(connectionId);
 
-    if (connection.meta.status !== CONNECTIONS_STATUS.ESTABLISHED) {
-      return;
-    }
-
-    if (connection.meta.lagging) {
-      if (msg.c === CLIENT_PACKETS.ACK || msg.c === CLIENT_PACKETS.KEY) {
-        connection.meta.limits.any -= LIMITS_ANY_WEIGHT;
-        connection.meta.lagPackets += 1;
-        this.app.metrics.lagPackets += 1;
-
-        return;
-      }
-    }
-
-    if (connection.meta.isBackup === true) {
+    if (connection.isBackup) {
       if (this.validBackupPackets.includes(msg.c)) {
         this.emit(this.backupRoutes[msg.c], connectionId, msg);
       } else {

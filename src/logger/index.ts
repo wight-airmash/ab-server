@@ -1,1 +1,1 @@
-export { default } from '@/logger/logger';
+export { default } from './logger';

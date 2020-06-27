@@ -40,11 +40,35 @@ interface PerformanceSample {
    * Skipped frames since last performance measurement.
    */
   sf: number;
+
+  /**
+   * Transfer, bytes.
+   */
+  tIn: number;
+  tOut: number;
 }
 
 interface Uptime {
   human: string;
   seconds: number;
+}
+
+type FramesSkipped = number;
+type SkipsHistory = FramesSkipped[];
+
+interface Frames {
+  /**
+   * Last skipped frame time, ms.
+   */
+  skippedAt: number;
+  skippedDuringMatch: number;
+  skips: SkipsHistory;
+}
+
+type Duration = number;
+
+interface Online {
+  [playersOnline: number]: Duration;
 }
 
 export class Metrics {
@@ -74,21 +98,69 @@ export class Metrics {
    */
   public uptime: Uptime;
 
+  public frames: Frames = {
+    /**
+     * Last skipped frame time, ms.
+     */
+    skippedAt: 0,
+
+    skippedDuringMatch: 0,
+
+    /**
+     * Skips per players online.
+     */
+    skips: [],
+  };
+
+  public online: Online = [];
+
   /**
    * Packets amount.
    */
   public packets = {
-    // Converted into millions from time to time.
+    // Converted into million from time to time.
     in: 0,
     out: 0,
 
-    // Millions.
+    /**
+     * Million.
+     */
     inM: 0,
+    /**
+     * Million.
+     */
     outM: 0,
+
+    /**
+     * Billion.
+     */
+    inB: 0,
+    /**
+     * Billion.
+     */
+    outB: 0,
   };
 
   public players = {
     max: 0,
+    updatedAt: 0,
+  };
+
+  public transfer = {
+    /**
+     * Bytes.
+     */
+    inB: 0,
+    /**
+     * Bytes.
+     */
+    outB: 0,
+
+    inMB: 0,
+    outMB: 0,
+
+    inGB: 0,
+    outGB: 0,
   };
 
   /**
@@ -108,6 +180,8 @@ export class Metrics {
       online: 0,
       sft: 0,
       sf: 0,
+      tIn: 0,
+      tOut: 0,
     };
 
     this.sample = {
@@ -119,6 +193,8 @@ export class Metrics {
       online: 0,
       sft: 0,
       sf: 0,
+      tIn: 0,
+      tOut: 0,
     };
 
     this.uptime = {

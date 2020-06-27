@@ -1,5 +1,5 @@
 import { MOB_TYPES } from '@airbattle/protocol';
-import { MissileTemplate, FireTemplate } from '@/types';
+import { MissileTemplate, FireTemplate } from '../types';
 
 export const SHIPS_TYPES = {
   PREDATOR: 1,
@@ -188,7 +188,7 @@ export const SHIPS_SPECS = {
     specialDelay: 0,
 
     fireDelay: 300,
-    damageFactor: 2.78,
+    damageFactor: 2.87,
     energyLight: 0.3,
 
     collisions: [
@@ -232,7 +232,7 @@ export const SHIPS_SPECS = {
     specialDelay: 0,
 
     fireDelay: 500,
-    damageFactor: 5 / 3,
+    damageFactor: 4.85 / 3.1,
     energyLight: 0.5,
 
     collisions: [

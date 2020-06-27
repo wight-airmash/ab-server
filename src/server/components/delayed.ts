@@ -1,4 +1,4 @@
-import Component from '@/server/component';
+import Component from '../component';
 
 export default class Delayed extends Component {
   public BROADCAST_PLAYER_UPDATE = false;

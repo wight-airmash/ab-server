@@ -32,6 +32,12 @@ Default: `https://login.airmash.online/key`
 
 Public key server url. Required by [user accounts](../README.md#user-account). Only https is supported.
 
+### BASE_PATH
+
+Default: `"/"`
+
+Game server URL base path.
+
 ### BOTS_IP
 
 Default: `"127.0.0.1"`
@@ -76,12 +82,6 @@ Default: `true`
 
 Turn on/off features like [/usurp](./commands#usurp) or [/elections](./commands#elections) applicable only to Q-bots in CTF. Affects only CTF mode.
 
-### CTF_SAVE_RESULTS_TO_FILES
-
-Default: `false`
-
-Save CTF results into files in `./cache/matches`. Also adds API, available to moderators for downloading data (see `endpoints/ws.ts`). It is recommended to use only for debugging.
-
 ### ENDPOINTS_TLS
 
 Default: `false`
@@ -117,6 +117,12 @@ Enable or disable auto kick policy based on invalid protocol implementation `BAC
 Default: `true`
 
 Enable or disable auto kick policy based on invalid protocol implementation `PONG` packets. Normally, you don't need to turn it off.
+
+### LOG_CHAT_FILE
+
+Default: `../logs/chat.log`
+
+Chat logs file path. Relative (to `app.js` [root](#app-root)) or full path. Set to empty to turn off chat file logs.
 
 ### LOG_FILE
 
@@ -212,15 +218,27 @@ Server port.
 
 Default FFA: `0.5`
 
-Default CTF: `0.03`
+Default CTF: `0.02`
 
 Default BTR: `0.5`
 
 Probability of shields and inferno boxes spawn. Valid value: `[0..1]`. Set `0` to disable shields and inferno boxes spawn.
 
-The map is split into 32 chunks. Each chunk can hold no more than 1 powerup at a time (periodicals powerups aren't counted). One by one, one per second, the chunks are checked for spawning possibilities. If powerup was picked up or despawned, the chunk will have a timeout to spawn of 5 minutes. After 5 minutes, considering the probability value, a powerup may be spawned (per chunk probability automatically increases with time if no powerups were spawned).
+The map is split into chunks (32 in FFA and BTR, 80 in CTF). Each chunk can hold no more than 1 powerup at a time (periodicals powerups aren't counted). One by one, once per minute, the chunks are checked for spawning possibilities. If powerup was picked up or despawned, the chunk will have a timeout to spawn of 5 minutes. After 5 minutes, considering the probability value, a powerup may be spawned again.
 
-Set `1` for guaranteed powerup spawn after 5 minutes timeout.
+Set `1` for guaranteed powerup spawn after 5 minutes timeout, but don't forget about [POWERUPS_SPAWN_LIMIT](#powerups_spawn_limit).
+
+The default values are empirical (selected during testing). Change the value with care, it may affect the balance of the games.
+
+### POWERUPS_SPAWN_LIMIT
+
+Default FFA: `0.4`
+
+Default CTF: `0.05`
+
+Default BTR: `0.25`
+
+Limit (percentage of the chunks amount) of shields and inferno spawns per minute. Valid value: `[0..1]`. Set `0` to disable shields and inferno boxes spawn. Example: `0.5` value in FFA mode means, that 16 (0.5 \* 32 chunks) powerups is the maximum amount of boxes can be spawned per minute.
 
 The default values are empirical (selected during testing). Change the value with care, it may affect the balance of the games.
 
@@ -320,7 +338,7 @@ Example: `"Hello, %username%!%split%Welcome to AB FFA server."` will be sent as 
 
 Default: `true`
 
-Enable or disable bots ip list. If disabled, all connected players will be considered as bots, and the server bot won't be able to send them messages (both whisper and public).
+Enable or disable bots ip list.
 
 ## Notes
 

@@ -1,6 +1,14 @@
+export const CHAT_CHECK_LIMITS = 'CHAT_CHECK_LIMITS';
+
 export const CHAT_EMIT_DELAYED_EVENTS = 'CHAT_EMIT_DELAYED_EVENTS';
 
+export const CHAT_MUTE_BY_IP = 'CHAT_MUTE_BY_IP';
+
+export const CHAT_MUTE_BY_SERVER = 'CHAT_MUTE_BY_SERVER';
+
 export const CHAT_MUTE_EMIT_DELAYED_EVENTS = 'CHAT_MUTE_EMIT_DELAYED_EVENTS';
+
+export const CHAT_MUTE_VOTE = 'CHAT_MUTE_VOTE';
 
 export const CHAT_PUBLIC = 'CHAT_PUBLIC';
 
@@ -8,14 +16,8 @@ export const CHAT_SAY = 'CHAT_SAY';
 
 export const CHAT_TEAM = 'CHAT_TEAM';
 
-export const CHAT_WHISPER = 'CHAT_WHISPER';
-
-export const CHAT_MUTE_VOTE = 'CHAT_MUTE_VOTE';
-
-export const CHAT_MUTE_BY_SERVER = 'CHAT_MUTE_BY_SERVER';
-
-export const CHAT_CHECK_LIMITS = 'CHAT_CHECK_LIMITS';
-
-export const CHAT_MUTE_BY_IP = 'CHAT_MUTE_BY_IP';
-
 export const CHAT_UNMUTE_BY_IP = 'CHAT_UNMUTE_BY_IP';
+
+export const CHAT_WELCOME = 'CHAT_WELCOME';
+
+export const CHAT_WHISPER = 'CHAT_WHISPER';

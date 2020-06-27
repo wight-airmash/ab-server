@@ -1,33 +1,39 @@
-export * from '@/events/broadcast';
+export * from './broadcast';
 
-export * from '@/events/chat';
+export * from './chat';
 
-export * from '@/events/collisions';
+export * from './collisions';
 
-export * from '@/events/commands';
+export * from './commands';
 
-export * from '@/events/connection';
+export * from './connection';
 
-export * from '@/events/ctf';
+export * from './ctf';
 
-export * from '@/events/errors';
+export * from './errors';
 
-export * from '@/events/maintenance';
+export * from './maintenance';
 
-export * from '@/events/players';
+export * from './players';
 
-export * from '@/events/powerups';
+export * from './powerups';
 
-export * from '@/events/projectiles';
+export * from './projectiles';
 
-export * from '@/events/responses';
+export * from './responses';
 
-export * from '@/events/routes';
+export * from './routes';
 
-export * from '@/events/spectating';
+export * from './spectating';
 
-export * from '@/events/timeline';
+export * from './timeline';
 
-export * from '@/events/timeouts';
+export * from './timeouts';
 
-export * from '@/events/viewports';
+export * from './users';
+
+export * from './viewports';
+
+export * from './workers';
+
+export * from './ws-worker';

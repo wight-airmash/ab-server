@@ -1,10 +1,13 @@
-import Component from '@/server/component';
+import Component from './component';
 
 export default class Entity {
   [x: string]: any;
 
-  public destroyed = false;
-
+  /**
+   * Attach component(s) with all its properties.
+   *
+   * @param components
+   */
   attach(...components: Component[]): Entity {
     for (let index = 0; index < components.length; index += 1) {
       const component = components[index];
@@ -17,9 +20,5 @@ export default class Entity {
     }
 
     return this;
-  }
-
-  destroy(): void {
-    this.destroyed = true;
   }
 }

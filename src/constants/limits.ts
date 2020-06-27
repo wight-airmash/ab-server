@@ -31,7 +31,7 @@ export const LIMITS_KEY_DECREASE_WEIGHT = 20;
  * Decreasing every second.
  * The punishment is mute.
  */
-export const LIMITS_CHAT = 1;
+export const LIMITS_CHAT = 2;
 
 export const LIMITS_CHAT_WEIGHT = 1;
 

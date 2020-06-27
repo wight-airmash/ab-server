@@ -1,6 +1,21 @@
-import { NS_PER_SEC, MAX_UINT16 } from '@/constants/units';
+import {
+  NS_PER_SEC,
+  MAX_UINT16,
+  SECONDS_PER_MINUTE,
+  MINUTES_PER_HOUR,
+  HOURS_PER_DAY,
+} from './units';
 
 export const SERVER_FPS = 60;
+
+/**
+ * Max value of the counter before reset.
+ * In theory it's Math.floor(Number.MAX_SAFE_INTEGER / SERVER_LOOP_INTERVAL_NS).
+ *
+ * 60 frames * 60 seconds * 60 minutes * 24 hours * 100 days.
+ */
+export const SERVER_FRAMES_COUNTER_LIMIT =
+  SERVER_FPS * SECONDS_PER_MINUTE * MINUTES_PER_HOUR * HOURS_PER_DAY * 100;
 
 export const SERVER_LOOP_INTERVAL_NS = Math.ceil((1 / SERVER_FPS) * NS_PER_SEC);
 
@@ -11,6 +26,8 @@ export const SERVER_DEFAULT_ENVIRONMENT = 'production';
 export const SERVER_DEFAULT_HOST = '0.0.0.0';
 
 export const SERVER_DEFAULT_PORT = 3501;
+
+export const SERVER_DEFAULT_PATH = '/';
 
 export const SERVER_DEFAULT_TLS = false;
 

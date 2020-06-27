@@ -1,5 +1,33 @@
 ## Future version (unversioned)
 
+## 6.0.0 (June 27, 2020)
+
+Performance update.
+
+Features:
+
+- Save chat log (public and team) in the file. See [LOG_CHAT_FILE](./docs/env-variables.md#log_chat_file).
+- [`/lags`](./docs/commands.md#lags) command.
+- New network metrics. See `/server network` command result.
+- New performance metrics. See `/server performance` and `/server frames` commands result.
+- `/welcome` command to repeat welcome messages.
+- Server URL base, [BASE_PATH](./docs/env-variables.md#base_path).
+- New data in server `/` JSON response. See [docs/api.md](./docs/api.md).
+
+Improvements:
+
+- Original upgrades drop rate (50%).
+- Original damage and health values and mechanics. See [docs/damage.md](./docs/damage.md).
+- Redesigned powerups (random shields and infernos) spawn. See [POWERUPS_SPAWN_CHANCE](./docs/env-variables.md#powerups_spawn_chance) and [POWERUPS_SPAWN_LIMIT](./docs/env-variables.md#powerups_spawn_limit).
+- Better lags detection, reduced probability of false anti-flooding disconnection.
+- Data serialization with `fast-json-stringify`.
+- Custom modes moved to `/src/modes`, `/src/server` is the base mode only.
+- Typed entities.
+
+Bug fixes:
+
+- Server-side limited `/say` broadcasting (#51).
+
 ## 5.10.0 (March 28, 2020)
 
 Features:

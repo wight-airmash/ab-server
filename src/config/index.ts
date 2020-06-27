@@ -1,1 +1,1 @@
-export { default, GameServerConfigInterface } from '@/config/config';
+export { default, GameServerConfigInterface } from './config';

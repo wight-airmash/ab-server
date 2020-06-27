@@ -1,4 +1,4 @@
-import { MS_PER_SEC } from '@/constants/units';
+import { MS_PER_SEC } from './units';
 
 export const PLAYERS_ID_CACHE_LIFETIME_MS = 24 * 60 * 60 * MS_PER_SEC;
 

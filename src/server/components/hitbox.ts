@@ -1,6 +1,6 @@
-import Component from '@/server/component';
+import Component from '../component';
 
-export default class Hitbox extends Component {
+export default class Hitbox<T> extends Component {
   public x = 0;
 
   public y = 0;
@@ -13,7 +13,7 @@ export default class Hitbox extends Component {
 
   public type = 0;
 
-  public current: any;
+  public current: T;
 
   constructor() {
     super();

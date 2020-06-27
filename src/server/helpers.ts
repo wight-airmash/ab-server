@@ -1,42 +1,52 @@
 import crypto from 'crypto';
-import { MAX_UINT32, NS_PER_SEC, SERVER_MAX_MOB_ID, SERVER_MIN_MOB_ID } from '@/constants';
-import Logger from '@/logger';
-import { GameStorage } from '@/server/storage';
-import { AuthToken, AuthTokenData, ConnectionId, MobId, PlayerId } from '@/types';
+import { ClockTime } from '@airbattle/protocol';
+import { NS_PER_SEC, SERVER_MAX_MOB_ID, SERVER_MIN_MOB_ID } from '../constants';
+import Logger from '../logger';
+import { AuthToken, AuthTokenData, MobId, PlayerId } from '../types';
+import { GameStorage } from './storage';
 
 /**
  * Helpers that need access to app instance.
- * Place other helpers in @/support.
+ * Place other helpers in src/support.
  */
-export class Helpers {
+class Helpers {
   /**
    * Reference to game storage.
    */
-  protected storage: GameStorage;
+  private storage: GameStorage;
 
   /**
    * Reference to logger.
    */
-  protected log: Logger;
+  private log: Logger;
 
   /**
    * Server start time.
    */
-  protected startTime: [number, number];
+  private clockResetTime: [number, number];
 
   constructor({ app }) {
     this.storage = app.storage;
     this.log = app.log;
-    this.startTime = process.hrtime();
+
+    this.resetClock();
   }
 
   /**
    * Protocol time format.
    */
-  clock(): number {
-    const [s, ns] = process.hrtime(this.startTime);
+  clock(): ClockTime {
+    const [s, ns] = process.hrtime(this.clockResetTime);
 
     return Math.ceil((s * NS_PER_SEC + ns) / 10000);
+  }
+
+  /**
+   * Use to prevent clock value overflow.
+   */
+  resetClock(): void {
+    this.log.info('Reset protocol clock.');
+    this.clockResetTime = process.hrtime();
   }
 
   isPlayerConnected(playerId: PlayerId): boolean {
@@ -62,24 +72,6 @@ export class Helpers {
     }
 
     return false;
-  }
-
-  createConnectionId(): ConnectionId {
-    while (this.storage.connectionList.has(this.storage.nextConnectionId)) {
-      this.storage.nextConnectionId += 1;
-
-      if (this.storage.nextConnectionId >= MAX_UINT32) {
-        this.storage.nextConnectionId = 1;
-      }
-    }
-
-    if (this.storage.nextConnectionId >= MAX_UINT32) {
-      this.storage.nextConnectionId = 1;
-    }
-
-    this.storage.nextConnectionId += 1;
-
-    return this.storage.nextConnectionId - 1;
   }
 
   createServiceMobId(): MobId {
@@ -118,8 +110,6 @@ export class Helpers {
     }
 
     if (this.storage.nextMobId >= SERVER_MAX_MOB_ID) {
-      this.log.debug('Mob ID reached the limit. Reseting.');
-
       this.storage.nextMobId = SERVER_MIN_MOB_ID;
     }
 
@@ -146,7 +136,7 @@ export class Helpers {
     const tokenParts = token.split('.') as AuthToken;
 
     if (tokenParts.length !== 2) {
-      this.log.debug('Wrong number of parts in authentication token');
+      this.log.debug('Wrong number of parts in authentication token.');
 
       return '';
     }
@@ -163,13 +153,13 @@ export class Helpers {
       signature = Buffer.from(tokenParts[1], 'base64');
       auth = JSON.parse(data.toString());
     } catch (e) {
-      this.log.debug('Cannot parse authentication token');
+      this.log.debug('Cannot parse authentication token.');
 
       return '';
     }
 
     if (typeof auth !== 'object' || auth === null) {
-      this.log.debug('Decoded token data was not an object');
+      this.log.debug('Decoded token data was not an object.');
 
       return '';
     }
@@ -178,7 +168,7 @@ export class Helpers {
      * User id, timestamp, and purpose must be specified in token.
      */
     if (undefined === auth.uid || undefined === auth.ts || undefined === auth.for) {
-      this.log.debug('Required fields not present in authentication token data');
+      this.log.debug('Required fields not present in authentication token data.');
 
       return '';
     }
@@ -187,7 +177,7 @@ export class Helpers {
      * Check uid type.
      */
     if (typeof auth.uid !== 'string') {
-      this.log.debug('In authentication token, uid field must be a string');
+      this.log.debug('In authentication token, uid field must be a string.');
 
       return '';
     }
@@ -196,7 +186,7 @@ export class Helpers {
      * Check ts type.
      */
     if (typeof auth.ts !== 'number') {
-      this.log.debug('In authentication token, ts field must be a number');
+      this.log.debug('In authentication token, ts field must be a number.');
 
       return '';
     }
@@ -205,7 +195,7 @@ export class Helpers {
      * Purpose of token must be 'game'.
      */
     if (auth.for !== 'game') {
-      this.log.debug('Authentication token purpose is incorrect');
+      this.log.debug('Authentication token purpose is incorrect.');
 
       return '';
     }
@@ -214,7 +204,7 @@ export class Helpers {
      * Ed25519 signature must be exactly 64 bytes long.
      */
     if (signature.length !== 64) {
-      this.log.debug('Invalid signature length in authentication token');
+      this.log.debug('Invalid signature length in authentication token.');
 
       return '';
     }
@@ -223,7 +213,7 @@ export class Helpers {
      * Verify signature.
      */
     if (!crypto.verify(null, data, this.storage.loginPublicKey, signature)) {
-      this.log.debug('Authentication token signature not verified');
+      this.log.debug('Authentication token signature not verified.');
 
       return '';
     }

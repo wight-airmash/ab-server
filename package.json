@@ -1,6 +1,6 @@
 {
   "name": "@airbattle/server",
-  "version": "5.10.0",
+  "version": "6.0.0",
   "description": "ab-server.",
   "main": "./dist/app.js",
   "author": "wight",
@@ -27,33 +27,28 @@
   },
   "dependencies": {
     "@airbattle/protocol": "github:wight-airmash/ab-protocol#v6.0.0",
-    "collisions": "github:wight-airmash/ab-collisions#v5.0.0",
+    "collisions": "github:wight-airmash/ab-collisions#v2.0.14-ab.6.1",
     "dotenv": "^8.2.0",
-    "eventemitter3": "^4.0.0",
-    "maxmind": "^4.1.1",
-    "module-alias": "^2.2.2",
-    "pino": "^5.17.0",
-    "uWebSockets.js": "github:uNetworking/uWebSockets.js#v17.3.0"
+    "eventemitter3": "^4.0.4",
+    "fast-json-stringify": "^2.2.0",
+    "maxmind": "^4.1.3",
+    "pino": "^6.3.2",
+    "uWebSockets.js": "github:uNetworking/uWebSockets.js#v17.6.0"
   },
   "devDependencies": {
-    "@types/dotenv": "^8.2.0",
-    "@types/node": "^12.12.32",
-    "@types/pino": "^5.17.0",
-    "@typescript-eslint/eslint-plugin": "^2.25.0",
-    "@typescript-eslint/parser": "^2.25.0",
-    "eslint": "^6.8.0",
-    "eslint-config-airbnb": "^18.1.0",
-    "eslint-config-airbnb-base": "^14.1.0",
-    "eslint-config-prettier": "^6.10.1",
-    "eslint-import-resolver-alias": "^1.1.2",
-    "eslint-plugin-import": "^2.20.1",
-    "eslint-plugin-prettier": "^3.1.2",
-    "pino-pretty": "^3.6.1",
-    "prettier": "^2.0.2",
-    "typescript": "^3.8.3"
-  },
-  "_moduleAliases": {
-    "@": "dist"
+    "@types/node": "^12.12.47",
+    "@types/pino": "^6.3.0",
+    "@typescript-eslint/eslint-plugin": "^3.4.0",
+    "@typescript-eslint/parser": "^3.4.0",
+    "eslint": "^7.3.1",
+    "eslint-config-airbnb": "^18.2.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "pino-pretty": "^4.0.0",
+    "prettier": "^2.0.5",
+    "typescript": "^3.9.5"
   },
   "eslintConfig": {
     "parser": "@typescript-eslint/parser",
@@ -62,6 +57,9 @@
     ],
     "extends": [
       "airbnb-base",
+      "plugin:import/errors",
+      "plugin:import/warnings",
+      "plugin:import/typescript",
       "plugin:@typescript-eslint/eslint-recommended",
       "plugin:@typescript-eslint/recommended",
       "prettier/@typescript-eslint",
@@ -91,19 +89,6 @@
             ".mjs",
             "json"
           ]
-        },
-        "eslint-import-resolver-alias": {
-          "map": [
-            [
-              "@/*",
-              "./src"
-            ]
-          ],
-          "extensions": [
-            ".js",
-            ".ts",
-            ".mjs"
-          ]
         }
       }
     },
@@ -128,6 +113,7 @@
           ]
         }
       ],
+      "@typescript-eslint/ban-types": "off",
       "@typescript-eslint/adjacent-overload-signatures": [
         "error"
       ],
@@ -148,7 +134,11 @@
           }
         }
       ],
+      "@typescript-eslint/explicit-module-boundary-types": [
+        "off"
+      ],
       "no-bitwise": "off",
+      "no-continue": "off",
       "no-useless-constructor": "off",
       "import/no-cycle": "off",
       "import/prefer-default-export": "off",
@@ -158,6 +148,7 @@
           "props": true,
           "ignorePropertyModificationsFor": [
             "ws",
+            "res",
             "player",
             "viewport",
             "connection"

@@ -1,5 +1,5 @@
-import { SHIPS_TYPES } from '@/constants/ships';
-import { SpawnZone } from '@/types';
+import { SpawnZone } from '../types';
+import { SHIPS_TYPES } from './ships';
 
 export const BTR_WIN_ALERT_DURATION_SEC = 13;
 

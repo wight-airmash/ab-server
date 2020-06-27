@@ -1,1 +1,1 @@
-export { default, Metrics } from '@/logger/metrics/metrics';
+export { default, Metrics } from './metrics';

@@ -6,6 +6,10 @@ export const PROJECTILES_SHAPES = {
   SMALL: 3,
 };
 
+/**
+ * The order is always from the front hitcircle to the back.
+ * Hitcircle at index 0 is used to find collisions with mountains.
+ */
 export const PROJECTILES_COLLISIONS = {
   [PROJECTILES_SHAPES.REGULAR]: [
     [0, 3, 3],
@@ -23,8 +27,6 @@ export const PROJECTILES_COLLISIONS = {
     [0, 10, 2],
   ],
 };
-
-export const PROJECTILES_EXTRA_SPEED_TO_DAMAGE_FACTOR = 1 / 45;
 
 export const PROJECTILES_SPECS = {
   [MOB_TYPES.PREDATOR_MISSILE]: {
@@ -96,7 +98,7 @@ export const PROJECTILES_SPECS = {
 
     accel: 0.0875,
 
-    damage: 0.4,
+    damage: 0.42,
     infernoDamageFactor: 1,
 
     distance: 997,
