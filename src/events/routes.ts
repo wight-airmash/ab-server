@@ -22,6 +22,8 @@ export const ROUTE_PONG = 'ROUTE_PONG';
 
 export const ROUTE_SAY = 'ROUTE_SAY';
 
+export const ROUTE_SYNC_START = 'ROUTE_SYNC_START';
+
 export const ROUTE_SCOREDETAILED = 'ROUTE_SCOREDETAILED';
 
 export const ROUTE_TEAMCHAT = 'ROUTE_TEAMCHAT';

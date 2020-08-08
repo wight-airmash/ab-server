@@ -24,6 +24,7 @@ import LoginMessageHandler from './controllers/login';
 import PongMessageHandler from './controllers/pong';
 import SayMessageHandler from './controllers/say';
 import ScoredetailedMessageHandler from './controllers/scoredetailed';
+import SyncMessageHandler from './controllers/sync';
 import TeamchatMessageHandler from './controllers/teamchat';
 import VotemuteMessageHandler from './controllers/votemute';
 import WhisperMessageHandler from './controllers/whisper';
@@ -153,6 +154,7 @@ export default abstract class GameManifest {
       PongMessageHandler,
       SayMessageHandler,
       ScoredetailedMessageHandler,
+      SyncMessageHandler,
       TeamchatMessageHandler,
       VotemuteMessageHandler,
       WhisperMessageHandler,

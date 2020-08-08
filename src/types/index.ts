@@ -123,6 +123,7 @@ export interface WorkerConnectionMeta {
 export interface ConnectionMeta extends WorkerConnectionMeta {
   isBackup: boolean;
   isMain: boolean;
+  isSync: boolean;
   status: CONNECTIONS_STATUS;
 
   isBot: boolean;
