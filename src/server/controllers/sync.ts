@@ -1,6 +1,18 @@
-import { ROUTE_SYNC_START } from '../../events';
+import { ClientPackets, SERVER_PACKETS, SERVER_ERRORS } from '@airbattle/protocol';
+import {
+  CONNECTIONS_DISCONNECT,
+  CONNECTIONS_SEND_PACKETS,
+  ROUTE_SYNC_START,
+  ROUTE_SYNC_AUTH,
+} from '../../events';
 import { ConnectionId, ConnectionMeta } from '../../types';
 import { System } from '../system';
+import { generateRandomString } from '../../support/strings';
+
+type SyncAuthTokenData = {
+  nonce: string;
+  for: string;
+};
 
 export default class SyncMessageHandler extends System {
   constructor({ app }) {
@@ -8,7 +20,26 @@ export default class SyncMessageHandler extends System {
 
     this.listeners = {
       [ROUTE_SYNC_START]: this.onSyncStart,
+      [ROUTE_SYNC_AUTH]: this.onSyncAuth,
     };
+  }
+
+  /**
+   * Helper function for disconnecting on error.
+   */
+  sendErrorAndDisconnect(connectionId: ConnectionId, error: SERVER_ERRORS): void {
+    this.emit(
+      CONNECTIONS_SEND_PACKETS,
+      {
+        c: SERVER_PACKETS.ERROR,
+        error,
+      },
+      connectionId
+    );
+
+    setTimeout(() => {
+      this.emit(CONNECTIONS_DISCONNECT, connectionId);
+    }, 100);
   }
 
   /**
@@ -39,11 +70,22 @@ export default class SyncMessageHandler extends System {
      * Validate and get connection object.
      */
     const connection = this.validateConnection(connectionId);
+
     if (connection == null) {
       return;
     }
 
     this.log.debug('Sync start received.');
+
+    /**
+     * Reject if we are not ready to synchronize.
+     */
+    if (this.storage.loginPublicKey === null) {
+      this.log.warn('Sync packet received but we are not ready, still awaiting login key.');
+      this.sendErrorAndDisconnect(connectionId, SERVER_ERRORS.SYNC_NOT_READY);
+
+      return;
+    }
 
     /**
      * Identifies this as a sync server connection.
@@ -57,6 +99,85 @@ export default class SyncMessageHandler extends System {
     clearTimeout(connection.timeouts.backup);
     clearTimeout(connection.timeouts.ack);
 
-    // TODO: response
+    /**
+     * Generate nonce and send it as authentication challenge to the sync service.
+     */
+    connection.sync.auth.nonce = generateRandomString(16);
+    this.log.debug('Sending nonce for sync auth: %o', connection.sync.auth.nonce);
+    this.emit(
+      CONNECTIONS_SEND_PACKETS,
+      {
+        c: SERVER_PACKETS.SYNC_AUTH,
+        challenge: connection.sync.auth.nonce,
+      },
+      connectionId
+    );
+  }
+
+  /**
+   * SYNC_AUTH packet handler.
+   */
+  onSyncAuth(connectionId: ConnectionId, msg: ClientPackets.SyncAuth): void {
+    /**
+     * Validate and get connection object.
+     */
+    const connection = this.validateConnection(connectionId);
+
+    if (connection == null) {
+      return;
+    }
+
+    /**
+     * Ignore if sync connection has not been started.
+     */
+    if (!connection.isSync) {
+      return;
+    }
+
+    this.log.debug('Sync auth received.');
+
+    /**
+     * Validate authentication response.
+     */
+    let failedAuth = true;
+    const token = msg.response;
+
+    try {
+      /**
+       * Call to verifyToken will return null if unverified.
+       */
+
+      const auth = this.helpers.verifyToken(token) as SyncAuthTokenData;
+
+      if (auth === null) {
+        this.log.debug('Sync token was not verified.');
+      } else if (undefined === auth.nonce || undefined === auth.for) {
+        this.log.debug('Required fields not present in sync auth token data.');
+      } else if (auth.for !== 'sync') {
+        this.log.debug('Sync auth token purpose is incorrect.');
+      } else if (connection.sync.auth.nonce === null) {
+        this.log.debug('Sync auth received but no nonce associated with connection.');
+      } else if (auth.nonce !== connection.sync.auth.nonce) {
+        this.log.debug('Sync auth nonce does not match that generated.');
+      } else {
+        /**
+         * If we've reached here then authentication is successful.
+         */
+        connection.sync.auth.nonce = null;
+        connection.sync.auth.complete = true;
+        failedAuth = false;
+      }
+    } catch (err) {
+      this.log.debug('Sync auth data parsing error: %o', { error: err.stack });
+    }
+
+    if (!failedAuth) {
+      this.log.info('Sync auth successful.');
+
+      // TODO: response
+    } else {
+      this.log.warn('Sync auth failed, disconnecting');
+      this.sendErrorAndDisconnect(connectionId, SERVER_ERRORS.SYNC_AUTH_INVALID);
+    }
   }
 }

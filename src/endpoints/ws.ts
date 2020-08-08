@@ -215,6 +215,13 @@ export default class WsEndpoint {
         debug: 0,
         spam: 0,
       },
+
+      sync: {
+        auth: {
+          nonce: null,
+          complete: false,
+        },
+      },
     };
 
     const connectionId = connectionMeta.id;

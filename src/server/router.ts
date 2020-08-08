@@ -14,6 +14,7 @@ import {
   ROUTE_SAY,
   ROUTE_SCOREDETAILED,
   ROUTE_SYNC_START,
+  ROUTE_SYNC_AUTH,
   ROUTE_TEAMCHAT,
   ROUTE_VOTEMUTE,
   ROUTE_WHISPER,
@@ -33,6 +34,11 @@ export default class PacketRouter extends System {
   protected backupRoutes: { [packetId: number]: string };
 
   /**
+   * Sync connection routes.
+   */
+  protected syncRoutes: { [packetId: number]: string };
+
+  /**
    * Packet ids valid for main connections.
    */
   protected validPackets: readonly number[];
@@ -41,6 +47,11 @@ export default class PacketRouter extends System {
    * Packet ids valid for backup connections.
    */
   protected validBackupPackets: readonly number[];
+
+  /**
+   * Packet ids valid for sync connections.
+   */
+  protected validSyncPackets: readonly number[];
 
   constructor({ app }) {
     super({ app });
@@ -88,9 +99,16 @@ export default class PacketRouter extends System {
       [CLIENT_PACKETS.KEY]: ROUTE_KEY,
     });
 
+    this.syncRoutes = Object.freeze({
+      [CLIENT_PACKETS.SYNC_AUTH]: ROUTE_SYNC_AUTH,
+    });
+
     this.validPackets = Object.freeze(Object.keys(this.routes).map(packetId => ~~packetId));
     this.validBackupPackets = Object.freeze(
       Object.keys(this.backupRoutes).map(packetId => ~~packetId)
+    );
+    this.validSyncPackets = Object.freeze(
+      Object.keys(this.syncRoutes).map(packetId => ~~packetId)
     );
   }
 
@@ -104,6 +122,12 @@ export default class PacketRouter extends System {
     if (connection.isBackup) {
       if (this.validBackupPackets.includes(msg.c)) {
         this.emit(this.backupRoutes[msg.c], connectionId, msg);
+      } else {
+        this.emit(ROUTE_NOT_FOUND, connectionId);
+      }
+    } else if (connection.isSync) {
+      if (this.validSyncPackets.includes(msg.c)) {
+        this.emit(this.syncRoutes[msg.c], connectionId, msg);
       } else {
         this.emit(ROUTE_NOT_FOUND, connectionId);
       }

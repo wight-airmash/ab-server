@@ -179,6 +179,13 @@ export interface ConnectionMeta extends WorkerConnectionMeta {
     debug: number;
     spam: number;
   };
+
+  sync: {
+    auth: {
+      nonce: string;
+      complete: boolean;
+    };
+  };
 }
 
 export interface PlayerConnection extends WebSocket {
