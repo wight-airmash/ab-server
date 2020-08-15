@@ -419,11 +419,13 @@ export interface GameServerBootstrapInterface {
   mainLoop: GameLoopCallback;
 }
 
+export type SequenceId = number;
+
 export interface SyncStorage {
   /**
-   * Next sequence number for object data update message.
+   * Next sequence id for object data update message.
    */
-  nextSequence: number;
+  nextSequenceId: SequenceId;
 
   /**
    * Server identity (region-room).

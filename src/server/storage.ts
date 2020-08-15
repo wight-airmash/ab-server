@@ -300,8 +300,8 @@ export class GameStorage {
   public gameModeAPIResponse = '';
 
   public sync: SyncStorage = {
-    nextSequence: 0,
+    nextSequenceId: 1,
     thisServerId: null,
     thisServerEndpoint: null,
-  }
+  };
 }

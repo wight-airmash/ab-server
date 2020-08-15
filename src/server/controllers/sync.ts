@@ -22,7 +22,7 @@ export default class SyncMessageHandler extends System {
     this.listeners = {
       [ROUTE_SYNC_START]: this.onSyncStart,
       [ROUTE_SYNC_AUTH]: this.onSyncAuth,
-      [ROUTE_SYNC_INIT]: this.onSyncInit,      
+      [ROUTE_SYNC_INIT]: this.onSyncInit,
     };
   }
 
@@ -193,7 +193,7 @@ export default class SyncMessageHandler extends System {
         CONNECTIONS_SEND_PACKETS,
         {
           c: SERVER_PACKETS.SYNC_INIT,
-          sequence: this.storage.sync.nextSequence,
+          sequence: this.storage.sync.nextSequenceId,
           timestamp: Date.now(),
         },
         connectionId
@@ -212,6 +212,7 @@ export default class SyncMessageHandler extends System {
      * Validate and get connection object.
      */
     const connection = this.validateConnection(connectionId);
+
     if (connection == null) {
       return;
     }
@@ -230,7 +231,7 @@ export default class SyncMessageHandler extends System {
      * Reject if sync connection is not authenticated.
      */
     if (!connection.sync.auth.complete) {
-      this.log.error('Sync connection not authenticated, rejecting initialization')
+      this.log.error('Sync connection not authenticated, rejecting initialization');
       failedInit = true;
     }
 
@@ -239,10 +240,11 @@ export default class SyncMessageHandler extends System {
      */
     if (!failedInit) {
       const tsdiff = Date.now() - msg.timestamp;
+
       this.log.debug('Sync time difference is %d ms', tsdiff);
 
-      this.storage.sync.nextSequence = Math.max(msg.sequence, this.storage.sync.nextSequence);
-      this.log.debug('Next sequence id: %d', this.storage.sync.nextSequence);
+      this.storage.sync.nextSequenceId = Math.max(msg.sequence, this.storage.sync.nextSequenceId);
+      this.log.debug('Next sequence id: %d', this.storage.sync.nextSequenceId);
 
       this.storage.sync.thisServerId = msg.serverId;
       this.log.debug('Server id: %s', msg.serverId);
