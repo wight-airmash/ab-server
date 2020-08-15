@@ -63,6 +63,8 @@ export type MainConnectionId = ConnectionId;
 
 export type BackupConnectionId = ConnectionId;
 
+export type SyncConnectionId = ConnectionId;
+
 export type MobId = number;
 
 export type PlayerId = MobId;
@@ -183,6 +185,9 @@ export interface ConnectionMeta extends WorkerConnectionMeta {
   sync: {
     auth: {
       nonce: string;
+      complete: boolean;
+    };
+    init: {
       complete: boolean;
     };
   };
@@ -412,6 +417,23 @@ export interface GameLoopCallback {
 
 export interface GameServerBootstrapInterface {
   mainLoop: GameLoopCallback;
+}
+
+export interface SyncStorage {
+  /**
+   * Next sequence number for object data update message.
+   */
+  nextSequence: number;
+
+  /**
+   * Server identity (region-room).
+   */
+  thisServerId: string;
+
+  /**
+   * Public websocket endpoint of this server.
+   */
+  thisServerEndpoint: string;
 }
 
 export * from './entities';

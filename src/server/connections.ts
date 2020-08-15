@@ -182,6 +182,13 @@ export default class Connections extends System {
       secondConnectionId = this.storage.playerMainConnectionList.get(connection.playerId);
 
       this.storage.playerBackupConnectionList.delete(connection.playerId);
+    } else if (connection.isSync) {
+      /**
+       * Only remove stored sync connection if it matches the active one.
+       */
+      if (this.storage.syncConnectionId === connectionId) {
+        this.storage.syncConnectionId = null;
+      }
     }
 
     this.storage.connectionList.delete(connectionId);

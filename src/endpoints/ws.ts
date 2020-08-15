@@ -221,6 +221,9 @@ export default class WsEndpoint {
           nonce: null,
           complete: false,
         },
+        init: {
+          complete: false,
+        },
       },
     };
 

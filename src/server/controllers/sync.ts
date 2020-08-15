@@ -21,6 +21,7 @@ export default class SyncMessageHandler extends System {
     this.listeners = {
       [ROUTE_SYNC_START]: this.onSyncStart,
       [ROUTE_SYNC_AUTH]: this.onSyncAuth,
+      [ROUTE_SYNC_INIT]: this.onSyncInit,      
     };
   }
 
@@ -174,10 +175,89 @@ export default class SyncMessageHandler extends System {
     if (!failedAuth) {
       this.log.info('Sync auth successful.');
 
-      // TODO: response
+      /**
+       * Send initialization data to sync service.
+       */
+      this.emit(
+        CONNECTIONS_SEND_PACKETS,
+        {
+          c: SERVER_PACKETS.SYNC_INIT,
+          sequence: this.storage.sync.nextSequence,
+          timestamp: Date.now(),
+        },
+        connectionId
+      );
     } else {
       this.log.warn('Sync auth failed, disconnecting');
       this.sendErrorAndDisconnect(connectionId, SERVER_ERRORS.SYNC_AUTH_INVALID);
+    }
+  }
+
+  /**
+   * SYNC_INIT packet handler.
+   */
+  onSyncInit(connectionId: ConnectionId, msg: ClientPackets.SyncInit): void {
+    /**
+     * Validate and get connection object.
+     */
+    const connection = this.validateConnection(connectionId);
+    if (connection == null) {
+      return;
+    }
+
+    /**
+     * Ignore if sync connection has not been started.
+     */
+    if (!connection.isSync) {
+      return;
+    }
+
+    this.log.debug('Sync init received');
+    let failedInit = false;
+
+    /**
+     * Reject if sync connection is not authenticated.
+     */
+    if (!connection.sync.auth.complete) {
+      this.log.error('Sync connection not authenticated, rejecting initialization')
+      failedInit = true;
+    }
+
+    /**
+     * Validate and store sync init data.
+     */
+    if (!failedInit) {
+      const tsdiff = Date.now() - msg.timestamp;
+      this.log.debug('Sync time difference is %d ms', tsdiff);
+
+      this.storage.sync.nextSequence = Math.max(msg.sequence, this.storage.sync.nextSequence);
+      this.log.debug('Next sequence id: %d', this.storage.sync.nextSequence);
+
+      this.storage.sync.thisServerId = msg.serverId;
+      this.log.debug('Server id: %s', msg.serverId);
+
+      this.storage.sync.thisServerEndpoint = msg.wsEndpoint;
+      this.log.debug('Public websocket endpoint: %s', msg.wsEndpoint);
+    }
+
+    if (!failedInit) {
+      const previousSyncConnectionId = this.storage.syncConnectionId;
+
+      this.storage.syncConnectionId = connection.id;
+
+      connection.sync.init.complete = true;
+      this.log.info(
+        'Sync init successful, new sync connection id: %d',
+        this.storage.syncConnectionId
+      );
+
+      if (previousSyncConnectionId !== null) {
+        this.log.warn('Replaced existing sync connection id %d', previousSyncConnectionId);
+        this.emit(CONNECTIONS_DISCONNECT, previousSyncConnectionId);
+      }
+    } else {
+      this.log.warn('Sync init failed, disconnecting');
+      this.sendErrorAndDisconnect(connectionId, SERVER_ERRORS.SYNC_INIT_INVALID);
     }
   }
 }
