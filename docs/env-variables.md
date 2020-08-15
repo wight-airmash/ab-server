@@ -284,6 +284,14 @@ Types: FFA, CTF or BTR.
 
 Default: `../data/user-stats.json`
 
+### STATS_SYNC
+
+Default: `false`
+
+Allows cross-server synchronization of user stats, via the airmash.online sync service.
+
+Public servers in the games list should set this to true. Development or private servers should leave this as false.
+
 ### SU_PASSWORD
 
 Default: `""`

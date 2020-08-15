@@ -4,6 +4,7 @@ import {
   CONNECTIONS_SEND_PACKETS,
   ROUTE_SYNC_START,
   ROUTE_SYNC_AUTH,
+  ROUTE_SYNC_INIT,
 } from '../../events';
 import { ConnectionId, ConnectionMeta } from '../../types';
 import { System } from '../system';
@@ -77,6 +78,16 @@ export default class SyncMessageHandler extends System {
     }
 
     this.log.debug('Sync start received.');
+
+    /**
+     * Reject if we are not configured to synchronize.
+     */
+    if (!this.config.accounts.userStats.synchronize) {
+      this.log.debug('Sync packet received but server is not configured for this feature.');
+      this.sendErrorAndDisconnect(connectionId, SERVER_ERRORS.SYNC_NOT_CONFIGURED);
+
+      return;
+    }
 
     /**
      * Reject if we are not ready to synchronize.
