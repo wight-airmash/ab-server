@@ -71,7 +71,7 @@ export default class Connections extends System {
     connection.lastPacketAt = Date.now();
     connection.limits.any += LIMITS_ANY_WEIGHT;
 
-    if (!connection.isBot) {
+    if (!connection.isBot && !(connection.isSync && connection.sync.init.complete)) {
       if (connection.lagging.isActive) {
         if (connection.timeouts.lagging === null) {
           this.log.debug('Connection is lagging, packets dropping start: %o', {

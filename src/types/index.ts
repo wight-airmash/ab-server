@@ -487,6 +487,13 @@ export interface SyncStorage {
    * State after being assigned a sequence id. Initial state after being enqueued if sync connection active.
    */
   updatesAwaitingSend: Map<SequenceId, SyncDataUpdate>;
+
+  /**
+   * Updates waiting to be acknowledged by sync service.
+   *
+   * State after update has been sent.
+   */
+  updatesAwaitingAck: Map<SequenceId, SyncDataUpdate>;
 }
 
 export * from './entities';

@@ -38,6 +38,7 @@ import {
   RESPONSE_SCORE_UPDATE,
   RESPONSE_SEND_PING,
   RESPONSE_SERVER_PLAYER_CONNECT,
+  SYNC_ENQUEUE_UPDATE,
   TIMELINE_BEFORE_GAME_START,
   TIMEOUT_ACK,
   TIMEOUT_BACKUP,
@@ -231,6 +232,19 @@ export default class GamePlayersConnect extends System {
 
         this.storage.users.list.set(userId, user);
         this.storage.users.hasChanges = true;
+      }
+
+      if (this.config.accounts.userStats.synchronize) {
+        const eventDetail = { name, flag };
+
+        this.emit(
+          SYNC_ENQUEUE_UPDATE,
+          'user',
+          player.user.id,
+          {},
+          Date.now(),
+          ['login', eventDetail]
+        );
       }
 
       player.level.current = convertEarningsToLevel(user.lifetimestats.earnings);

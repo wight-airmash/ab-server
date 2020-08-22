@@ -306,5 +306,6 @@ export class GameStorage {
     thisServerEndpoint: null,
     updatesAwaitingSequenceId: [],
     updatesAwaitingSend: new Map(),
+    updatesAwaitingAck: new Map(),
   };
 }

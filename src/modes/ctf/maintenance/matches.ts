@@ -17,6 +17,7 @@ import {
   PLAYERS_CREATED,
   PLAYERS_RESPAWN,
   RESPONSE_SCORE_UPDATE,
+  SYNC_ENQUEUE_UPDATE,
   TIMELINE_CLOCK_SECOND,
   TIMELINE_GAME_MATCH_END,
   TIMELINE_GAME_MATCH_START,
@@ -159,7 +160,8 @@ export default class GameMatches extends System {
         this.storage.gameEntity.match.bounty = CTF_WIN_BOUNTY.MAX;
       }
 
-      const matchDuration = Date.now() - this.storage.gameEntity.match.start;
+      const now = Date.now();
+      const matchDuration = now - this.storage.gameEntity.match.start;
 
       const playersIterator = this.storage.playerList.values();
       let player: Player = playersIterator.next().value;
@@ -188,6 +190,30 @@ export default class GameMatches extends System {
 
             user.lifetimestats.earnings += shareInScore;
             this.storage.users.hasChanges = true;
+
+            if (this.config.accounts.userStats.synchronize) {
+              const eventDetail = {
+                match: { start: this.storage.gameEntity.match.start },
+                player: {
+                  active: {
+                    red: player.times.activePlayingRed,
+                    blue: player.times.activePlayingBlue,
+                  },
+                  plane: player.planetype.current,
+                  team: player.team.current,
+                  flag: player.flag.current,
+                },
+              };
+
+              this.emit(
+                SYNC_ENQUEUE_UPDATE,
+                'user',
+                player.user.id,
+                { earnings: shareInScore },
+                now,
+                ['ctf-match-winner', eventDetail]
+              );
+            }
           }
 
           this.emit(RESPONSE_SCORE_UPDATE, player.id.current);
