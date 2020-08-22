@@ -26,6 +26,8 @@ export * from './routes';
 
 export * from './spectating';
 
+export * from './sync';
+
 export * from './timeline';
 
 export * from './timeouts';

@@ -115,7 +115,7 @@ export default class Connections extends System {
   }
 
   /**
-   * One of the connections (main or backup) was closed.
+   * One of the connections (main or backup or sync) was closed.
    *
    * @param connectionId
    */
@@ -188,6 +188,7 @@ export default class Connections extends System {
        */
       if (this.storage.syncConnectionId === connectionId) {
         this.storage.syncConnectionId = null;
+        this.storage.sync.active = false;
       }
     }
 

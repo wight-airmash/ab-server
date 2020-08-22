@@ -254,9 +254,13 @@ export default class SyncMessageHandler extends System {
     }
 
     if (!failedInit) {
+      /**
+       * Initialization succeeded.
+       */
       const previousSyncConnectionId = this.storage.syncConnectionId;
 
       this.storage.syncConnectionId = connection.id;
+      this.storage.sync.active = true;
 
       connection.sync.init.complete = true;
       this.log.info(
@@ -269,6 +273,9 @@ export default class SyncMessageHandler extends System {
         this.emit(CONNECTIONS_DISCONNECT, previousSyncConnectionId);
       }
     } else {
+      /**
+       * Initialization failed.
+       */
       this.log.warn('Sync init failed, disconnecting');
       this.sendErrorAndDisconnect(connectionId, SERVER_ERRORS.SYNC_INIT_INVALID);
     }
