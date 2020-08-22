@@ -81,9 +81,11 @@ export default class SyncMessageHandler extends System {
 
     /**
      * Reject if we are not configured to synchronize.
+     *
+     * As this cannot be marked as a sync connection, this means all other sync packet types will be ignored as well.
      */
     if (!this.config.accounts.userStats.synchronize) {
-      this.log.debug('Sync packet received but server is not configured for this feature.');
+      this.log.warn('Sync start received but server is not configured for this feature.');
       this.sendErrorAndDisconnect(connectionId, SERVER_ERRORS.SYNC_NOT_CONFIGURED);
 
       return;
@@ -93,7 +95,7 @@ export default class SyncMessageHandler extends System {
      * Reject if we are not ready to synchronize.
      */
     if (this.storage.loginPublicKey === null) {
-      this.log.warn('Sync packet received but we are not ready, still awaiting login key.');
+      this.log.warn('Sync start received but we are not ready, still awaiting login key.');
       this.sendErrorAndDisconnect(connectionId, SERVER_ERRORS.SYNC_NOT_READY);
 
       return;
@@ -208,6 +210,8 @@ export default class SyncMessageHandler extends System {
    * SYNC_INIT packet handler.
    */
   onSyncInit(connectionId: ConnectionId, msg: ClientPackets.SyncInit): void {
+    const { sync } = this.storage;
+
     /**
      * Validate and get connection object.
      */
@@ -243,13 +247,13 @@ export default class SyncMessageHandler extends System {
 
       this.log.debug('Sync time difference is %d ms', tsdiff);
 
-      this.storage.sync.nextSequenceId = Math.max(msg.sequence, this.storage.sync.nextSequenceId);
-      this.log.debug('Next sequence id: %d', this.storage.sync.nextSequenceId);
+      sync.nextSequenceId = Math.max(msg.sequence, sync.nextSequenceId);
+      this.log.debug('Next sequence id: %d', sync.nextSequenceId);
 
-      this.storage.sync.thisServerId = msg.serverId;
+      sync.thisServerId = msg.serverId;
       this.log.debug('Server id: %s', msg.serverId);
 
-      this.storage.sync.thisServerEndpoint = msg.wsEndpoint;
+      sync.thisServerEndpoint = msg.wsEndpoint;
       this.log.debug('Public websocket endpoint: %s', msg.wsEndpoint);
     }
 
@@ -257,16 +261,14 @@ export default class SyncMessageHandler extends System {
       /**
        * Initialization succeeded.
        */
-      const previousSyncConnectionId = this.storage.syncConnectionId;
-
-      this.storage.syncConnectionId = connection.id;
-      this.storage.sync.active = true;
+      const previousSyncConnectionId = sync.connectionId;
 
       connection.sync.init.complete = true;
-      this.log.info(
-        'Sync init successful, new sync connection id: %d',
-        this.storage.syncConnectionId
-      );
+
+      sync.connectionId = connection.id;
+      sync.active = true;
+
+      this.log.info('Sync init successful, new sync connection id: %d', sync.connectionId);
 
       if (previousSyncConnectionId !== null) {
         this.log.warn('Replaced existing sync connection id %d', previousSyncConnectionId);

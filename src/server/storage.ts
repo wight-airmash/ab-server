@@ -29,7 +29,6 @@ import {
   UnmuteTime,
   UsersStorage,
   Viewports,
-  SyncConnectionId,
   SyncStorage,
 } from '../types';
 
@@ -125,11 +124,6 @@ export class GameStorage {
   public connectionIdByNameList: {
     [playerName: string]: MainConnectionId;
   } = {};
-
-  /**
-   * Connection id from sync service, if connected.
-   */
-  public syncConnectionId: SyncConnectionId = null;
 
   /**
    * All mobs ids (include players).
@@ -301,6 +295,7 @@ export class GameStorage {
 
   public sync: SyncStorage = {
     active: false,
+    connectionId: null,
     nextSequenceId: 1,
     thisServerId: null,
     thisServerEndpoint: null,

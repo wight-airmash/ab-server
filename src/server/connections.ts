@@ -186,8 +186,8 @@ export default class Connections extends System {
       /**
        * Only remove stored sync connection if it matches the active one.
        */
-      if (this.storage.syncConnectionId === connectionId) {
-        this.storage.syncConnectionId = null;
+      if (this.storage.sync.connectionId === connectionId) {
+        this.storage.sync.connectionId = null;
         this.storage.sync.active = false;
       }
     }

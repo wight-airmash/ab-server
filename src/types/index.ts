@@ -460,6 +460,11 @@ export interface SyncStorage {
   active: boolean;
 
   /**
+   * Connection id from sync service, if connected and initialized.
+   */
+  connectionId: SyncConnectionId;
+
+  /**
    * Next sequence id for object data update message.
    */
   nextSequenceId: SequenceId;

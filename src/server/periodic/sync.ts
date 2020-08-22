@@ -12,36 +12,38 @@ export default class SyncUpdatePeriodic extends System {
   }
 
   sendUpdates(): void {
+    const { sync } = this.storage;
+
     /**
      * Only process update queues if we have an initialized sync connection.
      */
-    if (this.storage.sync.active) {
+    if (sync.active) {
       /**
        * Updates waiting for sequence id.
        */
-      while (this.storage.sync.updatesAwaitingSequenceId.length > 0) {
-        const sequence = this.storage.sync.nextSequenceId;
-        const update = this.storage.sync.updatesAwaitingSequenceId[0];
+      while (sync.updatesAwaitingSequenceId.length > 0) {
+        const sequence = sync.nextSequenceId;
+        const update = sync.updatesAwaitingSequenceId[0];
 
-        this.storage.sync.nextSequenceId += 1;
+        sync.nextSequenceId += 1;
 
         this.log.debug('Assigned sequence id %d to sync update %o', sequence, update);
 
         /**
          * Add to updates awaiting send.
          */
-        this.storage.sync.updatesAwaitingSend.set(sequence, update);
+        sync.updatesAwaitingSend.set(sequence, update);
 
         /**
          * Remove from updates awaiting sequence id.
          */
-        this.storage.sync.updatesAwaitingSequenceId.shift();
+        sync.updatesAwaitingSequenceId.shift();
       }
 
       /**
        * Updates waiting for send.
        */
-      this.storage.sync.updatesAwaitingSend.forEach((update, sequence) => {
+      sync.updatesAwaitingSend.forEach((update, sequence) => {
         this.log.debug('Sending sync update %d: %o', sequence, update);
 
         /**
@@ -58,7 +60,7 @@ export default class SyncUpdatePeriodic extends System {
             timestamp: update.timestamp,
             event: update.event,
           },
-          this.storage.syncConnectionId
+          sync.connectionId
         );
 
         this.log.debug('Moving sync update %d to await acknowledgement', sequence);
@@ -66,12 +68,12 @@ export default class SyncUpdatePeriodic extends System {
         /**
          * Add to updates awaiting acknowledgement.
          */
-        this.storage.sync.updatesAwaitingAck.set(sequence, update);
+        sync.updatesAwaitingAck.set(sequence, update);
 
         /**
          * Remove from updates awaiting send.
          */
-        this.storage.sync.updatesAwaitingSend.delete(sequence);
+        sync.updatesAwaitingSend.delete(sequence);
       });
     }
   }
