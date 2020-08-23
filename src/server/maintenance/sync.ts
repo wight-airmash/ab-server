@@ -7,6 +7,7 @@ import {
 } from '../../events';
 import { SyncDataUpdate, Timestamp } from '../../types';
 import { System } from '../system';
+import { OBJECT_TYPE_ID_FIELD_SEPARATOR } from '../../constants';
 
 export default class GameSync extends System {
   constructor({ app }) {
@@ -28,6 +29,11 @@ export default class GameSync extends System {
   ): void {
     const { sync } = this.storage;
     const update: SyncDataUpdate = {
+      meta: {
+        stateChangeTime: Date.now(),
+        lastAckResult: null,
+        sendCount: 0,
+      },
       type,
       id,
       data: JSON.stringify(data),
@@ -59,7 +65,7 @@ export default class GameSync extends System {
 
   onSubscribe(type: string, id: string): void {
     const { sync } = this.storage;
-    const combinedObjectTypeId = [type, id].join(':');
+    const combinedObjectTypeId = [type, id].join(OBJECT_TYPE_ID_FIELD_SEPARATOR);
     const isSubscribed = sync.subscribedObjects.has(combinedObjectTypeId);
 
     if (!isSubscribed) {
@@ -82,7 +88,7 @@ export default class GameSync extends System {
 
   onUnsubscribe(type: string, id: string): void {
     const { sync } = this.storage;
-    const combinedObjectTypeId = [type, id].join(':');
+    const combinedObjectTypeId = [type, id].join(OBJECT_TYPE_ID_FIELD_SEPARATOR);
     const isSubscribed = sync.subscribedObjects.has(combinedObjectTypeId);
 
     if (isSubscribed) {

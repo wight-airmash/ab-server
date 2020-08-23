@@ -17,6 +17,7 @@ import {
   ROUTE_SYNC_AUTH,
   ROUTE_SYNC_INIT,
   ROUTE_SYNC_UPDATE,
+  ROUTE_SYNC_ACK,
   ROUTE_TEAMCHAT,
   ROUTE_VOTEMUTE,
   ROUTE_WHISPER,
@@ -107,6 +108,8 @@ export default class PacketRouter extends System {
       [CLIENT_PACKETS.SYNC_INIT]: ROUTE_SYNC_INIT,
 
       [CLIENT_PACKETS.SYNC_UPDATE]: ROUTE_SYNC_UPDATE,
+
+      [CLIENT_PACKETS.SYNC_ACK]: ROUTE_SYNC_ACK,
     });
 
     this.validPackets = Object.freeze(Object.keys(this.routes).map(packetId => ~~packetId));

@@ -51,7 +51,6 @@ export default class ScoreUpdateResponse extends System {
 
         player.level.current = newLevel;
         this.emit(BROADCAST_PLAYER_LEVEL, player.id.current, updateType);
-
       }
     }
 

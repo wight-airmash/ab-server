@@ -1,6 +1,7 @@
 import { SERVER_PACKETS } from '@airbattle/protocol';
-import { CONNECTIONS_SEND_PACKETS, TIMELINE_LOOP_TICK } from '../../events';
+import { CONNECTIONS_SEND_PACKETS, TIMELINE_LOOP_TICK, TIMELINE_CLOCK_SECOND } from '../../events';
 import { System } from '../system';
+import { SYNC_ACK_TIMEOUT_MS, SYNC_RESEND_TIMEOUT_MS } from '../../constants';
 
 export default class SyncUpdatePeriodic extends System {
   constructor({ app }) {
@@ -8,6 +9,7 @@ export default class SyncUpdatePeriodic extends System {
 
     this.listeners = {
       [TIMELINE_LOOP_TICK]: this.sendUpdates,
+      [TIMELINE_CLOCK_SECOND]: this.processAckTimeoutsAndResends,
     };
   }
 
@@ -18,6 +20,8 @@ export default class SyncUpdatePeriodic extends System {
      * Only process update queues if we have an initialized sync connection.
      */
     if (sync.active) {
+      const now = Date.now();
+
       /**
        * Updates waiting for sequence id.
        */
@@ -32,6 +36,7 @@ export default class SyncUpdatePeriodic extends System {
         /**
          * Add to updates awaiting send.
          */
+        update.meta.stateChangeTime = now;
         sync.updatesAwaitingSend.set(sequence, update);
 
         /**
@@ -68,6 +73,8 @@ export default class SyncUpdatePeriodic extends System {
         /**
          * Add to updates awaiting acknowledgement.
          */
+        update.meta.sendCount += 1;
+        update.meta.stateChangeTime = now;
         sync.updatesAwaitingAck.set(sequence, update);
 
         /**
@@ -75,6 +82,101 @@ export default class SyncUpdatePeriodic extends System {
          */
         sync.updatesAwaitingSend.delete(sequence);
       });
+    }
+  }
+
+  processAckTimeoutsAndResends(): void {
+    const { sync } = this.storage;
+    const now = Date.now();
+    let sendHasChanges = false;
+
+    if (sync.active) {
+      /**
+       * Timeout updates awaiting acknowledgement.
+       */
+      sync.updatesAwaitingAck.forEach((update, sequence) => {
+        if (now - update.meta.stateChangeTime > SYNC_ACK_TIMEOUT_MS) {
+          this.log.warn('Sync ack for update %d timed out, moving to resend queue', sequence);
+
+          /**
+           * Add to updates awaiting resend.
+           */
+          update.meta.stateChangeTime = now;
+          sync.updatesAwaitingResend.set(sequence, update);
+
+          /**
+           * Remove from updates awaiting acknowledgement.
+           */
+          sync.updatesAwaitingAck.delete(sequence);
+        }
+      });
+
+      /**
+       * Timeout updates awaiting resend.
+       */
+      sync.updatesAwaitingResend.forEach((update, sequence) => {
+        if (now - update.meta.stateChangeTime > SYNC_RESEND_TIMEOUT_MS) {
+          this.log.warn(
+            'Moving sync update %d to send queue, for retry %d',
+            sequence,
+            update.meta.sendCount
+          );
+
+          /**
+           * Add to updates awaiting send.
+           */
+          update.meta.stateChangeTime = now;
+          sync.updatesAwaitingSend.set(sequence, update);
+          sendHasChanges = true;
+
+          /**
+           * Remove from updates awaiting resend.
+           */
+          sync.updatesAwaitingResend.delete(sequence);
+        }
+      });
+    } else {
+      /**
+       * As connection is down, cancel any timeouts.
+       *
+       * That is, set any updates awaiting acknowledgement or resend to send when connection next active.
+       */
+      sync.updatesAwaitingAck.forEach((update, sequence) => {
+        /**
+         * Add to updates awaiting send.
+         */
+        update.meta.stateChangeTime = now;
+        sync.updatesAwaitingSend.set(sequence, update);
+        sendHasChanges = true;
+
+        /**
+         * Remove from updates awaiting acknowledgement.
+         */
+        sync.updatesAwaitingAck.delete(sequence);
+      });
+
+      sync.updatesAwaitingResend.forEach((update, sequence) => {
+        /**
+         * Add to updates awaiting send.
+         */
+        update.meta.stateChangeTime = now;
+        sync.updatesAwaitingSend.set(sequence, update);
+        sendHasChanges = true;
+
+        /**
+         * Remove from updates awaiting resend.
+         */
+        sync.updatesAwaitingResend.delete(sequence);
+      });
+    }
+
+    if (sendHasChanges) {
+      /**
+       * Reorder updates awaiting send by sequence id.
+       */
+      sync.updatesAwaitingSend = new Map(
+        [...sync.updatesAwaitingSend.entries()].sort((a, b) => a[0] - b[0])
+      );
     }
   }
 }

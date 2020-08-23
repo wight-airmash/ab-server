@@ -36,6 +36,8 @@ export * from './server';
 
 export * from './ships';
 
+export * from './sync';
+
 export * from './units';
 
 export * from './upgrades';

@@ -6,6 +6,7 @@ import {
   ROUTE_SYNC_AUTH,
   ROUTE_SYNC_INIT,
   ROUTE_SYNC_UPDATE,
+  ROUTE_SYNC_ACK,
   RESPONSE_SCORE_UPDATE,
 } from '../../events';
 import { ConnectionId, ConnectionMeta } from '../../types';
@@ -14,6 +15,7 @@ import { generateRandomString } from '../../support/strings';
 import Entity from '../entity';
 import Id from '../components/mob-id';
 import LifetimeStats from '../components/lifetime-stats';
+import { OBJECT_TYPE_ID_FIELD_SEPARATOR } from '../../constants';
 
 type SyncAuthTokenData = {
   nonce: string;
@@ -29,6 +31,7 @@ export default class SyncMessageHandler extends System {
       [ROUTE_SYNC_AUTH]: this.onSyncAuth,
       [ROUTE_SYNC_INIT]: this.onSyncInit,
       [ROUTE_SYNC_UPDATE]: this.onSyncUpdate,
+      [ROUTE_SYNC_ACK]: this.onSyncAck,
     };
   }
 
@@ -311,7 +314,7 @@ export default class SyncMessageHandler extends System {
        * Send object subscription requests.
        */
       sync.subscribedObjects.forEach(combinedObjectTypeId => {
-        const [type, id] = combinedObjectTypeId.split(':');
+        const [type, id] = combinedObjectTypeId.split(OBJECT_TYPE_ID_FIELD_SEPARATOR);
 
         this.emit(
           CONNECTIONS_SEND_PACKETS,
@@ -434,6 +437,102 @@ export default class SyncMessageHandler extends System {
      */
     if (failedUpdate) {
       this.sendErrorCustom(sync.connectionId, SERVER_ERRORS.SYNC_UPDATE_INVALID, msg);
+    }
+  }
+
+  /**
+   * SYNC_ACK packet handler.
+   */
+  onSyncAck(connectionId: ConnectionId, msg: ClientPackets.SyncAck): void {
+    const { sync } = this.storage;
+
+    /**
+     * Validate and get connection object.
+     */
+    const connection = this.validateConnection(connectionId);
+
+    if (connection == null) {
+      return;
+    }
+
+    /**
+     * Ignore if sync connection has not been started.
+     */
+    if (!connection.isSync) {
+      return;
+    }
+
+    this.log.debug('Sync ack received: %o', msg);
+    let failedAck = false;
+
+    /**
+     * Reject if sync connection is not authenticated and initialized.
+     */
+    if (!(connection.sync.auth.complete && connection.sync.init.complete)) {
+      this.log.error('Sync connection not authenticated and initialized, rejecting ack');
+      failedAck = true;
+    }
+
+    /**
+     * Validate existence of update with this sequence id.
+     */
+    if (!failedAck) {
+      failedAck = !sync.updatesAwaitingAck.has(msg.sequence);
+    }
+
+    /**
+     * Result codes (after converting to signed int8):
+     *    0   update applied successfully
+     *   +ve  update not applied due to temporary failure, retry
+     *   -ve  update not applied due to permanent failure, discard
+     */
+    if (!failedAck) {
+      const result = (msg.result << 24) >> 24;
+
+      if (result === 0) {
+        this.log.debug('Sync update %d applied successfully', msg.sequence);
+        sync.updatesAwaitingAck.delete(msg.sequence);
+      } else {
+        this.log.warn(
+          'Sync update %d failed with ack result %d (%s failure)',
+          msg.sequence,
+          result,
+          result < 0 ? 'permanent' : 'transient'
+        );
+
+        const update = sync.updatesAwaitingAck.get(msg.sequence);
+
+        if (result > 0) {
+          /**
+           * Add to update resend list.
+           */
+          update.meta.lastAckResult = msg.result;
+          update.meta.stateChangeTime = Date.now();
+          sync.updatesAwaitingResend.set(msg.sequence, update);
+        } else {
+          /**
+           * Log and discard
+           */
+          this.log.error(
+            'Discarding failed sync update %d (result %d): %o',
+            msg.sequence,
+            result,
+            update
+          );
+        }
+
+        /**
+         * Remove from updates awaiting acknowledgement.
+         */
+        sync.updatesAwaitingAck.delete(msg.sequence);
+      }
+    }
+
+    /**
+     * If processing of acknowledgement message failed, report this to sync service.
+     */
+    if (failedAck) {
+      this.sendErrorCustom(sync.connectionId, SERVER_ERRORS.SYNC_ACK_INVALID, msg);
     }
   }
 }

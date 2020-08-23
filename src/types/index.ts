@@ -424,7 +424,29 @@ export interface GameServerBootstrapInterface {
   mainLoop: GameLoopCallback;
 }
 
+export interface SyncUpdateMetadata {
+  /**
+   * Time of last state change.
+   */
+  stateChangeTime: Timestamp;
+
+  /**
+   * Last result from submitting update to sync service.
+   */
+  lastAckResult: number;
+
+  /**
+   * Number of attempts to send update.
+   */
+  sendCount: number;
+}
+
 export interface SyncDataUpdate {
+  /**
+   * Metadata, for timeouts and resends.
+   */
+  meta: SyncUpdateMetadata;
+
   /**
    * Object type.
    */
@@ -499,6 +521,13 @@ export interface SyncStorage {
    * State after update has been sent.
    */
   updatesAwaitingAck: Map<SequenceId, SyncDataUpdate>;
+
+  /**
+   * Updates waiting to be resent to sync service.
+   *
+   * State after acknowledgement timed out or received a transient error.
+   */
+  updatesAwaitingResend: Map<SequenceId, SyncDataUpdate>;
 
   /**
    * Objects subscribed to.
