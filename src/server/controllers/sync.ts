@@ -265,7 +265,7 @@ export default class SyncMessageHandler extends System {
 
       connection.sync.init.complete = true;
 
-      sync.connectionId = connection.id;
+      sync.connectionId = connectionId;
       sync.active = true;
 
       this.log.info('Sync init successful, new sync connection id: %d', sync.connectionId);
@@ -274,6 +274,24 @@ export default class SyncMessageHandler extends System {
         this.log.warn('Replaced existing sync connection id %d', previousSyncConnectionId);
         this.emit(CONNECTIONS_DISCONNECT, previousSyncConnectionId);
       }
+
+      /**
+       * Send object subscription requests.
+       */
+      sync.subscribedObjects.forEach(combinedObjectTypeId => {
+        const [type, id] = combinedObjectTypeId.split(':');
+
+        this.emit(
+          CONNECTIONS_SEND_PACKETS,
+          {
+            c: SERVER_PACKETS.SYNC_SUBSCRIBE,
+            active: true,
+            type,
+            id,
+          },
+          connectionId
+        );
+      });
     } else {
       /**
        * Initialization failed.

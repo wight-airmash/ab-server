@@ -1,4 +1,10 @@
-import { SYNC_ENQUEUE_UPDATE } from '../../events';
+import { SERVER_PACKETS } from '@airbattle/protocol';
+import {
+  CONNECTIONS_SEND_PACKETS,
+  SYNC_ENQUEUE_UPDATE,
+  SYNC_SUBSCRIBE,
+  SYNC_UNSUBSCRIBE,
+} from '../../events';
 import { SyncDataUpdate, Timestamp } from '../../types';
 import { System } from '../system';
 
@@ -8,6 +14,8 @@ export default class GameSync extends System {
 
     this.listeners = {
       [SYNC_ENQUEUE_UPDATE]: this.onEnqueueUpdate,
+      [SYNC_SUBSCRIBE]: this.onSubscribe,
+      [SYNC_UNSUBSCRIBE]: this.onUnsubscribe,
     };
   }
 
@@ -46,6 +54,52 @@ export default class GameSync extends System {
       sync.updatesAwaitingSequenceId.push(update);
 
       this.log.debug('Sync update added to sequence id assignment queue');
+    }
+  }
+
+  onSubscribe(type: string, id: string): void {
+    const { sync } = this.storage;
+    const combinedObjectTypeId = [type, id].join(':');
+    const isSubscribed = sync.subscribedObjects.has(combinedObjectTypeId);
+
+    if (!isSubscribed) {
+      sync.subscribedObjects.add(combinedObjectTypeId);
+
+      if (sync.active) {
+        this.emit(
+          CONNECTIONS_SEND_PACKETS,
+          {
+            c: SERVER_PACKETS.SYNC_SUBSCRIBE,
+            active: true,
+            type,
+            id,
+          },
+          sync.connectionId
+        );
+      }
+    }
+  }
+
+  onUnsubscribe(type: string, id: string): void {
+    const { sync } = this.storage;
+    const combinedObjectTypeId = [type, id].join(':');
+    const isSubscribed = sync.subscribedObjects.has(combinedObjectTypeId);
+
+    if (isSubscribed) {
+      sync.subscribedObjects.delete(combinedObjectTypeId);
+
+      if (sync.active) {
+        this.emit(
+          CONNECTIONS_SEND_PACKETS,
+          {
+            c: SERVER_PACKETS.SYNC_SUBSCRIBE,
+            active: false,
+            type,
+            id,
+          },
+          sync.connectionId
+        );
+      }
     }
   }
 }

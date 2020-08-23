@@ -499,6 +499,11 @@ export interface SyncStorage {
    * State after update has been sent.
    */
   updatesAwaitingAck: Map<SequenceId, SyncDataUpdate>;
+
+  /**
+   * Objects subscribed to.
+   */
+  subscribedObjects: Set<string>;
 }
 
 export * from './entities';

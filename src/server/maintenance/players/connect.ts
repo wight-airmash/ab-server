@@ -39,6 +39,7 @@ import {
   RESPONSE_SEND_PING,
   RESPONSE_SERVER_PLAYER_CONNECT,
   SYNC_ENQUEUE_UPDATE,
+  SYNC_SUBSCRIBE,
   TIMELINE_BEFORE_GAME_START,
   TIMEOUT_ACK,
   TIMEOUT_BACKUP,
@@ -235,6 +236,8 @@ export default class GamePlayersConnect extends System {
       }
 
       if (this.config.accounts.userStats.synchronize) {
+        this.emit(SYNC_SUBSCRIBE, 'user', player.user.id);
+
         const eventDetail = { name, flag };
 
         this.emit(

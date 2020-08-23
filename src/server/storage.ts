@@ -302,5 +302,6 @@ export class GameStorage {
     updatesAwaitingSequenceId: [],
     updatesAwaitingSend: new Map(),
     updatesAwaitingAck: new Map(),
+    subscribedObjects: new Set(),
   };
 }
