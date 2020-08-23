@@ -221,7 +221,7 @@ export default class GamePlayersConnect extends System {
      * Retrieve or init user account stats.
      */
     if (this.config.accounts.active && userId.length > 0) {
-      this.storage.users.online.add(userId);
+      this.storage.users.online.set(userId, playerId);
       player.attach(new UserComponent(userId));
 
       let user: User;

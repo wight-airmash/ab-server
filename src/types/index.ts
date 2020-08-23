@@ -287,9 +287,9 @@ export interface UsersStorage {
   list: Map<UserId, User>;
 
   /**
-   * Logged-in user ids.
+   * Logged-in user ids, mapped to player ids.
    */
-  online: Set<UserId>;
+  online: Map<UserId, PlayerId>;
 
   /**
    * Is users data unsaved.

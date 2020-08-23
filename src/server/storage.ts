@@ -166,7 +166,7 @@ export class GameStorage {
 
   public users: UsersStorage = {
     list: new Map(),
-    online: new Set(),
+    online: new Map(),
     hasChanges: false,
   };
 

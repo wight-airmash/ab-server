@@ -5,10 +5,15 @@ import {
   ROUTE_SYNC_START,
   ROUTE_SYNC_AUTH,
   ROUTE_SYNC_INIT,
+  ROUTE_SYNC_UPDATE,
+  RESPONSE_SCORE_UPDATE,
 } from '../../events';
 import { ConnectionId, ConnectionMeta } from '../../types';
 import { System } from '../system';
 import { generateRandomString } from '../../support/strings';
+import Entity from '../entity';
+import Id from '../components/mob-id';
+import LifetimeStats from '../components/lifetime-stats';
 
 type SyncAuthTokenData = {
   nonce: string;
@@ -23,6 +28,7 @@ export default class SyncMessageHandler extends System {
       [ROUTE_SYNC_START]: this.onSyncStart,
       [ROUTE_SYNC_AUTH]: this.onSyncAuth,
       [ROUTE_SYNC_INIT]: this.onSyncInit,
+      [ROUTE_SYNC_UPDATE]: this.onSyncUpdate,
     };
   }
 
@@ -42,6 +48,32 @@ export default class SyncMessageHandler extends System {
     setTimeout(() => {
       this.emit(CONNECTIONS_DISCONNECT, connectionId);
     }, 100);
+  }
+
+  /**
+   * Helper function for sending error details to sync service.
+   *
+   * SERVER_CUSTOM is used here because ERROR packet type only has an error code field.
+   */
+  sendErrorCustom(connectionId: ConnectionId, error: SERVER_ERRORS, data: any): void {
+    this.emit(
+      CONNECTIONS_SEND_PACKETS,
+      {
+        c: SERVER_PACKETS.SERVER_CUSTOM,
+        type: error,
+        data: JSON.stringify(data),
+      },
+      connectionId
+    );
+
+    this.emit(
+      CONNECTIONS_SEND_PACKETS,
+      {
+        c: SERVER_PACKETS.ERROR,
+        error,
+      },
+      connectionId
+    );
   }
 
   /**
@@ -298,6 +330,110 @@ export default class SyncMessageHandler extends System {
        */
       this.log.warn('Sync init failed, disconnecting');
       this.sendErrorAndDisconnect(connectionId, SERVER_ERRORS.SYNC_INIT_INVALID);
+    }
+  }
+
+  /**
+   * SYNC_UPDATE packet handler.
+   */
+  onSyncUpdate(connectionId: ConnectionId, msg: ClientPackets.SyncUpdate): void {
+    const { sync } = this.storage;
+
+    /**
+     * Validate and get connection object.
+     */
+    const connection = this.validateConnection(connectionId);
+
+    if (connection == null) {
+      return;
+    }
+
+    /**
+     * Ignore if sync connection has not been started.
+     */
+    if (!connection.isSync) {
+      return;
+    }
+
+    this.log.debug('Sync update received: %o', msg);
+    let failedUpdate = false;
+
+    /**
+     * Reject if sync connection is not authenticated and initialized.
+     */
+    if (!(connection.sync.auth.complete && connection.sync.init.complete)) {
+      this.log.error('Sync connection not authenticated and initialized, rejecting update');
+      failedUpdate = true;
+    }
+
+    /**
+     * Validate object data JSON.
+     */
+    let data;
+
+    if (!failedUpdate) {
+      try {
+        data = JSON.parse(msg.data);
+      } catch (err) {
+        this.log.error('Cannot parse incoming sync update data as JSON: %o', { error: err.stack });
+        failedUpdate = true;
+      }
+    }
+
+    /**
+     * Apply update.
+     */
+    if (!failedUpdate) {
+      switch (msg.type) {
+        case 'user':
+          {
+            let user: Entity;
+
+            if (this.storage.users.list.has(msg.id)) {
+              user = this.storage.users.list.get(msg.id);
+            } else {
+              user = new Entity().attach(new Id(<any>msg.id), new LifetimeStats());
+              this.storage.users.list.set(msg.id, user);
+
+              if (!msg.complete) {
+                this.log.warn(
+                  'Received incomplete sync update for object %s:%s but it did not already exist',
+                  msg.type,
+                  msg.id
+                );
+              }
+            }
+
+            if (msg.complete) {
+              user.lifetimestats.earnings = data.earnings || 0;
+              user.lifetimestats.totalkills = data.totalkills || 0;
+              user.lifetimestats.totaldeaths = data.totaldeaths || 0;
+            } else {
+              user.lifetimestats.earnings += data.earnings;
+              user.lifetimestats.totalkills += data.totalkills;
+              user.lifetimestats.totaldeaths += data.totaldeaths;
+            }
+
+            const playerId = this.storage.users.online.get(msg.id);
+
+            if (playerId) {
+              this.emit(RESPONSE_SCORE_UPDATE, playerId, true);
+            }
+          }
+
+          break;
+        default:
+          this.log.error('Received incoming sync update for unsupported object type: %o', msg.type);
+          failedUpdate = true;
+          break;
+      }
+    }
+
+    /**
+     * If update failed, report this to sync service.
+     */
+    if (failedUpdate) {
+      this.sendErrorCustom(sync.connectionId, SERVER_ERRORS.SYNC_UPDATE_INVALID, msg);
     }
   }
 }
