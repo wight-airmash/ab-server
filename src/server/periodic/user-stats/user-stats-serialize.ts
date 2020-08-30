@@ -1,40 +1,152 @@
 import fastJson from 'fast-json-stringify';
 
+export enum GAME_DATA_FILE_FORMAT {
+  UNKNOWN,
+  USER_STATS = 'user-stats',
+  SYNC_STATE = 'sync-state',
+}
+
 export const stringifyUserStats = fastJson({
-  type: 'array',
-  items: {
-    type: 'array',
-    items: [
-      {
-        type: 'string',
-      },
-      {
-        type: 'object',
-        properties: {
-          id: {
+  type: 'object',
+  properties: {
+    type: {
+      type: 'string',
+    },
+    data: {
+      type: 'array',
+      items: {
+        type: 'array',
+        items: [
+          {
+            type: 'string',
+          },
+          {
             type: 'object',
             properties: {
-              current: {
-                type: 'string',
+              id: {
+                type: 'object',
+                properties: {
+                  current: {
+                    type: 'string',
+                  },
+                },
+              },
+              lifetimestats: {
+                type: 'object',
+                properties: {
+                  earnings: {
+                    type: 'number',
+                  },
+                  totalkills: {
+                    type: 'number',
+                  },
+                  totaldeaths: {
+                    type: 'number',
+                  },
+                },
               },
             },
           },
-          lifetimestats: {
-            type: 'object',
-            properties: {
-              earnings: {
+        ],
+      },
+    },
+  },
+});
+
+const syncDataUpdateSchema = {
+  type: 'object',
+  properties: {
+    meta: {
+      type: 'object',
+      properties: {
+        stateChangeTime: {
+          type: 'number',
+        },
+        lastAckResult: {
+          type: 'number',
+        },
+        sendCount: {
+          type: 'number',
+        },
+      },
+    },
+    type: {
+      type: 'string',
+    },
+    id: {
+      type: 'string',
+    },
+    data: {
+      type: 'string',
+    },
+    timestamp: {
+      type: 'number',
+    },
+    event: {
+      type: 'string',
+    },
+  },
+};
+
+export const stringifySyncState = fastJson({
+  type: 'object',
+  properties: {
+    type: {
+      type: 'string',
+    },
+    data: {
+      type: 'object',
+      properties: {
+        nextSequenceId: {
+          type: 'number',
+        },
+        thisServerId: {
+          type: 'string',
+        },
+        thisServerEndpoint: {
+          type: 'string',
+        },
+        updatesAwaitingSequenceId: {
+          type: 'array',
+          items: syncDataUpdateSchema,
+        },
+        updatesAwaitingSend: {
+          type: 'array',
+          items: {
+            type: 'array',
+            items: [
+              {
                 type: 'number',
               },
-              totalkills: {
+              syncDataUpdateSchema,
+            ],
+          },
+        },
+        updatesAwaitingAck: {
+          type: 'array',
+          items: {
+            type: 'array',
+            items: [
+              {
                 type: 'number',
               },
-              totaldeaths: {
+              syncDataUpdateSchema,
+            ],
+          },
+        },
+        updatesAwaitingResend: {
+          type: 'array',
+          items: {
+            type: 'array',
+            items: [
+              {
                 type: 'number',
               },
-            },
+              syncDataUpdateSchema,
+            ],
           },
         },
       },
-    ],
+    },
   },
 });
