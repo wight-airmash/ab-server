@@ -21,7 +21,6 @@ export default class SyncUpdatePeriodic extends System {
      */
     if (sync.active) {
       const now = Date.now();
-      let hasChanges = false;
 
       /**
        * Updates waiting for sequence id.
@@ -44,11 +43,6 @@ export default class SyncUpdatePeriodic extends System {
          * Remove from updates awaiting sequence id.
          */
         sync.updatesAwaitingSequenceId.shift();
-
-        /**
-         * Changes made to saveable sync state.
-         */
-        hasChanges = true;
       }
 
       /**
@@ -87,22 +81,14 @@ export default class SyncUpdatePeriodic extends System {
          * Remove from updates awaiting send.
          */
         sync.updatesAwaitingSend.delete(sequence);
-
-        /**
-         * Changes made to saveable sync state.
-         */
-        hasChanges = true;
       });
-
-      sync.hasChanges = sync.hasChanges || hasChanges;
     }
   }
 
   processAckTimeoutsAndResends(): void {
     const { sync } = this.storage;
     const now = Date.now();
-    let sendHasChanges = false; // changes to sync update send queue
-    let syncHasChanges = false; // any other changes to sync state
+    let sendHasChanges = false;
 
     if (sync.active) {
       /**
@@ -122,11 +108,6 @@ export default class SyncUpdatePeriodic extends System {
            * Remove from updates awaiting acknowledgement.
            */
           sync.updatesAwaitingAck.delete(sequence);
-
-          /**
-           * Changes made to saveable sync state.
-           */
-          syncHasChanges = true;
         }
       });
 
@@ -152,11 +133,6 @@ export default class SyncUpdatePeriodic extends System {
            * Remove from updates awaiting resend.
            */
           sync.updatesAwaitingResend.delete(sequence);
-
-          /**
-           * Changes made to saveable sync state.
-           */
-          syncHasChanges = true;
         }
       });
     } else {
@@ -202,7 +178,5 @@ export default class SyncUpdatePeriodic extends System {
         [...sync.updatesAwaitingSend.entries()].sort((a, b) => a[0] - b[0])
       );
     }
-
-    sync.hasChanges = sync.hasChanges || syncHasChanges || sendHasChanges;
   }
 }

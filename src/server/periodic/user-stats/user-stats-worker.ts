@@ -6,13 +6,10 @@ import {
   USERS_WORKER_SAVE_STATS_RESPONSE,
   USERS_WORKER_STOP,
 } from '../../../events';
+import { User, UserId } from '../../../types';
 import { hub, Hub } from '../../../workers/events-hub';
 import Log from '../../../workers/logger';
-import {
-  stringifyUserStats,
-  stringifySyncState,
-  GAME_DATA_FILE_FORMAT,
-} from './user-stats-serialize';
+import { stringifyUserStats } from './user-stats-serialize';
 
 class UserAccountsWorker {
   private config: GameServerConfigInterface;
@@ -25,34 +22,23 @@ class UserAccountsWorker {
     /**
      * Event handlers.
      */
-    hub.events.on(USERS_WORKER_SAVE_STATS, this.save, this);
+    hub.events.on(USERS_WORKER_SAVE_STATS, this.stringify, this);
 
     hub.events.on(USERS_WORKER_STOP, () => {
       process.exit();
     });
   }
 
-  save(type: GAME_DATA_FILE_FORMAT, data): void {
+  stringify(users: Map<UserId, User>): void {
     let resultStatus = true;
 
     if (!this.saveInProgress) {
       this.saveInProgress = true;
 
-      let json: string;
+      let data: string;
 
       try {
-        switch (type) {
-          case GAME_DATA_FILE_FORMAT.USER_STATS:
-            json = stringifyUserStats({ type, data });
-            break;
-          case GAME_DATA_FILE_FORMAT.SYNC_STATE:
-            json = stringifySyncState({ type, data });
-            break;
-          default:
-            Log.error('Unknown format for stringify: %o', type);
-            this.saveInProgress = false;
-            resultStatus = false;
-        }
+        data = stringifyUserStats([...users.entries()]);
       } catch (err) {
         Log.error('Error while serialising user stats: %o', { error: err.stack });
         this.saveInProgress = false;
@@ -60,7 +46,7 @@ class UserAccountsWorker {
       }
 
       if (resultStatus) {
-        writeFile(this.config.accounts.userStats.path, json, err => {
+        writeFile(this.config.accounts.userStats.path, data, err => {
           if (err) {
             Log.error('Error while saving user stats: %o', { error: err.stack });
             resultStatus = false;

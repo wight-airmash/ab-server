@@ -290,8 +290,6 @@ export default class SyncMessageHandler extends System {
 
       sync.thisServerEndpoint = msg.wsEndpoint;
       this.log.debug('Public websocket endpoint: %s', msg.wsEndpoint);
-
-      sync.hasChanges = true;
     }
 
     if (!failedInit) {
@@ -528,8 +526,6 @@ export default class SyncMessageHandler extends System {
          */
         sync.updatesAwaitingAck.delete(msg.sequence);
       }
-
-      sync.hasChanges = true;
     }
 
     /**

@@ -533,11 +533,6 @@ export interface SyncStorage {
    * Objects subscribed to.
    */
   subscribedObjects: Set<string>;
-
-  /**
-   * If sync state has unsaved changes.
-   */
-  hasChanges: boolean;
 }
 
 export * from './entities';
