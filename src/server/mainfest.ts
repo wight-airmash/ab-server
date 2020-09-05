@@ -275,7 +275,7 @@ export default abstract class GameManifest {
     ];
 
     if (this.app.config.accounts.active) {
-      if (this.app.config.accounts.userStats.synchronize) {
+      if (this.app.config.sync.enabled) {
         this.systems = [SyncUpdatePeriodic, GameSync];
       }
 

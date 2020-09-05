@@ -89,7 +89,7 @@ export default class GamePlayersKill extends System {
           user.lifetimestats.earnings += earnedScore;
           this.storage.users.hasChanges = true;
 
-          if (this.config.accounts.userStats.synchronize) {
+          if (this.config.sync.enabled) {
             const eventDetail: any = {
               victim: { name: victim.name.current, flag: victim.flag.current },
               projectile: projectileId,
@@ -141,7 +141,7 @@ export default class GamePlayersKill extends System {
       user.lifetimestats.totaldeaths += 1;
       this.storage.users.hasChanges = true;
 
-      if (this.config.accounts.userStats.synchronize) {
+      if (this.config.sync.enabled) {
         const eventDetail: any = {};
 
         if (killer !== null) {

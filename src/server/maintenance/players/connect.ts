@@ -235,7 +235,7 @@ export default class GamePlayersConnect extends System {
         this.storage.users.hasChanges = true;
       }
 
-      if (this.config.accounts.userStats.synchronize) {
+      if (this.config.sync.enabled) {
         this.emit(SYNC_SUBSCRIBE, 'user', player.user.id);
 
         const eventDetail = { name, flag };

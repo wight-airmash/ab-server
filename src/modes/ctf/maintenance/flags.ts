@@ -346,7 +346,7 @@ export default class GameFlags extends System {
         user.lifetimestats.earnings += earnedScore;
         this.storage.users.hasChanges = true;
 
-        if (this.config.accounts.userStats.synchronize) {
+        if (this.config.sync.enabled) {
           const eventDetail = {
             match: { start: this.storage.gameEntity.match.start },
             player: {

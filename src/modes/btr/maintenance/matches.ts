@@ -285,7 +285,7 @@ export default class GameMatches extends System {
           user.lifetimestats.earnings += match.bounty;
           this.storage.users.hasChanges = true;
 
-          if (this.config.accounts.userStats.synchronize) {
+          if (this.config.sync.enabled) {
             const eventDetail = {
               match: { start: match.start },
               player: {

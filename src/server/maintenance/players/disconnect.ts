@@ -150,7 +150,7 @@ export default class GamePlayersDisconnect extends System {
       if (has(player, 'user')) {
         this.storage.users.online.delete(player.user.id);
 
-        if (this.config.accounts.userStats.synchronize) {
+        if (this.config.sync.enabled) {
           const eventDetail = { flag: player.flag.current };
 
           this.emit(

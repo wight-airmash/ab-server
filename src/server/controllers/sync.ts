@@ -119,7 +119,7 @@ export default class SyncMessageHandler extends System {
      *
      * As this cannot be marked as a sync connection, this means all other sync packet types will be ignored as well.
      */
-    if (!this.config.accounts.userStats.synchronize) {
+    if (!this.config.sync.enabled) {
       this.log.warn('Sync start received but server is not configured for this feature.');
       this.sendErrorAndDisconnect(connectionId, SERVER_ERRORS.SYNC_NOT_CONFIGURED);
 

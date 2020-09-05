@@ -216,8 +216,14 @@ export interface GameServerConfigInterface {
      */
     userStats: {
       path: string;
-      synchronize: boolean;
     };
+  };
+
+  sync: {
+    /**
+     * Synchronize data with other game servers.
+     */
+    enabled: boolean;
   };
 
   admin: {
@@ -502,8 +508,11 @@ const config: GameServerConfigInterface = {
 
     userStats: {
       path: resolvePath(strValue(process.env.STATS_PATH, '../data/user-stats.json')),
-      synchronize: boolValue(process.env.STATS_SYNC, false),
     },
+  },
+
+  sync: {
+    enabled: boolValue(process.env.STATS_SYNC, false),
   },
 
   admin: {
