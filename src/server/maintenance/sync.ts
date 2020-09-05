@@ -61,6 +61,8 @@ export default class GameSync extends System {
 
       this.log.debug('Sync update added to sequence id assignment queue');
     }
+
+    sync.hasChanges = true;
   }
 
   onSubscribe(type: string, id: string): void {

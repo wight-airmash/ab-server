@@ -102,4 +102,5 @@ certs/**/*.pem
 
 # Server cache
 cache/**/*
-data/user-stats.json
+data/user-stats.json*
+data/sync-state.json*

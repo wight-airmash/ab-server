@@ -298,6 +298,10 @@ Default: `""`
 
 Superuser password to run some [commands](./commands.md#superuser-command). Must be filled.
 
+### SYNC_STATE_PATH
+
+Default: `../data/sync-state.json`
+
 ### UPGRADES_DROP_MAX_CHANCE
 
 Default FFA: `0.65`

@@ -224,6 +224,13 @@ export interface GameServerConfigInterface {
      * Synchronize data with other game servers.
      */
     enabled: boolean;
+
+    /**
+     * Path for persisting sync state.
+     */
+    state: {
+      path: string;
+    };
   };
 
   admin: {
@@ -513,6 +520,10 @@ const config: GameServerConfigInterface = {
 
   sync: {
     enabled: boolValue(process.env.STATS_SYNC, false),
+
+    state: {
+      path: resolvePath(strValue(process.env.SYNC_STATE_PATH, '../data/sync-state.json')),
+    },
   },
 
   admin: {
@@ -599,5 +610,6 @@ if (config.logs.chat.length > 0) {
 
 mkdirSync(config.cache.path, { recursive: true });
 mkdirSync(dirname(config.accounts.userStats.path), { recursive: true });
+mkdirSync(dirname(config.sync.state.path), { recursive: true });
 
 export default config;
