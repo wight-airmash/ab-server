@@ -17,6 +17,7 @@ import {
   ERRORS_PACKET_DECODE_FAILED,
   PLAYERS_REMOVE,
   ROUTE_PACKET,
+  SYNC_CONNECTION_INACTIVE,
 } from '../events';
 import { CHANNEL_DISCONNECT_PLAYER } from '../events/channels';
 import { ConnectionId, ConnectionMeta, PlayerId } from '../types';
@@ -189,6 +190,7 @@ export default class Connections extends System {
       if (this.storage.sync.connectionId === connectionId) {
         this.storage.sync.connectionId = null;
         this.storage.sync.active = false;
+        this.emit(SYNC_CONNECTION_INACTIVE);
       }
     }
 

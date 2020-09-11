@@ -1,5 +1,5 @@
 import { SERVER_PACKETS } from '@airbattle/protocol';
-import { CONNECTIONS_SEND_PACKETS, TIMELINE_LOOP_TICK, TIMELINE_CLOCK_SECOND } from '../../events';
+import { CONNECTIONS_SEND_PACKETS, TIMELINE_LOOP_TICK, TIMELINE_CLOCK_SECOND, SYNC_CONNECTION_INACTIVE } from '../../events';
 import { System } from '../system';
 import { SYNC_ACK_TIMEOUT_MS, SYNC_RESEND_TIMEOUT_MS } from '../../constants';
 
@@ -10,6 +10,7 @@ export default class SyncUpdatePeriodic extends System {
     this.listeners = {
       [TIMELINE_LOOP_TICK]: this.sendUpdates,
       [TIMELINE_CLOCK_SECOND]: this.processAckTimeoutsAndResends,
+      [SYNC_CONNECTION_INACTIVE]: this.processAckTimeoutsAndResends,
     };
   }
 
