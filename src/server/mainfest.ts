@@ -24,6 +24,7 @@ import LoginMessageHandler from './controllers/login';
 import PongMessageHandler from './controllers/pong';
 import SayMessageHandler from './controllers/say';
 import ScoredetailedMessageHandler from './controllers/scoredetailed';
+import SyncMessageHandler from './controllers/sync';
 import TeamchatMessageHandler from './controllers/teamchat';
 import VotemuteMessageHandler from './controllers/votemute';
 import WhisperMessageHandler from './controllers/whisper';
@@ -52,11 +53,13 @@ import GamePowerups from './maintenance/powerups';
 import GameProjectiles from './maintenance/projectiles';
 import GameRankings from './maintenance/rankings';
 import GameSpectating from './maintenance/spectating';
+import GameSync from './maintenance/sync';
 import GameViewports from './maintenance/viewports';
 import GameWarming from './maintenance/warming';
 import PingPeriodic from './periodic/ping';
 import PowerupsPeriodic from './periodic/powerups';
 import ScoreBoardPeriodic from './periodic/score-board';
+import SyncUpdatePeriodic from './periodic/sync';
 import UserStatsPeriodic from './periodic/user-stats/user-stats';
 import AfkDisconnectResponse from './responses/afk-disconnect';
 import AlreadyLoggedInResponse from './responses/already-logged-in';
@@ -153,6 +156,7 @@ export default abstract class GameManifest {
       PongMessageHandler,
       SayMessageHandler,
       ScoredetailedMessageHandler,
+      SyncMessageHandler,
       TeamchatMessageHandler,
       VotemuteMessageHandler,
       WhisperMessageHandler,
@@ -271,6 +275,10 @@ export default abstract class GameManifest {
     ];
 
     if (this.app.config.accounts.active) {
+      if (this.app.config.sync.enabled) {
+        this.systems = [SyncUpdatePeriodic, GameSync];
+      }
+
       this.systems = [UserStatsPeriodic];
     }
 

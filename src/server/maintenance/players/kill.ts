@@ -15,6 +15,7 @@ import {
   PLAYERS_RESPAWN,
   POWERUPS_SPAWN,
   RESPONSE_PLAYER_UPGRADE,
+  SYNC_ENQUEUE_UPDATE,
 } from '../../../events';
 import { CHANNEL_RESPAWN_PLAYER } from '../../../events/channels';
 import { getRandomInt } from '../../../support/numbers';
@@ -47,6 +48,7 @@ export default class GamePlayersKill extends System {
     let killer: Player = null;
     let projectileOwner: PlayerId = 0;
     const victim = this.storage.playerList.get(victimId);
+    const killTime = Date.now();
 
     if (projectileId !== 0) {
       const projectile = this.storage.mobList.get(projectileId) as Projectile;
@@ -86,6 +88,35 @@ export default class GamePlayersKill extends System {
           user.lifetimestats.totalkills += 1;
           user.lifetimestats.earnings += earnedScore;
           this.storage.users.hasChanges = true;
+
+          if (this.config.sync.enabled) {
+            const eventDetail: any = {
+              victim: { name: victim.name.current, flag: victim.flag.current },
+              projectile: projectileId,
+              player: {
+                plane: killer.planetype.current,
+                team: killer.team.current,
+                flag: killer.flag.current,
+              },
+            };
+
+            if (has(victim, 'user')) {
+              eventDetail.victim.user = victim.user.id;
+            }
+
+            if (isVictimBot) {
+              eventDetail.victim.bot = true;
+            }
+
+            this.emit(
+              SYNC_ENQUEUE_UPDATE,
+              'user',
+              killer.user.id,
+              { earnings: earnedScore, totalkills: 1 },
+              killTime,
+              ['killer', eventDetail]
+            );
+          }
         }
       }
     }
@@ -109,6 +140,38 @@ export default class GamePlayersKill extends System {
 
       user.lifetimestats.totaldeaths += 1;
       this.storage.users.hasChanges = true;
+
+      if (this.config.sync.enabled) {
+        const eventDetail: any = {};
+
+        if (killer !== null) {
+          eventDetail.killer = { name: killer.name.current, flag: killer.flag.current };
+
+          if (has(killer, 'user')) {
+            eventDetail.killer.user = killer.user.id;
+          }
+
+          if (isKillerBot) {
+            eventDetail.killer.bot = true;
+          }
+        }
+
+        eventDetail.projectile = projectileId;
+        eventDetail.player = {
+          plane: victim.planetype.current,
+          team: victim.team.current,
+          flag: victim.flag.current,
+        };
+
+        this.emit(
+          SYNC_ENQUEUE_UPDATE,
+          'user',
+          victim.user.id,
+          { totaldeaths: 1 },
+          killTime,
+          ['victim', eventDetail]
+        );
+      }
     }
 
     if (victim.score.current < 0) {

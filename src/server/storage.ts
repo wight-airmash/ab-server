@@ -29,6 +29,7 @@ import {
   UnmuteTime,
   UsersStorage,
   Viewports,
+  SyncStorage,
 } from '../types';
 
 export class GameStorage {
@@ -165,7 +166,7 @@ export class GameStorage {
 
   public users: UsersStorage = {
     list: new Map(),
-    online: new Set(),
+    online: new Map(),
     hasChanges: false,
   };
 
@@ -291,4 +292,18 @@ export class GameStorage {
   };
 
   public gameModeAPIResponse = '';
+
+  public sync: SyncStorage = {
+    active: false,
+    connectionId: null,
+    nextSequenceId: 1,
+    thisServerId: null,
+    thisServerEndpoint: null,
+    updatesAwaitingSequenceId: [],
+    updatesAwaitingSend: new Map(),
+    updatesAwaitingAck: new Map(),
+    updatesAwaitingResend: new Map(),
+    subscribedObjects: new Set(),
+    hasChanges: false,
+  };
 }

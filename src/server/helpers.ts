@@ -122,12 +122,16 @@ class Helpers {
 
   /**
    * For verifying authentication tokens.
+   *
+   * Checks the outer format and the signature.
+   *
+   * Does not check the token data other than ensuring it is valid JSON, this is the responsibility of the caller.
    */
-  getUserIdFromToken(token: string): string {
+  verifyToken(token: string): object {
     if (this.storage.loginPublicKey === null) {
       this.log.debug('The public key is not installed. Authentication request rejected.');
 
-      return '';
+      return null;
     }
 
     /**
@@ -138,7 +142,7 @@ class Helpers {
     if (tokenParts.length !== 2) {
       this.log.debug('Wrong number of parts in authentication token.');
 
-      return '';
+      return null;
     }
 
     /**
@@ -146,7 +150,7 @@ class Helpers {
      */
     let data: Buffer;
     let signature: Buffer;
-    let auth: AuthTokenData;
+    let auth: object;
 
     try {
       data = Buffer.from(tokenParts[0], 'base64');
@@ -155,12 +159,49 @@ class Helpers {
     } catch (e) {
       this.log.debug('Cannot parse authentication token.');
 
-      return '';
+      return null;
     }
 
     if (typeof auth !== 'object' || auth === null) {
       this.log.debug('Decoded token data was not an object.');
 
+      return null;
+    }
+
+    /**
+     * Ed25519 signature must be exactly 64 bytes long.
+     */
+    if (signature.length !== 64) {
+      this.log.debug('Invalid signature length in authentication token.');
+
+      return null;
+    }
+
+    /**
+     * Verify signature.
+     */
+    if (!crypto.verify(null, data, this.storage.loginPublicKey, signature)) {
+      this.log.debug('Authentication token signature not verified.');
+
+      return null;
+    }
+
+    /**
+     * We have a correctly signed object, so return it.
+     */
+    return auth;
+  }
+
+  /**
+   * Verify token and extract user id.
+   */
+  getUserIdFromToken(token: string): string {
+    const auth = this.verifyToken(token) as AuthTokenData;
+
+    /**
+     * Check if format and signature verification failed.
+     */
+    if (auth === null) {
       return '';
     }
 
@@ -196,24 +237,6 @@ class Helpers {
      */
     if (auth.for !== 'game') {
       this.log.debug('Authentication token purpose is incorrect.');
-
-      return '';
-    }
-
-    /**
-     * Ed25519 signature must be exactly 64 bytes long.
-     */
-    if (signature.length !== 64) {
-      this.log.debug('Invalid signature length in authentication token.');
-
-      return '';
-    }
-
-    /**
-     * Verify signature.
-     */
-    if (!crypto.verify(null, data, this.storage.loginPublicKey, signature)) {
-      this.log.debug('Authentication token signature not verified.');
 
       return '';
     }

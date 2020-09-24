@@ -28,7 +28,7 @@ export default class ScoreUpdateResponse extends System {
    *
    * @param playerId
    */
-  onScoreUpdate(playerId: PlayerId): void {
+  onScoreUpdate(playerId: PlayerId, informPlayerLevel: boolean): void {
     const player = this.storage.playerList.get(playerId);
     const connectionId = this.storage.playerMainConnectionList.get(playerId);
 
@@ -43,9 +43,14 @@ export default class ScoreUpdateResponse extends System {
 
       const newLevel = convertEarningsToLevel(earnings);
 
-      if (newLevel > player.level.current) {
+      if (newLevel !== player.level.current) {
+        const updateType =
+          newLevel > player.level.current && !informPlayerLevel
+            ? PLAYER_LEVEL_UPDATE_TYPES.LEVELUP
+            : PLAYER_LEVEL_UPDATE_TYPES.INFORM;
+
         player.level.current = newLevel;
-        this.emit(BROADCAST_PLAYER_LEVEL, player.id.current, PLAYER_LEVEL_UPDATE_TYPES.LEVELUP);
+        this.emit(BROADCAST_PLAYER_LEVEL, player.id.current, updateType);
       }
     }
 

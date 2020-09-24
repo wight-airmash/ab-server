@@ -8,6 +8,8 @@ import {
   PLAYERS_REMOVE,
   PLAYERS_REMOVED,
   PLAYERS_REPEL_DELETE,
+  SYNC_ENQUEUE_UPDATE,
+  SYNC_UNSUBSCRIBE,
   VIEWPORTS_REMOVE,
 } from '../../../events';
 import { CHANNEL_DISCONNECT_PLAYER } from '../../../events/channels';
@@ -147,6 +149,21 @@ export default class GamePlayersDisconnect extends System {
 
       if (has(player, 'user')) {
         this.storage.users.online.delete(player.user.id);
+
+        if (this.config.sync.enabled) {
+          const eventDetail = { flag: player.flag.current };
+
+          this.emit(
+            SYNC_ENQUEUE_UPDATE,
+            'user',
+            player.user.id,
+            {},
+            Date.now(),
+            ['logout', eventDetail]
+          );
+
+          this.emit(SYNC_UNSUBSCRIBE, 'user', player.user.id);
+        }
       }
 
       if (this.storage.viewportList.has(player.spectate.current)) {

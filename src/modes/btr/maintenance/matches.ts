@@ -20,6 +20,7 @@ import {
   PLAYERS_KILL,
   PLAYERS_RESPAWN,
   RESPONSE_SCORE_UPDATE,
+  SYNC_ENQUEUE_UPDATE,
   TIMELINE_CLOCK_HALFSECOND,
   TIMELINE_CLOCK_SECOND,
   TIMELINE_GAME_MATCH_END,
@@ -283,6 +284,27 @@ export default class GameMatches extends System {
 
           user.lifetimestats.earnings += match.bounty;
           this.storage.users.hasChanges = true;
+
+          if (this.config.sync.enabled) {
+            const eventDetail = {
+              match: { start: match.start },
+              player: {
+                kills: winner.kills.currentmatch,
+                plane: winner.planetype.current,
+                team: winner.team.current,
+                flag: winner.flag.current,
+              },
+            };
+
+            this.emit(
+              SYNC_ENQUEUE_UPDATE,
+              'user',
+              winner.user.id,
+              { earnings: match.bounty },
+              Date.now(),
+              ['btr-match-winner', eventDetail]
+            );
+          }
         }
 
         this.emit(RESPONSE_SCORE_UPDATE, winner.id.current);

@@ -38,6 +38,8 @@ import {
   RESPONSE_SCORE_UPDATE,
   RESPONSE_SEND_PING,
   RESPONSE_SERVER_PLAYER_CONNECT,
+  SYNC_ENQUEUE_UPDATE,
+  SYNC_SUBSCRIBE,
   TIMELINE_BEFORE_GAME_START,
   TIMEOUT_ACK,
   TIMEOUT_BACKUP,
@@ -219,7 +221,7 @@ export default class GamePlayersConnect extends System {
      * Retrieve or init user account stats.
      */
     if (this.config.accounts.active && userId.length > 0) {
-      this.storage.users.online.add(userId);
+      this.storage.users.online.set(userId, playerId);
       player.attach(new UserComponent(userId));
 
       let user: User;
@@ -231,6 +233,21 @@ export default class GamePlayersConnect extends System {
 
         this.storage.users.list.set(userId, user);
         this.storage.users.hasChanges = true;
+      }
+
+      if (this.config.sync.enabled) {
+        this.emit(SYNC_SUBSCRIBE, 'user', player.user.id);
+
+        const eventDetail = { name, flag };
+
+        this.emit(
+          SYNC_ENQUEUE_UPDATE,
+          'user',
+          player.user.id,
+          {},
+          Date.now(),
+          ['login', eventDetail]
+        );
       }
 
       player.level.current = convertEarningsToLevel(user.lifetimestats.earnings);

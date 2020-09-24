@@ -17,6 +17,7 @@ import {
   ERRORS_PACKET_DECODE_FAILED,
   PLAYERS_REMOVE,
   ROUTE_PACKET,
+  SYNC_CONNECTION_INACTIVE,
 } from '../events';
 import { CHANNEL_DISCONNECT_PLAYER } from '../events/channels';
 import { ConnectionId, ConnectionMeta, PlayerId } from '../types';
@@ -71,7 +72,7 @@ export default class Connections extends System {
     connection.lastPacketAt = Date.now();
     connection.limits.any += LIMITS_ANY_WEIGHT;
 
-    if (!connection.isBot) {
+    if (!connection.isBot && !(connection.isSync && connection.sync.init.complete)) {
       if (connection.lagging.isActive) {
         if (connection.timeouts.lagging === null) {
           this.log.debug('Connection is lagging, packets dropping start: %o', {
@@ -115,7 +116,7 @@ export default class Connections extends System {
   }
 
   /**
-   * One of the connections (main or backup) was closed.
+   * One of the connections (main or backup or sync) was closed.
    *
    * @param connectionId
    */
@@ -182,6 +183,15 @@ export default class Connections extends System {
       secondConnectionId = this.storage.playerMainConnectionList.get(connection.playerId);
 
       this.storage.playerBackupConnectionList.delete(connection.playerId);
+    } else if (connection.isSync) {
+      /**
+       * Only remove stored sync connection if it matches the active one.
+       */
+      if (this.storage.sync.connectionId === connectionId) {
+        this.storage.sync.connectionId = null;
+        this.storage.sync.active = false;
+        this.emit(SYNC_CONNECTION_INACTIVE);
+      }
     }
 
     this.storage.connectionList.delete(connectionId);

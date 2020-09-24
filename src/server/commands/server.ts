@@ -319,6 +319,39 @@ export default class ServerCommandHandler extends System {
   }
 
   /**
+   * /server sync
+   *
+   * @param playerId
+   */
+  private responseServerSync(playerId: PlayerId): void {
+    if (this.config.sync.enabled) {
+      const { sync } = this.storage;
+      this.emit(
+        BROADCAST_CHAT_SERVER_WHISPER,
+        playerId,
+        [
+          `Sync connection: ${sync.active ? 'active' : 'inactive'}. `,
+          `Server id: ${sync.thisServerId}. `,
+          `Websocket endpoint: ${sync.thisServerEndpoint}. `,
+          `Next sequence id: ${sync.nextSequenceId}. `,
+          `Subscribed objects: ${sync.subscribedObjects.size}. `,
+          `Update queues: ${sync.updatesAwaitingSequenceId.length}`,
+            `/${sync.updatesAwaitingSend.size}`,
+            `/${sync.updatesAwaitingAck.size}`,
+            `/${sync.updatesAwaitingResend.size}. `,
+        ].join('')
+      );  
+    }
+    else {
+      this.emit(
+        BROADCAST_CHAT_SERVER_WHISPER,
+        playerId,
+        'Sync feature not configured.'
+      );
+    }
+  }
+
+  /**
    * /server debug
    *
    * @param playerId
@@ -900,6 +933,12 @@ export default class ServerCommandHandler extends System {
 
     if (command === 'frames') {
       this.responseServerFrames(playerId);
+
+      return;
+    }
+
+    if (command === 'sync') {
+      this.responseServerSync(playerId);
 
       return;
     }

@@ -168,6 +168,7 @@ export default class WsEndpoint {
       ip: workerConnectionMeta.ip,
       isBackup: false,
       isMain: false,
+      isSync: false,
       status: CONNECTIONS_STATUS.OPENED,
       headers: workerConnectionMeta.headers,
       isBot: false,
@@ -213,6 +214,16 @@ export default class WsEndpoint {
         su: 0,
         debug: 0,
         spam: 0,
+      },
+
+      sync: {
+        auth: {
+          nonce: null,
+          complete: false,
+        },
+        init: {
+          complete: false,
+        },
       },
     };
 

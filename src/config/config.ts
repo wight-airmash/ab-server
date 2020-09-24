@@ -219,6 +219,20 @@ export interface GameServerConfigInterface {
     };
   };
 
+  sync: {
+    /**
+     * Synchronize data with other game servers.
+     */
+    enabled: boolean;
+
+    /**
+     * Path for persisting sync state.
+     */
+    state: {
+      path: string;
+    };
+  };
+
   admin: {
     active: boolean;
     route: string;
@@ -504,6 +518,14 @@ const config: GameServerConfigInterface = {
     },
   },
 
+  sync: {
+    enabled: boolValue(process.env.STATS_SYNC, false),
+
+    state: {
+      path: resolvePath(strValue(process.env.SYNC_STATE_PATH, '../data/sync-state.json')),
+    },
+  },
+
   admin: {
     active: boolValue(process.env.MODERATION_PANEL, SERVER_MODERATION_PANEL),
     route: strValue(process.env.MODERATION_PANEL_URL_ROUTE, SERVER_MODERATION_PANEL_URL_ROUTE),
@@ -588,5 +610,6 @@ if (config.logs.chat.length > 0) {
 
 mkdirSync(config.cache.path, { recursive: true });
 mkdirSync(dirname(config.accounts.userStats.path), { recursive: true });
+mkdirSync(dirname(config.sync.state.path), { recursive: true });
 
 export default config;

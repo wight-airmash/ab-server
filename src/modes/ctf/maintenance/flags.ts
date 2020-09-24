@@ -25,6 +25,7 @@ import {
   CTF_TEAM_CAPTURED_FLAG,
   PLAYERS_BEFORE_REMOVE,
   RESPONSE_SCORE_UPDATE,
+  SYNC_ENQUEUE_UPDATE,
   TIMELINE_BEFORE_GAME_START,
   TIMELINE_CLOCK_MINUTE,
 } from '../../../events';
@@ -344,6 +345,27 @@ export default class GameFlags extends System {
 
         user.lifetimestats.earnings += earnedScore;
         this.storage.users.hasChanges = true;
+
+        if (this.config.sync.enabled) {
+          const eventDetail = {
+            match: { start: this.storage.gameEntity.match.start },
+            player: {
+              captures: player.captures.current,
+              plane: player.planetype.current,
+              team: player.team.current,
+              flag: player.flag.current,
+            },
+          };
+
+          this.emit(
+            SYNC_ENQUEUE_UPDATE,
+            'user',
+            player.user.id,
+            { earnings: earnedScore },
+            Date.now(),
+            ['ctf-flag-capture', eventDetail]
+          );
+        }
       }
 
       this.emit(BROADCAST_FLAG_CAPTURED, flag.team.current, player.name.current);
