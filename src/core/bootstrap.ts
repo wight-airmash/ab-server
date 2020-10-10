@@ -1,5 +1,6 @@
 import { GAME_TYPES } from '@airbattle/protocol';
 import { Collisions } from 'collisions';
+import { Netmask } from 'netmask';
 import EventEmitter from 'eventemitter3';
 import maxmind, { CountryResponse, Reader } from 'maxmind';
 import { GameServerConfigInterface } from '../config';
@@ -148,8 +149,20 @@ export default class GameServerBootstrap implements GameServerBootstrapInterface
     this.storage = new GameStorage();
 
     this.config.bots.ipList.forEach(ip => {
-      this.storage.ipBotList.add(ip);
+      // allow subnet blocks to be provided and expanded
+      // this allows for a subnet like 192.168.100.0/26 to be expanded to 64 ip addresses, 
+      // without requiring the 64 ips to be provided as an enumerated list in an env variable.
+      // This should perform fine even if a large subnet is provided. If that use case were
+      // relevant the Netmask library could be used to combine subnets and perform efficient
+      // lookups.
+      var block = new Netmask(ip)
+      block.forEach((ip, long, index) => {
+        this.storage.ipBotList.add(ip);
+      })
     });
+    if (this.storage.ipBotList.size > 1048576) {
+      this.log.warn('Bot IP list is getting long. %o records. This may impact performance!', this.storage.ipBotList.size)
+    }
 
     this.helpers = new Helpers({ app: this });
     this.ticker = new GameTicker({ app: this, interval: SERVER_LOOP_INTERVAL_NS });
