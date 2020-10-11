@@ -54,6 +54,7 @@ export default class MobUpdateBroadcast extends System {
         accelX: projectile.acceleration.x,
         accelY: projectile.acceleration.y,
         maxSpeed: projectile.velocity.max,
+        ownerId: projectile.owner.current,
       } as ServerPackets.MobUpdate,
       recipients
     );
