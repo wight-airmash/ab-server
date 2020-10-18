@@ -135,7 +135,7 @@ export default class GamePlayersConnect extends System {
    * Create player.
    */
   onCreatePlayer({ connectionId, name, flag, horizon, userId }): void {
-    if (this.storage.playerList.size > SERVER_MAX_PLAYERS_LIMIT) {
+    if (this.storage.playerList.size >= SERVER_MAX_PLAYERS_LIMIT) {
       this.emit(PLAYERS_LIMIT_REACHED, connectionId);
 
       return;
