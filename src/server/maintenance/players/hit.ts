@@ -30,6 +30,7 @@ export default class GamePlayersHit extends System {
     const now = Date.now();
     const victim = this.storage.playerList.get(victimId);
     let damage: number;
+    let aggressorId = 0;
 
     if (victim.planestate.stealthed) {
       victim.planestate.stealthed = false;
@@ -51,6 +52,7 @@ export default class GamePlayersHit extends System {
 
       const projectile = this.storage.mobList.get(projectileId) as Projectile;
 
+      aggressorId = projectile.owner.current;
       victim.times.lastHit = now;
       victim.damage.hitsReceived += 1;
       damage = PROJECTILES_SPECS[projectile.mobtype.current].damage;
@@ -97,7 +99,26 @@ export default class GamePlayersHit extends System {
 
     victim.health.current = fullAirplaneHealth * victim.health.current - damage;
 
+    if (this.config.killAssists) {
+      victim.damage.takenTraking.push(aggressorId, damage / fullAirplaneHealth);
+
+      /**
+       * Limit records.
+       */
+      if (victim.damage.takenTraking.length > 30) {
+        victim.damage.takenTraking.splice(0, 2);
+      }
+    }
+
     if (victim.health.current <= PLAYERS_HEALTH.MIN) {
+      if (this.config.killAssists) {
+        /**
+         * Subtract extra damage from the last record.
+         */
+        victim.damage.takenTraking[victim.damage.takenTraking.length - 1] +=
+          victim.health.current / fullAirplaneHealth;
+      }
+
       /**
        * Player is dead.
        */

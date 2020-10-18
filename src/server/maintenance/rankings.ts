@@ -1,6 +1,7 @@
 import {
   PLAYERS_CREATED,
   PLAYERS_KILLED,
+  PLAYERS_KILL_ASSISTED,
   PLAYERS_RANKINGS_SORT,
   PLAYERS_RANKINGS_UPDATE,
   PLAYERS_REMOVE,
@@ -20,6 +21,7 @@ export default class GameRankings extends System {
     this.listeners = {
       [PLAYERS_CREATED]: this.onPlayerCreated,
       [PLAYERS_KILLED]: this.onPlayerKilled,
+      [PLAYERS_KILL_ASSISTED]: this.onPlayerAssistedInKilling,
       [PLAYERS_RANKINGS_SORT]: this.onSort,
       [PLAYERS_RANKINGS_UPDATE]: this.onUpdate,
       [PLAYERS_REMOVE]: this.onPlayerRemove,
@@ -90,6 +92,17 @@ export default class GameRankings extends System {
       this.storage.playerRankings.byBounty[killerIndex].score = killer.score.current;
     }
 
+    this.storage.playerRankings.outdated = true;
+  }
+
+  onPlayerAssistedInKilling(aggressorId: PlayerId): void {
+    const aggressor = this.storage.playerList.get(aggressorId);
+
+    const aggressorIndex = this.storage.playerRankings.byBounty.findIndex(
+      rankingItem => rankingItem.id === aggressorId
+    );
+
+    this.storage.playerRankings.byBounty[aggressorIndex].score = aggressor.score.current;
     this.storage.playerRankings.outdated = true;
   }
 

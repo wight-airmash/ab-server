@@ -59,3 +59,5 @@ export const PLAYERS_BROADCAST_UPDATE_INTERVAL_MS = 2.9 * MS_PER_SEC;
  * after which the player is considered inactive.
  */
 export const PLAYERS_INACTIVITY_VELOCITY_COORD_VALUE = 0.5;
+
+export const PLAYERS_KILL_ASSISTS = false;

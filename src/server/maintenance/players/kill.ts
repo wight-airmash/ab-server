@@ -12,9 +12,12 @@ import {
   PLAYERS_ALIVE_UPDATE,
   PLAYERS_KILL,
   PLAYERS_KILLED,
+  PLAYERS_KILL_ASSISTED,
   PLAYERS_RESPAWN,
   POWERUPS_SPAWN,
+  RESPONSE_KILL_ASSIST,
   RESPONSE_PLAYER_UPGRADE,
+  RESPONSE_SCORE_UPDATE,
   SYNC_ENQUEUE_UPDATE,
 } from '../../../events';
 import { CHANNEL_RESPAWN_PLAYER } from '../../../events/channels';
@@ -22,6 +25,11 @@ import { getRandomInt } from '../../../support/numbers';
 import { has } from '../../../support/objects';
 import { MobId, Player, PlayerId, Projectile } from '../../../types';
 import { System } from '../../system';
+
+interface AggressorsListItem {
+  aggressor: Player;
+  bounty: number;
+}
 
 export default class GamePlayersKill extends System {
   private minScoreToDrop: number;
@@ -43,80 +51,243 @@ export default class GamePlayersKill extends System {
    * @param victimId
    */
   onKillPlayer(victimId: PlayerId, projectileId: MobId): void {
-    const isVictimBot = this.storage.botIdList.has(victimId);
-    let isKillerBot = false;
-    let killer: Player = null;
-    let projectileOwner: PlayerId = 0;
     const victim = this.storage.playerList.get(victimId);
+    const totalKillBounty = Math.round(victim.score.current * 0.2) + 25;
+    let killer: Player = null;
+    let isKillerBot = false;
+
+    const projectile =
+      projectileId === 0 ? null : (this.storage.mobList.get(projectileId) as Projectile);
+
+    const killerId = projectile === null ? 0 : projectile.owner.current;
     const killTime = Date.now();
+    const aggressors: AggressorsListItem[] = [];
+    const assistantsSyncData = [];
 
-    if (projectileId !== 0) {
-      const projectile = this.storage.mobList.get(projectileId) as Projectile;
-
-      projectileOwner = projectile.owner.current;
+    /**
+     * Kill assists.
+     */
+    if (this.config.killAssists) {
+      /**
+       * While `takenTraking` contains the records about damage in time,
+       * the `damageDealers` has the summarised data about damage dealt.
+       */
+      const damageDealers: Map<PlayerId, number> = new Map();
+      let victimHealthLeft = 1;
 
       /**
-       * Tracking killer kills and score.
-       * Damage was already updated on hit event.
+       * Filling the list of aggressors.
        */
-      if (this.storage.playerList.has(projectile.owner.current)) {
-        killer = this.storage.playerList.get(projectile.owner.current);
-        isKillerBot = this.storage.botIdList.has(killer.id.current);
+      for (let aidx = victim.damage.takenTraking.length - 1; aidx > 0; aidx -= 2) {
+        const aggressorId = victim.damage.takenTraking[aidx - 1];
+        const damage = victim.damage.takenTraking[aidx];
 
-        killer.kills.current += 1;
-        killer.kills.currentmatch += 1;
-
-        if (projectile.inferno.current) {
-          killer.kills.totalWithInferno += 1;
+        if (damageDealers.has(aggressorId)) {
+          damageDealers.set(aggressorId, damageDealers.get(aggressorId) + damage);
+        } else {
+          damageDealers.set(aggressorId, damage);
         }
 
-        if (isVictimBot) {
-          killer.kills.bots += 1;
+        victimHealthLeft -= damage;
 
-          if (projectile.inferno.current) {
-            killer.kills.botsWithInferno += 1;
-          }
+        if (victimHealthLeft <= 0) {
+          damageDealers.set(aggressorId, damageDealers.get(aggressorId) + victimHealthLeft);
+
+          break;
+        }
+      }
+
+      /**
+       * Alerting aggressors about assists.
+       */
+      damageDealers.forEach((damage, aggressorId) => {
+        let bounty = 0;
+
+        if (damage > 1) {
+          bounty = totalKillBounty;
+        } else {
+          // Not the most accurate way.
+          bounty = Math.round(totalKillBounty * damage);
         }
 
-        const earnedScore = Math.round(victim.score.current * 0.2) + 25;
+        /**
+         * If the aggressor has already left or it is the BTR firewall (id = 0), the bounty is lost.
+         */
+        if (bounty > 0 && this.storage.playerList.has(aggressorId)) {
+          const aggressor = this.storage.playerList.get(aggressorId);
 
-        killer.score.current += earnedScore;
+          if (aggressorId !== killerId) {
+            if (!aggressor.delayed.RESPONSE_SCORE_UPDATE) {
+              aggressor.delayed.RESPONSE_SCORE_UPDATE = true;
 
-        if (has(killer, 'user')) {
-          const user = this.storage.users.list.get(killer.user.id);
+              if (!aggressor.bot.current) {
+                this.delay(RESPONSE_KILL_ASSIST, aggressorId, victim.name.current);
+              }
 
-          user.lifetimestats.totalkills += 1;
-          user.lifetimestats.earnings += earnedScore;
-          this.storage.users.hasChanges = true;
+              this.delay(RESPONSE_SCORE_UPDATE, aggressorId);
+            }
 
-          if (this.config.sync.enabled) {
-            const eventDetail: any = {
-              victim: { name: victim.name.current, flag: victim.flag.current },
-              projectile: projectileId,
-              player: {
-                plane: killer.planetype.current,
-                team: killer.team.current,
-                flag: killer.flag.current,
-              },
+            const eventData: any = {
+              name: aggressor.name.current,
+              plane: aggressor.planetype.current,
+              flag: aggressor.flag.current,
             };
 
-            if (has(victim, 'user')) {
-              eventDetail.victim.user = victim.user.id;
+            if (has(aggressor, 'user')) {
+              eventData.user = aggressor.user.id;
             }
 
-            if (isVictimBot) {
-              eventDetail.victim.bot = true;
+            if (aggressor.bot.current) {
+              eventData.bot = true;
             }
 
-            this.emit(
-              SYNC_ENQUEUE_UPDATE,
-              'user',
-              killer.user.id,
-              { earnings: earnedScore, totalkills: 1 },
-              killTime,
-              ['killer', eventDetail]
-            );
+            assistantsSyncData.push(eventData);
           }
+
+          aggressors.push({
+            aggressor,
+            bounty,
+          });
+        }
+      });
+
+      victim.damage.takenTraking = [];
+    }
+
+    /**
+     * Update killer stats.
+     */
+    if (projectileId !== 0 && this.storage.playerList.has(killerId)) {
+      let earnedScore = 0;
+
+      /**
+       * If `aggressors` isn't empty and killer is online,
+       * so the first record is a killer.
+       */
+      if (aggressors.length > 0) {
+        killer = aggressors[0].aggressor;
+        earnedScore = aggressors[0].bounty;
+      } else {
+        killer = this.storage.playerList.get(killerId);
+        earnedScore = totalKillBounty;
+      }
+
+      isKillerBot = killer.bot.current;
+
+      killer.kills.current += 1;
+      killer.kills.currentmatch += 1;
+
+      if (projectile.inferno.current) {
+        killer.kills.totalWithInferno += 1;
+      }
+
+      if (victim.bot.current) {
+        killer.kills.bots += 1;
+
+        if (projectile.inferno.current) {
+          killer.kills.botsWithInferno += 1;
+        }
+      }
+
+      killer.score.current += earnedScore;
+
+      if (has(killer, 'user')) {
+        const user = this.storage.users.list.get(killer.user.id);
+
+        user.lifetimestats.totalkills += 1;
+        user.lifetimestats.earnings += earnedScore;
+        this.storage.users.hasChanges = true;
+
+        if (this.config.sync.enabled) {
+          const eventDetail: any = {
+            victim: { name: victim.name.current, flag: victim.flag.current },
+            projectile: projectileId,
+            player: {
+              plane: killer.planetype.current,
+              team: killer.team.current,
+              flag: killer.flag.current,
+            },
+          };
+
+          if (assistantsSyncData.length > 0) {
+            eventDetail.aggressors = assistantsSyncData;
+          }
+
+          if (has(victim, 'user')) {
+            eventDetail.victim.user = victim.user.id;
+          }
+
+          if (victim.bot.current) {
+            eventDetail.victim.bot = true;
+          }
+
+          this.emit(
+            SYNC_ENQUEUE_UPDATE,
+            'user',
+            killer.user.id,
+            { earnings: earnedScore, totalkills: 1 },
+            killTime,
+            ['killer', eventDetail]
+          );
+        }
+      }
+    }
+
+    for (let index = 0; index < aggressors.length; index += 1) {
+      const { aggressor, bounty } = aggressors[index];
+
+      if (aggressor.id.current === killerId) {
+        continue;
+      }
+
+      aggressor.score.current += bounty;
+
+      this.delay(PLAYERS_KILL_ASSISTED, aggressor.id.current);
+
+      if (has(aggressor, 'user')) {
+        const user = this.storage.users.list.get(aggressor.user.id);
+
+        user.lifetimestats.earnings += bounty;
+        this.storage.users.hasChanges = true;
+
+        if (this.config.sync.enabled) {
+          const eventDetail: any = {
+            victim: { name: victim.name.current, flag: victim.flag.current },
+            player: {
+              plane: aggressor.planetype.current,
+              team: aggressor.team.current,
+              flag: aggressor.flag.current,
+            },
+          };
+
+          if (has(victim, 'user')) {
+            eventDetail.victim.user = victim.user.id;
+          }
+
+          if (victim.bot.current) {
+            eventDetail.victim.bot = true;
+          }
+
+          if (killer !== null) {
+            eventDetail.killer = { name: killer.name.current, flag: killer.flag.current };
+
+            if (has(killer, 'user')) {
+              eventDetail.killer.user = killer.user.id;
+            }
+
+            if (isKillerBot) {
+              eventDetail.killer.bot = true;
+            }
+          }
+
+          this.emit(
+            SYNC_ENQUEUE_UPDATE,
+            'user',
+            aggressor.user.id,
+            { earnings: bounty },
+            killTime,
+            ['kill-assist', eventDetail]
+          );
         }
       }
     }
@@ -124,7 +295,7 @@ export default class GamePlayersKill extends System {
     /**
      * Tracking victim deaths and score.
      */
-    victim.deaths.killerId = projectileOwner;
+    victim.deaths.killerId = killerId;
     victim.deaths.current += 1;
 
     if (killer !== null && isKillerBot) {
@@ -175,7 +346,7 @@ export default class GamePlayersKill extends System {
     }
 
     victim.alivestatus.current = PLAYERS_ALIVE_STATUSES.DEAD;
-    victim.times.lastDeath = Date.now();
+    victim.times.lastDeath = killTime;
 
     /**
      * Victim upgrades reset.
@@ -251,7 +422,7 @@ export default class GamePlayersKill extends System {
           victim.deaths.withFlagByBots += 1;
         }
 
-        if (isVictimBot) {
+        if (victim.bot.current) {
           killer.kills.carriersBots += 1;
         }
       }
@@ -289,15 +460,8 @@ export default class GamePlayersKill extends System {
       this.delay(RESPONSE_PLAYER_UPGRADE, victimId, UPGRADES_ACTION_TYPE.LOST);
     }
 
-    this.delay(
-      BROADCAST_PLAYER_KILL,
-      victimId,
-      projectileOwner,
-      victim.position.x,
-      victim.position.y
-    );
-
-    this.delay(PLAYERS_KILLED, victimId, projectileOwner, projectileId);
+    this.delay(BROADCAST_PLAYER_KILL, victimId, killerId, victim.position.x, victim.position.y);
+    this.delay(PLAYERS_KILLED, victimId, killerId, projectileId);
     this.delay(PLAYERS_ALIVE_UPDATE);
   }
 }

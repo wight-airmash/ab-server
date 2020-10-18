@@ -101,6 +101,7 @@ import GameSpectateResponse from './responses/game-spectate';
 import IncorrectProtocolResponse from './responses/incorrect-protocol';
 import InvalidLoginResponse from './responses/invalid-login';
 import KickPlayerResponse from './responses/kick';
+import KillAssistResponse from './responses/kill-assist';
 import LoginResponse from './responses/login';
 import NotEnoughUpgradesResponse from './responses/not-enough-upgrades';
 import PingResultResponse from './responses/ping-result';
@@ -185,6 +186,7 @@ export default abstract class GameManifest {
       IncorrectProtocolResponse,
       InvalidLoginResponse,
       KickPlayerResponse,
+      KillAssistResponse,
       LoginResponse,
       NotEnoughUpgradesResponse,
       PingResultResponse,

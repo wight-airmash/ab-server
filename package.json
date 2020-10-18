@@ -26,7 +26,7 @@
     "lint-autofix": "eslint ./src --ext .js,.mjs,.ts --fix"
   },
   "dependencies": {
-    "@airbattle/protocol": "github:wight-airmash/ab-protocol#v6.0.0",
+    "@airbattle/protocol": "github:wight-airmash/ab-protocol#develop",
     "collisions": "github:wight-airmash/ab-collisions#v2.0.14-ab.6.1",
     "dotenv": "^8.2.0",
     "eventemitter3": "^4.0.4",
@@ -152,6 +152,7 @@
             "ws",
             "res",
             "player",
+            "killer",
             "viewport",
             "connection",
             "update"

@@ -22,6 +22,7 @@ import {
   METRICS_LOG_INTERVAL_SEC,
   METRICS_LOG_SAMPLES,
   PLAYERS_ALLOW_NON_ASCII_USERNAMES,
+  PLAYERS_KILL_ASSISTS,
   POWERUPS_SPAWN_CHANCE,
   POWERUPS_SPAWN_LIMIT,
   SERVER_DEFAULT_ENVIRONMENT,
@@ -292,6 +293,11 @@ export interface GameServerConfigInterface {
 
   allowNonAsciiUsernames: boolean;
 
+  /**
+   * Track assistance in killing.
+   */
+  killAssists: boolean;
+
   ctf: {
     /**
      * Enable special CTF Q-bots features.
@@ -560,6 +566,8 @@ const config: GameServerConfigInterface = {
     process.env.ALLOW_NON_ASCII_USERNAMES,
     PLAYERS_ALLOW_NON_ASCII_USERNAMES
   ),
+
+  killAssists: boolValue(process.env.KILL_ASSISTS, PLAYERS_KILL_ASSISTS),
 
   bots: {
     enabled: boolValue(process.env.WHITELIST_ENABLED, BOTS_IP_LIST_ENABLED),

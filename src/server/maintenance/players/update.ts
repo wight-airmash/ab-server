@@ -424,6 +424,10 @@ export default class GamePlayersUpdate extends System {
         }
 
         if (player.health.current > PLAYERS_HEALTH.MAX) {
+          if (this.config.killAssists) {
+            player.damage.takenTraking = [];
+          }
+
           player.health.regen = 0;
           player.health.current = PLAYERS_HEALTH.MAX;
           player.delayed.BROADCAST_PLAYER_UPDATE = true;

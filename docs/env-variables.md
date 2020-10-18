@@ -42,7 +42,7 @@ Game server URL base path.
 
 Default: `"127.0.0.1"`
 
-Pre-defined bots IP list. Parsed as array, use `,` as delimiter. Applies when [whitelist](#whitelist_enabled) is enabled.
+Pre-defined bots IP list and CIDR blocks. Parsed as array, use `,` as delimiter. Applies when [whitelist](#whitelist_enabled) is enabled.
 
 Use the [commands](./commands#server-bot-add-ip) to update the list without restarting a server.
 
@@ -117,6 +117,12 @@ Enable or disable auto kick policy based on invalid protocol implementation `BAC
 Default: `true`
 
 Enable or disable auto kick policy based on invalid protocol implementation `PONG` packets. Normally, you don't need to turn it off.
+
+### KILL_ASSISTS
+
+Default: `false`
+
+Enable or disable assistance tracking in killing. With this option enabled, the reward for killing a player is distributed among all those who dealt the damage.
 
 ### LOG_CHAT_FILE
 
