@@ -29,28 +29,28 @@
     "@airbattle/protocol": "github:wight-airmash/ab-protocol#develop",
     "collisions": "github:wight-airmash/ab-collisions#v2.0.14-ab.6.1",
     "dotenv": "^8.2.0",
-    "eventemitter3": "^4.0.4",
-    "fast-json-stringify": "^2.2.0",
-    "maxmind": "^4.1.3",
+    "eventemitter3": "^4.0.7",
+    "fast-json-stringify": "^2.2.9",
+    "maxmind": "^4.3.0",
     "netmask": "^1.0.6",
-    "pino": "^6.3.2",
+    "pino": "^6.7.0",
     "uWebSockets.js": "github:uNetworking/uWebSockets.js#v17.6.0"
   },
   "devDependencies": {
     "@types/netmask": "^1.0.30",
-    "@types/node": "^12.12.47",
-    "@types/pino": "^6.3.0",
-    "@typescript-eslint/eslint-plugin": "^3.4.0",
-    "@typescript-eslint/parser": "^3.4.0",
-    "eslint": "^7.3.1",
+    "@types/node": "^12.12.68",
+    "@types/pino": "^6.3.2",
+    "@typescript-eslint/eslint-plugin": "^4.4.1",
+    "@typescript-eslint/parser": "^4.4.1",
+    "eslint": "^7.11.0",
     "eslint-config-airbnb": "^18.2.0",
     "eslint-config-airbnb-base": "^14.2.0",
-    "eslint-config-prettier": "^6.11.0",
-    "eslint-plugin-import": "^2.22.0",
+    "eslint-config-prettier": "^6.13.0",
+    "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-prettier": "^3.1.4",
-    "pino-pretty": "^4.0.0",
-    "prettier": "^2.0.5",
-    "typescript": "^3.9.5"
+    "pino-pretty": "^4.3.0",
+    "prettier": "^2.1.2",
+    "typescript": "^4.0.3"
   },
   "eslintConfig": {
     "parser": "@typescript-eslint/parser",
@@ -116,6 +116,7 @@
         }
       ],
       "@typescript-eslint/ban-types": "off",
+      "no-shadow": "off",
       "@typescript-eslint/adjacent-overload-signatures": [
         "error"
       ],
