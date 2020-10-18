@@ -326,6 +326,7 @@ export default class ServerCommandHandler extends System {
   private responseServerSync(playerId: PlayerId): void {
     if (this.config.sync.enabled) {
       const { sync } = this.storage;
+
       this.emit(
         BROADCAST_CHAT_SERVER_WHISPER,
         playerId,
@@ -336,18 +337,13 @@ export default class ServerCommandHandler extends System {
           `Next sequence id: ${sync.nextSequenceId}. `,
           `Subscribed objects: ${sync.subscribedObjects.size}. `,
           `Update queues: ${sync.updatesAwaitingSequenceId.length}`,
-            `/${sync.updatesAwaitingSend.size}`,
-            `/${sync.updatesAwaitingAck.size}`,
-            `/${sync.updatesAwaitingResend.size}. `,
+          `/${sync.updatesAwaitingSend.size}`,
+          `/${sync.updatesAwaitingAck.size}`,
+          `/${sync.updatesAwaitingResend.size}. `,
         ].join('')
-      );  
-    }
-    else {
-      this.emit(
-        BROADCAST_CHAT_SERVER_WHISPER,
-        playerId,
-        'Sync feature not configured.'
       );
+    } else {
+      this.emit(BROADCAST_CHAT_SERVER_WHISPER, playerId, 'Sync feature not configured.');
     }
   }
 

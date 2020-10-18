@@ -163,14 +163,10 @@ export default class GamePlayersKill extends System {
           flag: victim.flag.current,
         };
 
-        this.emit(
-          SYNC_ENQUEUE_UPDATE,
-          'user',
-          victim.user.id,
-          { totaldeaths: 1 },
-          killTime,
-          ['victim', eventDetail]
-        );
+        this.emit(SYNC_ENQUEUE_UPDATE, 'user', victim.user.id, { totaldeaths: 1 }, killTime, [
+          'victim',
+          eventDetail,
+        ]);
       }
     }
 

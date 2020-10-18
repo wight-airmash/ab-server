@@ -150,18 +150,23 @@ export default class GameServerBootstrap implements GameServerBootstrapInterface
 
     this.config.bots.ipList.forEach(ip => {
       // allow subnet blocks to be provided and expanded
-      // this allows for a subnet like 192.168.100.0/26 to be expanded to 64 ip addresses, 
+      // this allows for a subnet like 192.168.100.0/26 to be expanded to 64 ip addresses,
       // without requiring the 64 ips to be provided as an enumerated list in an env variable.
       // This should perform fine even if a large subnet is provided. If that use case were
       // relevant the Netmask library could be used to combine subnets and perform efficient
       // lookups.
-      var block = new Netmask(ip)
-      block.forEach((ip, long, index) => {
-        this.storage.ipBotList.add(ip);
-      })
+      const block = new Netmask(ip);
+
+      block.forEach(botIP => {
+        this.storage.ipBotList.add(botIP);
+      });
     });
+
     if (this.storage.ipBotList.size > 1048576) {
-      this.log.warn('Bot IP list is getting long. %o records. This may impact performance!', this.storage.ipBotList.size)
+      this.log.warn(
+        'Bot IP list is getting long. %o records. This may impact performance!',
+        this.storage.ipBotList.size
+      );
     }
 
     this.helpers = new Helpers({ app: this });

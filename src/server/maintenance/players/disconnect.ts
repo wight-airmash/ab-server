@@ -153,14 +153,10 @@ export default class GamePlayersDisconnect extends System {
         if (this.config.sync.enabled) {
           const eventDetail = { flag: player.flag.current };
 
-          this.emit(
-            SYNC_ENQUEUE_UPDATE,
-            'user',
-            player.user.id,
-            {},
-            Date.now(),
-            ['logout', eventDetail]
-          );
+          this.emit(SYNC_ENQUEUE_UPDATE, 'user', player.user.id, {}, Date.now(), [
+            'logout',
+            eventDetail,
+          ]);
 
           this.emit(SYNC_UNSUBSCRIBE, 'user', player.user.id);
         }

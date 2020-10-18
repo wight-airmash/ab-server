@@ -240,14 +240,10 @@ export default class GamePlayersConnect extends System {
 
         const eventDetail = { name, flag };
 
-        this.emit(
-          SYNC_ENQUEUE_UPDATE,
-          'user',
-          player.user.id,
-          {},
-          Date.now(),
-          ['login', eventDetail]
-        );
+        this.emit(SYNC_ENQUEUE_UPDATE, 'user', player.user.id, {}, Date.now(), [
+          'login',
+          eventDetail,
+        ]);
       }
 
       player.level.current = convertEarningsToLevel(user.lifetimestats.earnings);

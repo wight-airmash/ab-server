@@ -13,11 +13,11 @@ import {
   ROUTE_PONG,
   ROUTE_SAY,
   ROUTE_SCOREDETAILED,
-  ROUTE_SYNC_START,
+  ROUTE_SYNC_ACK,
   ROUTE_SYNC_AUTH,
   ROUTE_SYNC_INIT,
+  ROUTE_SYNC_START,
   ROUTE_SYNC_UPDATE,
-  ROUTE_SYNC_ACK,
   ROUTE_TEAMCHAT,
   ROUTE_VOTEMUTE,
   ROUTE_WHISPER,
@@ -113,12 +113,12 @@ export default class PacketRouter extends System {
     });
 
     this.validPackets = Object.freeze(Object.keys(this.routes).map(packetId => ~~packetId));
+
     this.validBackupPackets = Object.freeze(
       Object.keys(this.backupRoutes).map(packetId => ~~packetId)
     );
-    this.validSyncPackets = Object.freeze(
-      Object.keys(this.syncRoutes).map(packetId => ~~packetId)
-    );
+
+    this.validSyncPackets = Object.freeze(Object.keys(this.syncRoutes).map(packetId => ~~packetId));
   }
 
   onRouteMessage(msg: ProtocolPacket, connectionId: ConnectionId): void {
