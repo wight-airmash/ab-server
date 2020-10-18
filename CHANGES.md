@@ -1,5 +1,18 @@
 ## Future version (unversioned)
 
+Features:
+
+- Sync service. See [./docs/sync.md](./docs/sync.md) and [STATS_SYNC](./docs/env-variables.md#stats_sync).
+- Kill assists. See [KILL_ASSISTS](./docs/env-variables.md#kill_assists).
+
+Improvements:
+
+- CIDR blocks in [BOTS_IP](./docs/env-variables.md#bots_ip).
+
+Bug fixes:
+
+- Invalid verification of the number of connected players (max players limit).
+
 ## 6.0.1 (June 27, 2020)
 
 Performance update.
