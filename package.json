@@ -27,7 +27,6 @@
   },
   "dependencies": {
     "@airbattle/protocol": "github:wight-airmash/ab-protocol#v6.0.0",
-    "@types/netmask": "^1.0.30",
     "collisions": "github:wight-airmash/ab-collisions#v2.0.14-ab.6.1",
     "dotenv": "^8.2.0",
     "eventemitter3": "^4.0.4",
@@ -38,6 +37,7 @@
     "uWebSockets.js": "github:uNetworking/uWebSockets.js#v17.6.0"
   },
   "devDependencies": {
+    "@types/netmask": "^1.0.30",
     "@types/node": "^12.12.47",
     "@types/pino": "^6.3.0",
     "@typescript-eslint/eslint-plugin": "^3.4.0",
