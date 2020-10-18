@@ -22,7 +22,7 @@ import { AdminActionPlayer, AdminPlayersListItem } from '../types';
 
 const { readFile } = fs;
 
-const readRequest = (res: HttpResponse, cb: Function, errCb: () => void): void => {
+const readRequest = (res: HttpResponse, cb: Function, errCb: () => void, log: Logger): void => {
   let buffer = Buffer.alloc(0);
 
   res.onAborted(errCb);
@@ -34,7 +34,7 @@ const readRequest = (res: HttpResponse, cb: Function, errCb: () => void): void =
       try {
         cb(buffer.toString());
       } catch (err) {
-        this.log.error('Reading request error: %o', { error: err.stack });
+        log.error('Reading request error: %o', { error: err.stack });
         res.close();
       }
     }
@@ -132,7 +132,8 @@ class Admin {
             },
             () => {
               this.log.error('Failed to parse /actions POST.');
-            }
+            },
+            this.log
           );
         })
 
