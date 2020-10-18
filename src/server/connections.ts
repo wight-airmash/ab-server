@@ -105,7 +105,7 @@ export default class Connections extends System {
 
       this.emit(ROUTE_PACKET, decodedMsg, connectionId);
     } catch (err) {
-      this.log.warn('Message decoding failed: %o', { error: err.stack });
+      this.log.warn('Message decoding failed: %o', { connectionId, error: err.stack });
 
       this.emit(ERRORS_PACKET_DECODE_FAILED, connectionId);
     }
