@@ -19,6 +19,7 @@ import {
   RESPONSE_PLAYER_UPGRADE,
   RESPONSE_SCORE_UPDATE,
   SYNC_ENQUEUE_UPDATE,
+  TIMELINE_LOOP_TICK,
 } from '../../../events';
 import { CHANNEL_RESPAWN_PLAYER } from '../../../events/channels';
 import { getRandomInt } from '../../../support/numbers';
@@ -34,6 +35,8 @@ interface AggressorsListItem {
 export default class GamePlayersKill extends System {
   private minScoreToDrop: number;
 
+  private killIndex = 0;
+
   constructor({ app }) {
     super({ app });
 
@@ -41,7 +44,12 @@ export default class GamePlayersKill extends System {
 
     this.listeners = {
       [PLAYERS_KILL]: this.onKillPlayer,
+      [TIMELINE_LOOP_TICK]: this.onTick,
     };
+  }
+
+  onTick(): void {
+    this.killIndex = 0;
   }
 
   /**
@@ -51,6 +59,9 @@ export default class GamePlayersKill extends System {
    * @param victimId
    */
   onKillPlayer(victimId: PlayerId, projectileId: MobId): void {
+    this.killIndex += 1;
+
+    const killTimestamp = this.app.ticker.now + this.killIndex;
     const victim = this.storage.playerList.get(victimId);
     const totalKillBounty = Math.round(victim.score.current * 0.2) + 25;
     let killer: Player = null;
@@ -65,7 +76,7 @@ export default class GamePlayersKill extends System {
     const assistantsSyncData = [];
 
     /**
-     * Kill assists.
+     * Kill assists processing.
      */
     if (this.config.killAssists) {
       /**
@@ -161,8 +172,8 @@ export default class GamePlayersKill extends System {
       let earnedScore = 0;
 
       /**
-       * If `aggressors` isn't empty and killer is online,
-       * so the first record is a killer.
+       * If `aggressors` isn't empty and the killer is online,
+       * so the first record is the killer.
        */
       if (aggressors.length > 0) {
         killer = aggressors[0].aggressor;
@@ -200,6 +211,7 @@ export default class GamePlayersKill extends System {
 
         if (this.config.sync.enabled) {
           const eventDetail: any = {
+            timestamp: killTimestamp,
             victim: { name: victim.name.current, flag: victim.flag.current },
             projectile: projectileId,
             player: {
@@ -233,6 +245,9 @@ export default class GamePlayersKill extends System {
       }
     }
 
+    /**
+     * Update aggressors stats.
+     */
     for (let index = 0; index < aggressors.length; index += 1) {
       const { aggressor, bounty } = aggressors[index];
 
@@ -252,6 +267,7 @@ export default class GamePlayersKill extends System {
 
         if (this.config.sync.enabled) {
           const eventDetail: any = {
+            timestamp: killTimestamp,
             victim: { name: victim.name.current, flag: victim.flag.current },
             player: {
               plane: aggressor.planetype.current,
@@ -333,6 +349,8 @@ export default class GamePlayersKill extends System {
           team: victim.team.current,
           flag: victim.flag.current,
         };
+
+        eventDetail.timestamp = killTimestamp;
 
         this.emit(SYNC_ENQUEUE_UPDATE, 'user', victim.user.id, { totaldeaths: 1 }, killTime, [
           'victim',
