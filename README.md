@@ -7,6 +7,7 @@ Docs:
 - [In-game commands](./docs/commands.md).
 - [Environment variables](./docs/env-variables.md).
 - [JSON API](./docs/api.md).
+- [Synchronization of shared data between game servers](./docs/sync.md).
 - [Aircrafts damage](./docs/damage.md).
 - [CTF mode Q-bots](./docs/ctf-bots.md) (not a server part).
 

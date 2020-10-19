@@ -2,12 +2,13 @@
 
 Features:
 
-- Sync service. See [./docs/sync.md](./docs/sync.md) and [STATS_SYNC](./docs/env-variables.md#stats_sync).
-- Kill assists. See [KILL_ASSISTS](./docs/env-variables.md#kill_assists).
+- Sync service ([#111](https://github.com/wight-airmash/ab-server/pull/111)). See [./docs/sync.md](./docs/sync.md) and [STATS_SYNC](./docs/env-variables.md#stats_sync).
+- Kill assists. Disabled by default. See [KILL_ASSISTS](./docs/env-variables.md#kill_assists).
 
 Improvements:
 
-- CIDR blocks in [BOTS_IP](./docs/env-variables.md#bots_ip).
+- CIDR blocks in [BOTS_IP](./docs/env-variables.md#bots_ip) ([#112](https://github.com/wight-airmash/ab-server/pull/112)).
+- `ownerId` field in MOB_UPDATE packets ([#113](https://github.com/wight-airmash/ab-server/pull/113)).
 
 Bug fixes:
 
