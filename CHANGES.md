@@ -1,5 +1,7 @@
 ## Future version (unversioned)
 
+## 6.1.0 (October 21, 2020)
+
 Features:
 
 - Sync service ([#111](https://github.com/wight-airmash/ab-server/pull/111)). See [./docs/sync.md](./docs/sync.md) and [STATS_SYNC](./docs/env-variables.md#stats_sync).
@@ -9,6 +11,7 @@ Improvements:
 
 - CIDR blocks in [BOTS_IP](./docs/env-variables.md#bots_ip) ([#112](https://github.com/wight-airmash/ab-server/pull/112)).
 - `ownerId` field in MOB_UPDATE packets ([#113](https://github.com/wight-airmash/ab-server/pull/113)).
+- Original `PLAYER_TYPE` and `PLAYER_RESPAWN` packets order.
 
 Bug fixes:
 
