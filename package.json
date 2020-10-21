@@ -26,7 +26,7 @@
     "lint-autofix": "eslint ./src --ext .js,.mjs,.ts --fix"
   },
   "dependencies": {
-    "@airbattle/protocol": "github:wight-airmash/ab-protocol#develop",
+    "@airbattle/protocol": "github:wight-airmash/ab-protocol#v6.1.0",
     "collisions": "github:wight-airmash/ab-collisions#v2.0.14-ab.6.1",
     "dotenv": "^8.2.0",
     "eventemitter3": "^4.0.7",
@@ -38,14 +38,14 @@
   },
   "devDependencies": {
     "@types/netmask": "^1.0.30",
-    "@types/node": "^12.12.68",
-    "@types/pino": "^6.3.2",
-    "@typescript-eslint/eslint-plugin": "^4.4.1",
-    "@typescript-eslint/parser": "^4.4.1",
+    "@types/node": "^12.12.70",
+    "@types/pino": "^6.3.3",
+    "@typescript-eslint/eslint-plugin": "^4.5.0",
+    "@typescript-eslint/parser": "^4.5.0",
     "eslint": "^7.11.0",
     "eslint-config-airbnb": "^18.2.0",
     "eslint-config-airbnb-base": "^14.2.0",
-    "eslint-config-prettier": "^6.13.0",
+    "eslint-config-prettier": "^6.14.0",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-prettier": "^3.1.4",
     "pino-pretty": "^4.3.0",
