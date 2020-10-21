@@ -169,14 +169,10 @@ export default class GamePlayersRespawn extends System {
        */
       if (isNewShipType) {
         this.emit(RESPONSE_SPECTATE_KILL, connection.id, player.id.current);
-      }
-
-      this.emit(BROADCAST_PLAYER_RESPAWN, player.id.current);
-
-      if (isNewShipType) {
         this.emit(BROADCAST_PLAYER_TYPE, player.id.current, shipType);
       }
 
+      this.emit(BROADCAST_PLAYER_RESPAWN, player.id.current);
       this.emit(PLAYERS_APPLY_SHIELD, player.id.current, PLAYERS_SPAWN_SHIELD_DURATION_MS);
 
       /**
