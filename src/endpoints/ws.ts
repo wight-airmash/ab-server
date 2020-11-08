@@ -235,6 +235,8 @@ export default class WsEndpoint {
 
     const { ip } = connection;
 
+    this.log.info('okay now');
+
     /**
      * Detect bots.
      */
@@ -456,13 +458,18 @@ export default class WsEndpoint {
   }
 
   private bindWebsocketHandlers(): void {
-    this.uws.ws(`${this.path}/`, {
+    this.log.error('what the everliving fuck')
+    this.uws.ws('*', {
+
       compression: this.config.server.compression ? CONNECTIONS_WEBSOCKETS_COMPRESSOR : DISABLED,
       maxPayloadLength: CONNECTIONS_MAX_PAYLOAD_BYTES,
       maxBackpressure: CONNECTIONS_MAX_BACKPRESSURE,
       idleTimeout: CONNECTIONS_IDLE_TIMEOUT_SEC,
 
       open: (connection: PlayerConnection, req) => {
+
+        this.log.error('what the heck is even happening?', {});
+
         const connectionId = this.createConnectionId();
         const now = Date.now();
         const meta: WorkerConnectionMeta = {
@@ -538,6 +545,9 @@ export default class WsEndpoint {
       })
 
       .get(`${this.path}/`, res => {
+
+        this.log.error('y tho');
+
         const gameModeResponse =
           this.storage.gameModeAPIResponse === '' ? '' : `,${this.storage.gameModeAPIResponse}`;
 

@@ -1,4 +1,4 @@
-import { CHAT_MIN_PLAYER_PLAYTIME_TO_VOTEMUTE_MS, CHAT_MUTE_TIME_MS } from '../../constants';
+import { CHAT_MIN_PLAYER_PLAYTIME_TO_VOTEMUTE_MS, CHAT_MUTE_TIME_MS, CHAT_MIN_PLAYER_SCORE_TO_VOTEMUTE } from '../../constants';
 import {
   CHAT_MUTE_BY_IP,
   CHAT_MUTE_BY_SERVER,
@@ -11,7 +11,7 @@ import {
   TIMELINE_CLOCK_DAY,
 } from '../../events';
 import { CHANNEL_MUTE } from '../../events/channels';
-import { IPv4, PlayerId, ConnectionId } from '../../types';
+import { IPv4, Player, PlayerId, ConnectionId } from '../../types';
 import { System } from '../system';
 
 export default class GameMute extends System {
@@ -53,6 +53,10 @@ export default class GameMute extends System {
     const player = this.storage.playerList.get(playerId);
     const playerToMute = this.storage.playerList.get(playerToMuteId);
 
+    /**
+     * Excluding players with no skin in the game.  
+     * A player must play for at least N minutes, and must have a score in the Nth percentile of all human players.
+     */
     if (player.times.activePlaying < CHAT_MIN_PLAYER_PLAYTIME_TO_VOTEMUTE_MS) {
       this.emit(
         RESPONSE_COMMAND_REPLY,
@@ -62,6 +66,44 @@ export default class GameMute extends System {
 
       return;
     }
+
+    /**
+     * Building a scores array and compare the player's score to the total. 
+     */
+    let scoreToBeat = 1;
+    let scores = [];
+    this.storage.playerList.forEach((p: Player, _: PlayerId) => {
+      if (p.bot.current) {
+        return;
+      }
+      scores.push(p.score.current);
+    })
+    scores.sort()
+
+    /**
+     * player score must be greater than scoreToBeat
+     * some examples of this index math... 
+     * round(scores.length * min_player_score - 1) 
+     * round(5 * 0.5 - 1) = round(2.5 - 1) = round(1.5) = 2 
+     * round(33 * 0.5 - 1) = round(16.5 - 1) = round(15.5) = 16
+     * round(18 * 0.5 - 1) = round(9 - 1) = round(8) = 8
+     * round(4 * 0.5 - 1) = round(2 - 1) = round(1) = 1 
+     * round(1 * 0.5 - 1) = round(0.5-1) = round(-0.5) = -1
+     */
+    let idx = Math.round((scores.length * CHAT_MIN_PLAYER_SCORE_TO_VOTEMUTE) - 1)
+    if (idx < scores.length && idx > 0) {
+      scoreToBeat = scores[idx];
+    }
+
+    if (player.score.current <= scoreToBeat) {
+      this.emit(
+        RESPONSE_COMMAND_REPLY,
+        this.storage.playerMainConnectionList.get(playerId),
+        `The vote isn't counted. Only winners can vote, please try harder.`
+      );
+      return;
+    }
+
 
     if (this.votes.has(playerToMuteId)) {
       this.votes.get(playerToMuteId).add(playerId);

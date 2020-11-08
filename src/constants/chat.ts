@@ -15,6 +15,11 @@ export const CHAT_SUPERUSER_MUTE_TIME_MS = 60 * SECONDS_PER_MINUTE * MS_PER_SEC;
 export const CHAT_MIN_PLAYER_PLAYTIME_TO_VOTEMUTE_MS = 60 * MS_PER_SEC;
 
 /**
+ * To use /votemute, player score must be in the top 50% of all players
+ */
+export const CHAT_MIN_PLAYER_SCORE_TO_VOTEMUTE = 0.50; 
+
+/**
  * StarMash client has built-in anti-spam, it rejects whisper messages
  * that comes within first seconds after joining the game.
  */
