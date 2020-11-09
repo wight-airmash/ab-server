@@ -140,6 +140,11 @@ export interface GameServerConfigInterface {
     };
   };
 
+  chat: {
+    votemutePercentile: number;
+    votemuteDuration: number;
+  }
+
   logs: {
     level: string;
 
@@ -463,9 +468,19 @@ const config: GameServerConfigInterface = {
     bot: {
       name: strValue(process.env.SERVER_BOT_NAME, BOTS_SERVER_BOT_NAME),
       flag: strValue(process.env.SERVER_BOT_FLAG, BOTS_SERVER_BOT_FLAG),
+
       flagId: 0,
       welcome: parseWelcomeMessages(process.env.WELCOME_MESSAGES, SERVER_WELCOME_MESSAGES),
     },
+  },
+
+  chat: {
+    /**
+     * To use /votemute player score must be in the top N-tile of all players.
+     * To use /votemute player must play (not spectate, not stay) at least this time duration.
+     */
+    votemutePercentile: floatValue(process.env.CHAT_MIN_PLAYER_SCORE_TO_VOTEMUTE, 0.0),
+    votemuteDuration: intValue(process.env.CHAT_MIN_PLAYER_PLAYTIME_TO_VOTEMUTE_MS, 60000),
   },
 
   logs: {

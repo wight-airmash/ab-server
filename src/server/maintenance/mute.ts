@@ -1,4 +1,4 @@
-import { CHAT_MIN_PLAYER_PLAYTIME_TO_VOTEMUTE_MS, CHAT_MUTE_TIME_MS, CHAT_MIN_PLAYER_SCORE_TO_VOTEMUTE } from '../../constants';
+import { CHAT_MUTE_TIME_MS } from '../../constants';
 import {
   CHAT_MUTE_BY_IP,
   CHAT_MUTE_BY_SERVER,
@@ -43,8 +43,9 @@ export default class GameMute extends System {
   }
 
   onVoteMute(playerId: PlayerId, playerToMuteId: PlayerId): void {
+
     if (
-      !this.helpers.isPlayerConnected(playerId) ||
+      !this.helpers.isPlayerConnected(playerId) || 
       !this.helpers.isPlayerConnected(playerToMuteId)
     ) {
       return;
@@ -57,28 +58,27 @@ export default class GameMute extends System {
      * Excluding players with no skin in the game.  
      * A player must play for at least N minutes, and must have a score in the Nth percentile of all human players.
      */
-    if (player.times.activePlaying < CHAT_MIN_PLAYER_PLAYTIME_TO_VOTEMUTE_MS) {
+    if (player.times.activePlaying < this.config.chat.votemuteDuration) {
       this.emit(
         RESPONSE_COMMAND_REPLY,
         this.storage.playerMainConnectionList.get(playerId),
         `The vote isn't counted. Only active players can vote, please play more.`
       );
-
       return;
     }
 
     /**
      * Building a scores array and compare the player's score to the total. 
      */
-    let scoreToBeat = 1;
+    let scoreToBeat = -1;
     let scores = [];
     this.storage.playerList.forEach((p: Player, _: PlayerId) => {
-      if (p.bot.current) {
-        return;
-      }
       scores.push(p.score.current);
     })
-    scores.sort()
+    // JS casts to unicode before sorting. 
+    scores.sort((a, b) => {
+      return (a > b) ? 1 : -1
+    })
 
     /**
      * player score must be greater than scoreToBeat
@@ -90,7 +90,7 @@ export default class GameMute extends System {
      * round(4 * 0.5 - 1) = round(2 - 1) = round(1) = 1 
      * round(1 * 0.5 - 1) = round(0.5-1) = round(-0.5) = -1
      */
-    let idx = Math.round((scores.length * CHAT_MIN_PLAYER_SCORE_TO_VOTEMUTE) - 1)
+    let idx = Math.round((scores.length * this.config.chat.votemutePercentile) - 1)
     if (idx < scores.length && idx > 0) {
       scoreToBeat = scores[idx];
     }
