@@ -56,7 +56,7 @@ export default class GameMute extends System {
 
     /**
      * Excluding players with no skin in the game.  
-     * A player must play for at least N minutes, and must have a score in the Nth percentile of all human players.
+     * A player must play for at least N minutes
      */
     if (player.times.activePlaying < this.config.chat.votemuteDuration) {
       this.emit(
@@ -68,42 +68,20 @@ export default class GameMute extends System {
     }
 
     /**
-     * Building a scores array and compare the player's score to the total. 
+     * A player must have a score in the Nth percentile of all human players.
+     * Only run the check when votemutePercentile is configured.
      */
-    let scoreToBeat = -1;
-    let scores = [];
-    this.storage.playerList.forEach((p: Player, _: PlayerId) => {
-      scores.push(p.score.current);
-    })
-    // JS casts to unicode before sorting. 
-    scores.sort((a, b) => {
-      return (a > b) ? 1 : -1
-    })
-
-    /**
-     * player score must be greater than scoreToBeat
-     * some examples of this index math... 
-     * round(scores.length * min_player_score - 1) 
-     * round(5 * 0.5 - 1) = round(2.5 - 1) = round(1.5) = 2 
-     * round(33 * 0.5 - 1) = round(16.5 - 1) = round(15.5) = 16
-     * round(18 * 0.5 - 1) = round(9 - 1) = round(8) = 8
-     * round(4 * 0.5 - 1) = round(2 - 1) = round(1) = 1 
-     * round(1 * 0.5 - 1) = round(0.5-1) = round(-0.5) = -1
-     */
-    let idx = Math.round((scores.length * this.config.chat.votemutePercentile) - 1)
-    if (idx < scores.length && idx > 0) {
-      scoreToBeat = scores[idx];
+    if (this.config.chat.votemutePercentile > 0.0) {
+      let scoreToBeat = this.storage.playerRankings.scoreAtPercentile(this.config.chat.votemutePercentile)
+      if (player.score.current <= scoreToBeat) {
+        this.emit(
+          RESPONSE_COMMAND_REPLY,
+          this.storage.playerMainConnectionList.get(playerId),
+          `The vote isn't counted. Only winners can vote, please try harder.`
+        );
+        return;
+      }
     }
-
-    if (player.score.current <= scoreToBeat) {
-      this.emit(
-        RESPONSE_COMMAND_REPLY,
-        this.storage.playerMainConnectionList.get(playerId),
-        `The vote isn't counted. Only winners can vote, please try harder.`
-      );
-      return;
-    }
-
 
     if (this.votes.has(playerToMuteId)) {
       this.votes.get(playerToMuteId).add(playerId);
