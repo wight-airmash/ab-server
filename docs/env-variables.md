@@ -70,6 +70,23 @@ Path to the certificates directory. Relative (to `app.js` [root](#app-root)) or 
 
 Must contain `privkey.pem` and `fullchain.pem` files (if `ENDPOINTS_TLS` is `true`).
 
+
+### CHAT_MIN_PLAYER_SCORE_TO_VOTEMUTE
+
+Default: 0.0
+
+Votemute abuse prevention. Requires voters to have a score exceeding the provided threshold percentile. 
+
+Valid values are in the range `[0.0, 1.0)`. Recommended value is `0.5`.
+
+
+### CHAT_MIN_PLAYER_PLAYTIME_TO_VOTEMUTE
+
+Default: 60
+
+To use /votemute, player must play at least this many seconds.
+
+
 ### CTF_BASE_SHIELD_RANDOM_INTERVAL
 
 Default: `30`

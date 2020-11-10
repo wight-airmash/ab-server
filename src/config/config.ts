@@ -1,6 +1,7 @@
 import { mkdirSync, readFileSync } from 'fs';
 import { dirname, isAbsolute, resolve } from 'path';
 import { FLAGS_ISO_TO_CODE, GAME_TYPES } from '@airbattle/protocol';
+import { MS_PER_SEC } from '../constants'
 import dotenv from 'dotenv';
 import {
   AUTH_LOGIN_SERVER_KEY_URL,
@@ -139,6 +140,11 @@ export interface GameServerConfigInterface {
       welcome: string[];
     };
   };
+
+  chat: {
+    votemutePercentile: number;
+    votemuteDuration: number;
+  }
 
   logs: {
     level: string;
@@ -463,9 +469,19 @@ const config: GameServerConfigInterface = {
     bot: {
       name: strValue(process.env.SERVER_BOT_NAME, BOTS_SERVER_BOT_NAME),
       flag: strValue(process.env.SERVER_BOT_FLAG, BOTS_SERVER_BOT_FLAG),
+
       flagId: 0,
       welcome: parseWelcomeMessages(process.env.WELCOME_MESSAGES, SERVER_WELCOME_MESSAGES),
     },
+  },
+
+  chat: {
+    /**
+     * To use /votemute player score must be in the top N-tile of all players.
+     * To use /votemute player must play (not spectate, not stay) at least this time duration.
+     */
+    votemutePercentile: floatValue(process.env.CHAT_MIN_PLAYER_SCORE_TO_VOTEMUTE, 0.0),
+    votemuteDuration: intValue(process.env.CHAT_MIN_PLAYER_PLAYTIME_TO_VOTEMUTE, 60) * MS_PER_SEC,
   },
 
   logs: {

@@ -1,4 +1,4 @@
-import { CHAT_MIN_PLAYER_PLAYTIME_TO_VOTEMUTE_MS, CHAT_MUTE_TIME_MS } from '../../constants';
+import { CHAT_MUTE_TIME_MS } from '../../constants';
 import {
   CHAT_MUTE_BY_IP,
   CHAT_MUTE_BY_SERVER,
@@ -11,7 +11,7 @@ import {
   TIMELINE_CLOCK_DAY,
 } from '../../events';
 import { CHANNEL_MUTE } from '../../events/channels';
-import { IPv4, PlayerId, ConnectionId } from '../../types';
+import { IPv4, Player, PlayerId, ConnectionId } from '../../types';
 import { System } from '../system';
 
 export default class GameMute extends System {
@@ -43,8 +43,9 @@ export default class GameMute extends System {
   }
 
   onVoteMute(playerId: PlayerId, playerToMuteId: PlayerId): void {
+
     if (
-      !this.helpers.isPlayerConnected(playerId) ||
+      !this.helpers.isPlayerConnected(playerId) || 
       !this.helpers.isPlayerConnected(playerToMuteId)
     ) {
       return;
@@ -53,14 +54,33 @@ export default class GameMute extends System {
     const player = this.storage.playerList.get(playerId);
     const playerToMute = this.storage.playerList.get(playerToMuteId);
 
-    if (player.times.activePlaying < CHAT_MIN_PLAYER_PLAYTIME_TO_VOTEMUTE_MS) {
+    /**
+     * Excluding players with no skin in the game.  
+     * A player must play for at least N minutes
+     */
+    if (player.times.activePlaying < this.config.chat.votemuteDuration) {
       this.emit(
         RESPONSE_COMMAND_REPLY,
         this.storage.playerMainConnectionList.get(playerId),
         `The vote isn't counted. Only active players can vote, please play more.`
       );
-
       return;
+    }
+
+    /**
+     * A player must have a score in the Nth percentile of all human players.
+     * Only run the check when votemutePercentile is configured.
+     */
+    if (this.config.chat.votemutePercentile > 0.0) {
+      let scoreToBeat = this.storage.playerRankings.scoreAtPercentile(this.config.chat.votemutePercentile)
+      if (player.score.current <= scoreToBeat) {
+        this.emit(
+          RESPONSE_COMMAND_REPLY,
+          this.storage.playerMainConnectionList.get(playerId),
+          `The vote isn't counted. Only winners can vote, please try harder.`
+        );
+        return;
+      }
     }
 
     if (this.votes.has(playerToMuteId)) {
