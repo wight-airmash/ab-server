@@ -480,7 +480,7 @@ const config: GameServerConfigInterface = {
      * To use /votemute player score must be in the top N-tile of all players.
      * To use /votemute player must play (not spectate, not stay) at least this time duration.
      */
-    votemutePercentile: floatValue(process.env.CHAT_MIN_PLAYER_SCORE_TO_VOTEMUTE, 0.0),
+    votemutePercentile: floatValue(process.env.CHAT_MIN_PLAYER_SCORE_TO_VOTEMUTE, 0),
     votemuteDuration: intValue(process.env.CHAT_MIN_PLAYER_PLAYTIME_TO_VOTEMUTE, 60) * MS_PER_SEC,
   },
 

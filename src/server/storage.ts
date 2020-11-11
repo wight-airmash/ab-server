@@ -289,19 +289,6 @@ export class GameStorage {
   public playerRankings: RankingsStorage = {
     outdated: false,
     byBounty: [],
-
-    /**
-     * scoreAtNtile returns the score at the Nth percentile from the byBounty array.
-     */
-    scoreAtPercentile: n => {
-      const idx = Math.round(this.playerRankings.byBounty.length * (1 - n) - 1);
-
-      if (idx < this.playerRankings.byBounty.length && idx > 0) {
-        return this.playerRankings.byBounty[idx].score;
-      }
-
-      return -1;
-    },
   };
 
   public gameModeAPIResponse = '';

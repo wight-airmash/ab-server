@@ -305,7 +305,6 @@ export interface BountyRankingItem {
 export interface RankingsStorage {
   outdated: boolean;
   byBounty: BountyRankingItem[];
-  scoreAtPercentile(n: number): number;
 }
 
 export interface CTFLeadersStorage {

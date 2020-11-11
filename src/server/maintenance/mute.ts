@@ -71,12 +71,8 @@ export default class GameMute extends System {
      * A player must have a score in the Nth percentile of all human players.
      * Only run the check when votemutePercentile is configured.
      */
-    if (this.config.chat.votemutePercentile > 0.0) {
-      const scoreToBeat = this.storage.playerRankings.scoreAtPercentile(
-        this.config.chat.votemutePercentile
-      );
-
-      if (player.score.current <= scoreToBeat) {
+    if (this.config.chat.votemutePercentile > 0) {
+      if (player.score.current <= this.minScoreToVote()) {
         this.emit(
           RESPONSE_COMMAND_REPLY,
           this.storage.playerMainConnectionList.get(playerId),
@@ -247,5 +243,20 @@ export default class GameMute extends System {
       player.times.unmuteTime = expired;
       connectionId = connectionsIterator.next().value;
     }
+  }
+
+  /**
+   * Returns the score at the Nth percentile from the byBounty array.
+   */
+  private minScoreToVote(): number {
+    const idx = Math.round(
+      this.storage.playerRankings.byBounty.length * (1 - this.config.chat.votemutePercentile) - 1
+    );
+
+    if (idx < this.storage.playerRankings.byBounty.length && idx > 0) {
+      return this.storage.playerRankings.byBounty[idx].score;
+    }
+
+    return -1;
   }
 }
