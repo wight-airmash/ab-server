@@ -1,5 +1,11 @@
 ## Future version (unversioned)
 
+## 6.2.0 (November 11, 2020)
+
+Features:
+
+- Votemute config to prevent abuse ([#115](https://github.com/wight-airmash/ab-server/pull/115)). See [CHAT_MIN_PLAYER_SCORE_TO_VOTEMUTE](./docs/env-variables.md#chat_min_player_score_to_votemute) and [CHAT_MIN_PLAYER_PLAYTIME_TO_VOTEMUTE](./docs/env-variables.md#chat_min_player_playtime_to_votemute).
+
 ## 6.1.0 (October 21, 2020)
 
 Features:
