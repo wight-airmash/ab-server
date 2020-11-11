@@ -1,7 +1,6 @@
 import { mkdirSync, readFileSync } from 'fs';
 import { dirname, isAbsolute, resolve } from 'path';
 import { FLAGS_ISO_TO_CODE, GAME_TYPES } from '@airbattle/protocol';
-import { MS_PER_SEC } from '../constants'
 import dotenv from 'dotenv';
 import {
   AUTH_LOGIN_SERVER_KEY_URL,
@@ -22,6 +21,7 @@ import {
   LIMITS_KEY,
   METRICS_LOG_INTERVAL_SEC,
   METRICS_LOG_SAMPLES,
+  MS_PER_SEC,
   PLAYERS_ALLOW_NON_ASCII_USERNAMES,
   PLAYERS_KILL_ASSISTS,
   POWERUPS_SPAWN_CHANCE,
@@ -144,7 +144,7 @@ export interface GameServerConfigInterface {
   chat: {
     votemutePercentile: number;
     votemuteDuration: number;
-  }
+  };
 
   logs: {
     level: string;

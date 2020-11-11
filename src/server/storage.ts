@@ -25,11 +25,11 @@ import {
   RankingsStorage,
   Repel,
   SpawnZones,
+  SyncStorage,
   TeamId,
   UnmuteTime,
   UsersStorage,
   Viewports,
-  SyncStorage,
 } from '../types';
 
 export class GameStorage {
@@ -293,13 +293,15 @@ export class GameStorage {
     /**
      * scoreAtNtile returns the score at the Nth percentile from the byBounty array.
      */
-    scoreAtPercentile: (n) => {
-      let idx = Math.round((this.playerRankings.byBounty.length * (1-n)) - 1) 
+    scoreAtPercentile: n => {
+      const idx = Math.round(this.playerRankings.byBounty.length * (1 - n) - 1);
+
       if (idx < this.playerRankings.byBounty.length && idx > 0) {
         return this.playerRankings.byBounty[idx].score;
       }
-      return -1
-    }
+
+      return -1;
+    },
   };
 
   public gameModeAPIResponse = '';
