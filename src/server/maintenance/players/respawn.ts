@@ -7,6 +7,7 @@ import {
   PLAYERS_RESPAWN_INACTIVITY_MS,
   PLAYERS_SPAWN_SHIELD_DURATION_MS,
   SHIPS_TYPES,
+  UPGRADES_ACTION_TYPE,
 } from '../../../constants';
 import {
   BROADCAST_PLAYER_RESPAWN,
@@ -21,6 +22,7 @@ import {
   PLAYERS_SET_SHIP_TYPE,
   PLAYERS_UPGRADES_RESET,
   RESPONSE_SPECTATE_KILL,
+  RESPONSE_PLAYER_UPGRADE,
   VIEWPORTS_UPDATE_POSITION,
 } from '../../../events';
 import { CHANNEL_RESPAWN_PLAYER } from '../../../events/channels';
@@ -137,6 +139,7 @@ export default class GamePlayersRespawn extends System {
       player.inferno.current = false;
       player.inferno.endTime = 0;
 
+
       const hitbox = this.storage.shipHitboxesCache[shipType][player.rotation.low];
 
       player.hitbox.width = hitbox.width;
@@ -174,6 +177,22 @@ export default class GamePlayersRespawn extends System {
 
       this.emit(BROADCAST_PLAYER_RESPAWN, player.id.current);
       this.emit(PLAYERS_APPLY_SHIELD, player.id.current, PLAYERS_SPAWN_SHIELD_DURATION_MS);
+
+      /**
+       * Check for upgrades fever and apply
+       */
+      if (this.config.upgrades.fever) {
+        let lvl = 5
+        if (player.bot.current) {
+          lvl = 3
+        }
+
+        player.upgrades.speed = lvl;
+        player.upgrades.defense = lvl;
+        player.upgrades.energy = lvl;
+        player.upgrades.missile = lvl;
+        this.emit(RESPONSE_PLAYER_UPGRADE, playerId, UPGRADES_ACTION_TYPE.LOST);
+      }
 
       /**
        * No spectating anymore.

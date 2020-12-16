@@ -290,6 +290,11 @@ export interface GameServerConfigInterface {
      * Set min = 0 and max = 0 to disable upgrades drop.
      */
     maxChance: number;
+
+    /**
+     * Fever indicates all users respawn with full boosts
+     */
+    fever: boolean;
   };
 
   /**
@@ -571,6 +576,7 @@ const config: GameServerConfigInterface = {
   upgrades: {
     minChance: floatValue(process.env.UPGRADES_DROP_MIN_CHANCE, UPGRADES_DEFAULT_MIN_CHANCE),
     maxChance: floatValue(process.env.UPGRADES_DROP_MAX_CHANCE, UPGRADES_DEFAULT_MAX_CHANCE),
+    fever: false,
   },
 
   visibleTeamProwlers: boolValue(
