@@ -32,6 +32,7 @@ import { numberToHumanReadable } from '../../support/numbers';
 import { has } from '../../support/objects';
 import { ConnectionId, ConnectionMeta, MainConnectionId, PlayerId } from '../../types';
 import { System } from '../system';
+import { applyUpgradeFever } from '../maintenance/players/upgrades'
 
 export default class ServerCommandHandler extends System {
   private cfg: GameServerConfigInterface;
@@ -775,19 +776,7 @@ export default class ServerCommandHandler extends System {
           return;
         }
 
-        let v = this.config.upgrades.fever ? player.bot.current ? 3 : 5 : 0;
-        if (v !== 0) {
-          player.upgrades.amount = player.upgrades.amount + 
-            player.upgrades.speed +
-            player.upgrades.defense +
-            player.upgrades.energy +
-            player.upgrades.missile
-        }
-
-        player.upgrades.speed = v;
-        player.upgrades.defense = v;
-        player.upgrades.energy = v;
-        player.upgrades.missile = v;
+        applyUpgradeFever(player, this.config.upgrades.fever)
         this.emit(RESPONSE_PLAYER_UPGRADE, player.id.current, UPGRADES_ACTION_TYPE.LOST);
       })
     }

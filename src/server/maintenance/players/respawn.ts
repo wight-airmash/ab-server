@@ -28,6 +28,7 @@ import {
 import { CHANNEL_RESPAWN_PLAYER } from '../../../events/channels';
 import { PlayerId } from '../../../types';
 import { System } from '../../system';
+import { applyUpgradeFever }from './upgrades';
 
 export default class GamePlayersRespawn extends System {
   constructor({ app }) {
@@ -181,18 +182,8 @@ export default class GamePlayersRespawn extends System {
       /**
        * Check for upgrades fever and apply
        */
-      if (this.config.upgrades.fever) {
-        let lvl = 5
-        if (player.bot.current) {
-          lvl = 3
-        }
-
-        player.upgrades.speed = lvl;
-        player.upgrades.defense = lvl;
-        player.upgrades.energy = lvl;
-        player.upgrades.missile = lvl;
-        this.emit(RESPONSE_PLAYER_UPGRADE, playerId, UPGRADES_ACTION_TYPE.LOST);
-      }
+      applyUpgradeFever(player, this.config.upgrades.fever)
+      this.emit(RESPONSE_PLAYER_UPGRADE, player.id.current, UPGRADES_ACTION_TYPE.LOST);
 
       /**
        * No spectating anymore.
