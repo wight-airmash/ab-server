@@ -264,3 +264,7 @@ Remove a message by the index from [/server welcome list](#server-welcome-list) 
 ### /server welcome flush
 
 Remove all the welcome messages from the list.
+
+### /server spawn <zone>
+
+Set an alternative spawn zone for FFA.  Valid zones are `europe`, `canada`, `latam`, and `asia`. 

@@ -321,6 +321,16 @@ export interface GameServerConfigInterface {
     randomBaseShieldInterval: number;
   };
 
+  ffa: {
+    /**
+     * Support alternative spawn zones at runtime.
+     * The provided string maps to an enumerated set of valid ffa spawn zones.
+     * If the string matches an available spawn zones, spawn events will take place in that zone.
+     * Otherwise, they will occur in the default EU spawn zone.
+     */
+    spawnZoneName: string; 
+  };
+
   bots: {
     /**
      * Enable or disable allowed IP list.
@@ -604,6 +614,10 @@ const config: GameServerConfigInterface = {
       process.env.CTF_BASE_SHIELD_RANDOM_INTERVAL,
       CTF_BASE_SHIELD_RANDOM_INTERVAL_SEC
     ),
+  },
+
+  ffa: {
+    spawnZoneName: strValue(process.env.FFA_SPAWN_ZONE_NAME, "europe"),
   },
 };
 

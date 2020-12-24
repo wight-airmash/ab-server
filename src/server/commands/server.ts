@@ -3,6 +3,7 @@ import {
   BYTES_PER_KB,
   CHAT_SUPERUSER_MUTE_TIME_MS,
   CONNECTIONS_SUPERUSER_BAN_MS,
+  FFA_VALID_SPAWN_ZONES,
   LIMITS_DEBUG,
   LIMITS_DEBUG_WEIGHT,
   SECONDS_PER_DAY,
@@ -899,6 +900,26 @@ export default class ServerCommandHandler extends System {
     }
   }
 
+
+  /**
+   * /server spawn [value]
+   *
+   * @param playerId
+   * @param command
+   */
+  private handleSpawnZoneSelection(playerId: PlayerId, command: string): void {
+    const zone = command.substring('spawn '.length);
+
+    if (FFA_VALID_SPAWN_ZONES[zone] !== undefined) {
+      this.cfg.ffa.spawnZoneName = zone
+      this.emit(BROADCAST_CHAT_SERVER_WHISPER, playerId, 'Spawn zone changed to "' + zone + '".');
+    } else {
+      this.emit(BROADCAST_CHAT_SERVER_WHISPER, playerId, 'Spawn zone "' + zone + '" not found in list of eligible zones.');
+    }
+  }
+
+  
+
   /**
    * "/server" command handler.
    *
@@ -1064,6 +1085,12 @@ export default class ServerCommandHandler extends System {
 
       if (command.indexOf('upgrades') === 0) {
         this.handleUpgradesSetupCommand(connectionId, playerId, command);
+
+        return;
+      }
+
+      if (command.indexOf('spawn') === 0) {
+        this.handleSpawnZoneSelection(playerId, command);
 
         return;
       }
