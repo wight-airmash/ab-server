@@ -1,4 +1,4 @@
-import { FFA_SPAWN_RUSSIA, FFA_VALID_SPAWN_ZONES, SHIPS_ENCLOSE_RADIUS } from '../../../constants';
+import { FFA_VALID_SPAWN_ZONES, SHIPS_ENCLOSE_RADIUS } from '../../../constants';
 import { PLAYERS_ASSIGN_SPAWN_POSITION } from '../../../events';
 import { System } from '../../../server/system';
 import { getRandomInt } from '../../../support/numbers';

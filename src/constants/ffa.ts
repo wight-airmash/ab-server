@@ -22,7 +22,7 @@ export const FFA_SPAWN_LATAM: SpawnZone = {
   MAX_Y: -512 * -13,
 }
 
-export const FFA_SPAWN_RUSSIA: SpawnZone = {
+export const FFA_SPAWN_ASIA: SpawnZone = {
   MIN_X: -512 * -8,
   MAX_X: -512 * -16,
   MIN_Y: -512 * 6,
