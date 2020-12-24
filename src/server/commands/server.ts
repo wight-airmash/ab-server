@@ -9,6 +9,7 @@ import {
   SECONDS_PER_HOUR,
   SECONDS_PER_MINUTE,
   SERVER_MIN_SERVICE_MOB_ID,
+  UPGRADES_ACTION_TYPE,
 } from '../../constants';
 import {
   BROADCAST_CHAT_SERVER_PUBLIC,
@@ -23,6 +24,7 @@ import {
   PLAYERS_KICK,
   POWERUPS_UPDATE_CONFIG,
   RESPONSE_COMMAND_REPLY,
+  RESPONSE_PLAYER_UPGRADE,
 } from '../../events';
 import { Metrics } from '../../logger/metrics';
 import { msToHumanReadable } from '../../support/datetime';
@@ -30,6 +32,7 @@ import { numberToHumanReadable } from '../../support/numbers';
 import { has } from '../../support/objects';
 import { ConnectionId, ConnectionMeta, MainConnectionId, PlayerId } from '../../types';
 import { System } from '../system';
+import { applyUpgradeFever } from '../maintenance/players/upgrades'
 
 export default class ServerCommandHandler extends System {
   private cfg: GameServerConfigInterface;
@@ -754,6 +757,30 @@ export default class ServerCommandHandler extends System {
     playerId: PlayerId,
     command: string
   ): void {
+
+    /**
+     * upgrades fever starts an upgrade fever event. The duration is indefinite. 
+     * 
+     * When the event begins, each player's current upgrades are tallied and stored,
+     * then their upgrades are all set to 5. Bots get set to 3. There is an additional
+     * check in respawn.js to set upgrades to 5 when fever is ongoing. 
+     * 
+     */
+    if (command.indexOf('upgrades fever') === 0) {
+      let verb = this.config.upgrades.fever ? 'ended' : 'started'
+      this.config.upgrades.fever = !this.config.upgrades.fever
+      this.emit(BROADCAST_CHAT_SERVER_PUBLIC, 'Upgrades fever ' + verb)
+
+      this.storage.playerList.forEach((player) => {
+        if (!this.helpers.isPlayerConnected(player.id.current)) {
+          return;
+        }
+
+        applyUpgradeFever(player, this.config.upgrades.fever)
+        this.emit(RESPONSE_PLAYER_UPGRADE, player.id.current, UPGRADES_ACTION_TYPE.LOST);
+      })
+    }
+
     if (command.indexOf('upgrades min') === 0 && command.length > 13) {
       const value = parseFloat(command.substring(13));
 
