@@ -180,9 +180,9 @@ export default class GamePlayersRespawn extends System {
       this.emit(PLAYERS_APPLY_SHIELD, player.id.current, PLAYERS_SPAWN_SHIELD_DURATION_MS);
 
       /**
-       * Check for upgrades fever and apply
+       * Check for upgrades fever and apply.
        */
-      applyUpgradeFever(player, this.config.upgrades.fever)
+      applyUpgradeFever(player, this.config.upgrades.fever, false)
       this.emit(RESPONSE_PLAYER_UPGRADE, player.id.current, UPGRADES_ACTION_TYPE.LOST);
 
       /**

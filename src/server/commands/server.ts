@@ -777,7 +777,7 @@ export default class ServerCommandHandler extends System {
           return;
         }
 
-        applyUpgradeFever(player, this.config.upgrades.fever)
+        applyUpgradeFever(player, this.config.upgrades.fever, true)
         this.emit(RESPONSE_PLAYER_UPGRADE, player.id.current, UPGRADES_ACTION_TYPE.LOST);
       })
     }
