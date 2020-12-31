@@ -1,4 +1,4 @@
-import { SHIPS_ENCLOSE_RADIUS } from '../../../constants';
+import { FFA_VALID_SPAWN_ZONES, SHIPS_ENCLOSE_RADIUS } from '../../../constants';
 import { PLAYERS_ASSIGN_SPAWN_POSITION } from '../../../events';
 import { System } from '../../../server/system';
 import { getRandomInt } from '../../../support/numbers';
@@ -19,9 +19,12 @@ export default class GamePlayers extends System {
     let r = 0;
 
     /**
-     * FFA has only one spawn zone at index 0.
+     * FFA support spawn zone selection.  Zones are defined in constants/ffa.ts.  
+     * A zone can be input by the administrator via the environment, or changed at runtime via a server command.
      */
-    const spawnZones = this.storage.spawnZoneSet.get(0).get(player.planetype.current);
+    let zone = this.config.ffa.spawnZoneName
+    let zoneIndex = FFA_VALID_SPAWN_ZONES[zone] || 0
+    let spawnZones = this.storage.spawnZoneSet.get(zoneIndex).get(player.planetype.current);
 
     [x, y] = spawnZones.get(getRandomInt(0, spawnZones.size - 1));
     r = SHIPS_ENCLOSE_RADIUS[player.planetype.current] / 2;

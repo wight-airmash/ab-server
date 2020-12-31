@@ -490,7 +490,7 @@ export default class GamePlayersConnect extends System {
         }were recovered after disconnection.`
       );
     }
-    applyUpgradeFever(player, this.config.upgrades.fever)
+    applyUpgradeFever(player, this.config.upgrades.fever, false)
     if (this.config.upgrades.fever) {
       this.emit(
         BROADCAST_CHAT_SERVER_WHISPER,

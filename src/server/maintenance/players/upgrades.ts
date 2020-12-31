@@ -24,31 +24,35 @@ export default class GameUpgrades extends System {
   }
 }
 
-export function applyUpgradeFever(player: Player, fever: Boolean): void {
+export function applyUpgradeFever(player: Player, fever: Boolean, toggle: Boolean): void {
 
   if (fever) {
-    if (player.bot.current) {
-      // bots get a nerf
-      player.upgrades.speed = 3;
-      player.upgrades.defense = 2;
-      player.upgrades.energy = 3;
-      player.upgrades.missile = 3;
-
-    } else {
+    // if we're toggling this, preserve upgrades.
+    if (toggle) {
       // preserve player upgrades
       player.upgrades.amount = player.upgrades.amount + 
         player.upgrades.speed +
         player.upgrades.defense +
         player.upgrades.energy +
         player.upgrades.missile
+    }
 
-      // full boosts
+    // apply upgrades
+    if (player.bot.current) {
+      player.upgrades.speed = 3;
+      player.upgrades.defense = 2;
+      player.upgrades.energy = 3;
+      player.upgrades.missile = 3;
+
+    } else {
       player.upgrades.speed = 5;
       player.upgrades.defense = 5;
       player.upgrades.energy = 5;
       player.upgrades.missile = 5;
     }
-  } else {
+
+  } else if (toggle) {
+    // only zero out upgrades when they're toggled - no other time!
     player.upgrades.speed = 0;
     player.upgrades.defense = 0;
     player.upgrades.energy = 0;
