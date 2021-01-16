@@ -33,7 +33,7 @@
     "fast-json-stringify": "^2.4.1",
     "maxmind": "^4.3.1",
     "netmask": "^1.0.6",
-    "pino": "^6.10.0",
+    "pino": "^6.11.0",
     "uWebSockets.js": "github:uNetworking/uWebSockets.js#v17.6.0"
   },
   "devDependencies": {
