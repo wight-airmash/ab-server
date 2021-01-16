@@ -331,6 +331,11 @@ export interface GameServerConfigInterface {
      * Otherwise, they will occur in the default EU spawn zone.
      */
     spawnZoneName: string;
+
+    /**
+     * Add periodic CTF-like base infernos.
+     */
+    baseInfernos: boolean;
   };
 
   bots: {
@@ -620,6 +625,7 @@ const config: GameServerConfigInterface = {
 
   ffa: {
     spawnZoneName: strValue(process.env.FFA_SPAWN_ZONE_NAME, FFA_DEFAULT_SPAWN_ZONE),
+    baseInfernos: boolValue(process.env.CTF_BASE_INFERNOS, false),
   },
 };
 

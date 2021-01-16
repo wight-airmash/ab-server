@@ -23,27 +23,31 @@ export default class InfernosPeriodic extends System {
         posY: -2800,
         type: MOB_TYPES.INFERNO,
       } as PeriodicPowerupTemplate,
-
-      /**
-       * Blue base inferno.
-       */
-      {
-        interval: 105,
-        posX: -7440,
-        posY: -1360,
-        type: MOB_TYPES.INFERNO,
-      } as PeriodicPowerupTemplate,
-
-      /**
-       * Red base inferno.
-       */
-      {
-        interval: 105,
-        posX: 6565,
-        posY: -935,
-        type: MOB_TYPES.INFERNO,
-      } as PeriodicPowerupTemplate,
     ]);
+
+    if (this.config.ffa.baseInfernos) {
+      this.emit(POWERUPS_ADD_PERIODIC, [
+        /**
+         * Blue base inferno.
+         */
+        {
+          interval: 105,
+          posX: -7440,
+          posY: -1360,
+          type: MOB_TYPES.INFERNO,
+        } as PeriodicPowerupTemplate,
+
+        /**
+         * Red base inferno.
+         */
+        {
+          interval: 105,
+          posX: 6565,
+          posY: -935,
+          type: MOB_TYPES.INFERNO,
+        } as PeriodicPowerupTemplate,
+      ]);
+    }
 
     this.log.debug('Periodic infernos loaded.');
   }
