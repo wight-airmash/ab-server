@@ -19,12 +19,12 @@ export default class GamePlayers extends System {
     let r = 0;
 
     /**
-     * FFA support spawn zone selection.  Zones are defined in constants/ffa.ts.  
+     * FFA support spawn zone selection.  Zones are defined in constants/ffa.ts.
      * A zone can be input by the administrator via the environment, or changed at runtime via a server command.
      */
-    let zone = this.config.ffa.spawnZoneName
-    let zoneIndex = FFA_VALID_SPAWN_ZONES[zone] || 0
-    let spawnZones = this.storage.spawnZoneSet.get(zoneIndex).get(player.planetype.current);
+    const zone = this.config.ffa.spawnZoneName;
+    const zoneIndex = FFA_VALID_SPAWN_ZONES[zone] || 0;
+    const spawnZones = this.storage.spawnZoneSet.get(zoneIndex).get(player.planetype.current);
 
     [x, y] = spawnZones.get(getRandomInt(0, spawnZones.size - 1));
     r = SHIPS_ENCLOSE_RADIUS[player.planetype.current] / 2;

@@ -1,6 +1,6 @@
 import { UPGRADES_ACTION_TYPE } from '../../../constants';
 import { PLAYERS_UPGRADES_RESET, RESPONSE_PLAYER_UPGRADE } from '../../../events';
-import { PlayerId, Player } from '../../../types';
+import { Player, PlayerId } from '../../../types';
 import { System } from '../../system';
 
 export default class GameUpgrades extends System {
@@ -25,16 +25,16 @@ export default class GameUpgrades extends System {
 }
 
 export function applyUpgradeFever(player: Player, fever: Boolean, toggle: Boolean): void {
-
   if (fever) {
     // if we're toggling this, preserve upgrades.
     if (toggle) {
       // preserve player upgrades
-      player.upgrades.amount = player.upgrades.amount + 
+      player.upgrades.amount =
+        player.upgrades.amount +
         player.upgrades.speed +
         player.upgrades.defense +
         player.upgrades.energy +
-        player.upgrades.missile
+        player.upgrades.missile;
     }
 
     // apply upgrades
@@ -43,14 +43,12 @@ export function applyUpgradeFever(player: Player, fever: Boolean, toggle: Boolea
       player.upgrades.defense = 2;
       player.upgrades.energy = 3;
       player.upgrades.missile = 3;
-
     } else {
       player.upgrades.speed = 5;
       player.upgrades.defense = 5;
       player.upgrades.energy = 5;
       player.upgrades.missile = 5;
     }
-
   } else if (toggle) {
     // only zero out upgrades when they're toggled - no other time!
     player.upgrades.speed = 0;
@@ -59,4 +57,3 @@ export function applyUpgradeFever(player: Player, fever: Boolean, toggle: Boolea
     player.upgrades.missile = 0;
   }
 }
-

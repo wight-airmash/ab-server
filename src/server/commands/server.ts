@@ -32,8 +32,8 @@ import { msToHumanReadable } from '../../support/datetime';
 import { numberToHumanReadable } from '../../support/numbers';
 import { has } from '../../support/objects';
 import { ConnectionId, ConnectionMeta, MainConnectionId, PlayerId } from '../../types';
+import { applyUpgradeFever } from '../maintenance/players/upgrades';
 import { System } from '../system';
-import { applyUpgradeFever } from '../maintenance/players/upgrades'
 
 export default class ServerCommandHandler extends System {
   private cfg: GameServerConfigInterface;
@@ -758,28 +758,28 @@ export default class ServerCommandHandler extends System {
     playerId: PlayerId,
     command: string
   ): void {
-
     /**
-     * upgrades fever starts an upgrade fever event. The duration is indefinite. 
-     * 
+     * upgrades fever starts an upgrade fever event. The duration is indefinite.
+     *
      * When the event begins, each player's current upgrades are tallied and stored,
      * then their upgrades are all set to 5. Bots get set to 3. There is an additional
-     * check in respawn.js to set upgrades to 5 when fever is ongoing. 
-     * 
+     * check in respawn.js to set upgrades to 5 when fever is ongoing.
+     *
      */
     if (command.indexOf('upgrades fever') === 0) {
-      let verb = this.config.upgrades.fever ? 'ended' : 'started'
-      this.config.upgrades.fever = !this.config.upgrades.fever
-      this.emit(BROADCAST_CHAT_SERVER_PUBLIC, 'Upgrades fever ' + verb)
+      const verb = this.config.upgrades.fever ? 'ended' : 'started';
 
-      this.storage.playerList.forEach((player) => {
+      this.config.upgrades.fever = !this.config.upgrades.fever;
+      this.emit(BROADCAST_CHAT_SERVER_PUBLIC, `Upgrades fever ${verb}`);
+
+      this.storage.playerList.forEach(player => {
         if (!this.helpers.isPlayerConnected(player.id.current)) {
           return;
         }
 
-        applyUpgradeFever(player, this.config.upgrades.fever, true)
+        applyUpgradeFever(player, this.config.upgrades.fever, true);
         this.emit(RESPONSE_PLAYER_UPGRADE, player.id.current, UPGRADES_ACTION_TYPE.LOST);
-      })
+      });
     }
 
     if (command.indexOf('upgrades min') === 0 && command.length > 13) {
@@ -900,7 +900,6 @@ export default class ServerCommandHandler extends System {
     }
   }
 
-
   /**
    * /server spawn [value]
    *
@@ -911,14 +910,16 @@ export default class ServerCommandHandler extends System {
     const zone = command.substring('spawn '.length);
 
     if (FFA_VALID_SPAWN_ZONES[zone] !== undefined) {
-      this.cfg.ffa.spawnZoneName = zone
-      this.emit(BROADCAST_CHAT_SERVER_WHISPER, playerId, 'Spawn zone changed to "' + zone + '".');
+      this.cfg.ffa.spawnZoneName = zone;
+      this.emit(BROADCAST_CHAT_SERVER_WHISPER, playerId, `Spawn zone changed to "${zone}".`);
     } else {
-      this.emit(BROADCAST_CHAT_SERVER_WHISPER, playerId, 'Spawn zone "' + zone + '" not found in list of eligible zones.');
+      this.emit(
+        BROADCAST_CHAT_SERVER_WHISPER,
+        playerId,
+        `Spawn zone "${zone}" not found in list of eligible zones.`
+      );
     }
   }
-
-  
 
   /**
    * "/server" command handler.

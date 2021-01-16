@@ -1,7 +1,7 @@
 import { GAME_TYPES } from '@airbattle/protocol';
 import { SpawnZonesTemplate } from '../types';
 import { BTR_SPAWN_MATCH_START, BTR_SPAWN_WAITING } from './btr';
-import { FFA_SPAWN_EUROPE, FFA_SPAWN_CANADA, FFA_SPAWN_LATAM, FFA_SPAWN_ASIA } from './ffa';
+import { FFA_SPAWN_ASIA, FFA_SPAWN_CANADA, FFA_SPAWN_EUROPE, FFA_SPAWN_LATAM } from './ffa';
 
 /**
  * CTF has a custom spawn system. See `CTF_PLAYERS_SPAWN_ZONES`.

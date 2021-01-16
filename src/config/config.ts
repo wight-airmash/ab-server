@@ -328,7 +328,7 @@ export interface GameServerConfigInterface {
      * If the string matches an available spawn zones, spawn events will take place in that zone.
      * Otherwise, they will occur in the default EU spawn zone.
      */
-    spawnZoneName: string; 
+    spawnZoneName: string;
   };
 
   bots: {
@@ -617,7 +617,7 @@ const config: GameServerConfigInterface = {
   },
 
   ffa: {
-    spawnZoneName: strValue(process.env.FFA_SPAWN_ZONE_NAME, "europe"),
+    spawnZoneName: strValue(process.env.FFA_SPAWN_ZONE_NAME, 'europe'),
   },
 };
 

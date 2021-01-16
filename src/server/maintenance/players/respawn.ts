@@ -21,14 +21,14 @@ import {
   PLAYERS_RESPAWNED,
   PLAYERS_SET_SHIP_TYPE,
   PLAYERS_UPGRADES_RESET,
-  RESPONSE_SPECTATE_KILL,
   RESPONSE_PLAYER_UPGRADE,
+  RESPONSE_SPECTATE_KILL,
   VIEWPORTS_UPDATE_POSITION,
 } from '../../../events';
 import { CHANNEL_RESPAWN_PLAYER } from '../../../events/channels';
 import { PlayerId } from '../../../types';
 import { System } from '../../system';
-import { applyUpgradeFever }from './upgrades';
+import { applyUpgradeFever } from './upgrades';
 
 export default class GamePlayersRespawn extends System {
   constructor({ app }) {
@@ -140,7 +140,6 @@ export default class GamePlayersRespawn extends System {
       player.inferno.current = false;
       player.inferno.endTime = 0;
 
-
       const hitbox = this.storage.shipHitboxesCache[shipType][player.rotation.low];
 
       player.hitbox.width = hitbox.width;
@@ -182,7 +181,7 @@ export default class GamePlayersRespawn extends System {
       /**
        * Check for upgrades fever and apply.
        */
-      applyUpgradeFever(player, this.config.upgrades.fever, false)
+      applyUpgradeFever(player, this.config.upgrades.fever, false);
       this.emit(RESPONSE_PLAYER_UPGRADE, player.id.current, UPGRADES_ACTION_TYPE.LOST);
 
       /**
