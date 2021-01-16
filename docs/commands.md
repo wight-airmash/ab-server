@@ -169,6 +169,10 @@ Set the min value of the upgrades drop chance.
 
 Set the max value of the upgrades drop chance.
 
+### /server upgrades fever
+
+Toggle upgrades fever event. If enabled, all the players are constantly full upgraded (5555 pattern) and the bots have 3233 upgrades state pattern.
+
 ### /server powerups chance \<value\>
 
 Set the chance value of the powerups spawn, [0, 1].
@@ -267,4 +271,4 @@ Remove all the welcome messages from the list.
 
 ### /server spawn <zone>
 
-Set an alternative spawn zone for FFA.  Valid zones are `europe`, `canada`, `latam`, and `asia`. 
+Set an alternative spawn zone for FFA.  Valid zones are `europe`, `canada`, `latam`, and `asia`.

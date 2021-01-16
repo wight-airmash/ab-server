@@ -108,9 +108,17 @@ Default: `undefined`
 
 It is preferable to set it `1` in the production, can affect performance. See uWebSockets.js. package repository for more info.
 
+### FFA_BASE_INFERNOS
+
+Default: `false`
+
+Add periodic CTF-like base infernos.
+
 ### FFA_SPAWN_ZONE_NAME
 
-Set an alternative spawn zone for FFA.  Valid zones are `europe`, `canada`, `latam`, and `asia`. 
+Default: `europe`
+
+Set an alternative spawn zone for FFA. Valid zones are `europe`, `canada`, `latam`, and `asia`.
 
 ### HOST
 

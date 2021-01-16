@@ -760,8 +760,7 @@ export default class ServerCommandHandler extends System {
      * upgrades fever starts an upgrade fever event. The duration is indefinite.
      *
      * When the event begins, each player's current upgrades are tallied and stored,
-     * then their upgrades are all set to 5. Bots get set to 3. There is an additional
-     * check in respawn.js to set upgrades to 5 when fever is ongoing.
+     * then their upgrades are all set to 5. Bots get set to 3.
      *
      */
     if (command.indexOf('upgrades fever') === 0) {
