@@ -909,7 +909,7 @@ export default class ServerCommandHandler extends System {
   private handleSpawnZoneSelection(playerId: PlayerId, command: string): void {
     const zone = command.substring('spawn '.length);
 
-    if (FFA_VALID_SPAWN_ZONES[zone] !== undefined) {
+    if (has(FFA_VALID_SPAWN_ZONES, zone)) {
       this.cfg.ffa.spawnZoneName = zone;
       this.emit(BROADCAST_CHAT_SERVER_WHISPER, playerId, `Spawn zone changed to "${zone}".`);
     } else {

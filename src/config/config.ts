@@ -15,6 +15,8 @@ import {
   CONNECTIONS_WEBSOCKETS_COMPRESSION,
   CTF_BASE_SHIELD_RANDOM_INTERVAL_SEC,
   CTF_QBOTS_FEATURES,
+  FFA_DEFAULT_SPAWN_ZONE,
+  FFA_VALID_SPAWN_ZONES,
   LIMITS_ANY,
   LIMITS_CHAT,
   LIMITS_CHAT_DECREASE_WEIGHT,
@@ -617,7 +619,7 @@ const config: GameServerConfigInterface = {
   },
 
   ffa: {
-    spawnZoneName: strValue(process.env.FFA_SPAWN_ZONE_NAME, 'europe'),
+    spawnZoneName: strValue(process.env.FFA_SPAWN_ZONE_NAME, FFA_DEFAULT_SPAWN_ZONE),
   },
 };
 
@@ -643,6 +645,10 @@ if (config.server.bot.name.length === 0 || config.server.bot.name.length > 20) {
 
 if (config.connections.afkDisconnectTimeout === undefined) {
   config.connections.afkDisconnectTimeout = config.server.typeId === GAME_TYPES.BTR ? 10 : 0;
+}
+
+if (!has(FFA_VALID_SPAWN_ZONES, config.ffa.spawnZoneName)) {
+  config.ffa.spawnZoneName = FFA_DEFAULT_SPAWN_ZONE;
 }
 
 mkdirSync(config.server.certs.path, { recursive: true });

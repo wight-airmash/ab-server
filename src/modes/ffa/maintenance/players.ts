@@ -22,8 +22,7 @@ export default class GamePlayers extends System {
      * FFA support spawn zone selection.  Zones are defined in constants/ffa.ts.
      * A zone can be input by the administrator via the environment, or changed at runtime via a server command.
      */
-    const zone = this.config.ffa.spawnZoneName;
-    const zoneIndex = FFA_VALID_SPAWN_ZONES[zone] || 0;
+    const zoneIndex = FFA_VALID_SPAWN_ZONES[this.config.ffa.spawnZoneName];
     const spawnZones = this.storage.spawnZoneSet.get(zoneIndex).get(player.planetype.current);
 
     [x, y] = spawnZones.get(getRandomInt(0, spawnZones.size - 1));

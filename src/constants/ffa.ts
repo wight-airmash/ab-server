@@ -41,3 +41,5 @@ export const FFA_VALID_SPAWN_ZONES = {
   latam: 2,
   asia: 3,
 };
+
+export const FFA_DEFAULT_SPAWN_ZONE = 'europe';
