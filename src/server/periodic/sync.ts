@@ -31,8 +31,10 @@ export default class SyncUpdatePeriodic extends System {
 
       /**
        * Updates waiting for sequence id.
+       *
+       * Process one update each tick.
        */
-      while (sync.updatesAwaitingSequenceId.length > 0) {
+      if (sync.updatesAwaitingSequenceId.length > 0) {
         const sequence = sync.nextSequenceId;
         const update = sync.updatesAwaitingSequenceId[0];
 
@@ -59,8 +61,12 @@ export default class SyncUpdatePeriodic extends System {
 
       /**
        * Updates waiting for send.
+       *
+       * Send one update each tick.
        */
-      sync.updatesAwaitingSend.forEach((update, sequence) => {
+      if (sync.updatesAwaitingSend.size > 0) {
+        const [sequence, update] = sync.updatesAwaitingSend.entries().next().value;
+
         this.log.debug('Sending sync update %d: %o', sequence, update);
 
         /**
@@ -98,7 +104,7 @@ export default class SyncUpdatePeriodic extends System {
          * Changes made to saveable sync state.
          */
         hasChanges = true;
-      });
+      }
 
       sync.hasChanges = sync.hasChanges || hasChanges;
     }
