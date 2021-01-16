@@ -625,7 +625,7 @@ const config: GameServerConfigInterface = {
 
   ffa: {
     spawnZoneName: strValue(process.env.FFA_SPAWN_ZONE_NAME, FFA_DEFAULT_SPAWN_ZONE),
-    baseInfernos: boolValue(process.env.CTF_BASE_INFERNOS, false),
+    baseInfernos: boolValue(process.env.FFA_BASE_INFERNOS, false),
   },
 };
 
