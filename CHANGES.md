@@ -1,12 +1,16 @@
 ## Future version (unversioned)
 
-## 6.3.0 (January 16, 2021)
+## 6.3.1 (January 16, 2021)
 
 Features:
 
 - Upgrades fever event ([#116](https://github.com/wight-airmash/ab-server/pull/116)). See [`/server upgrades fever`](./docs/commands.md#server_upgrades_fever) command.
 - FFA alternative spawn zones ([#117](https://github.com/wight-airmash/ab-server/pull/117)). See [FFA_SPAWN_ZONE_NAME](./docs/env-variables.md#ffa_spawn_zone_name) and [`/server spawn <zone>`](./docs/commands.md#server_spawn_zone) command.
 - Optional periodic CTF-like base infernos in FFA (in addition to the new spawn zones). See [FFA_BASE_INFERNOS](./docs/env-variables.md#ffa_base_infernos).
+
+Improvements:
+
+- Rate limits for assigning sequence ids and sending sync updates ([#119](https://github.com/wight-airmash/ab-server/pull/119)).
 
 ## 6.2.0 (November 11, 2020)
 
