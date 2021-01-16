@@ -10,7 +10,6 @@ import {
   SECONDS_PER_HOUR,
   SECONDS_PER_MINUTE,
   SERVER_MIN_SERVICE_MOB_ID,
-  UPGRADES_ACTION_TYPE,
 } from '../../constants';
 import {
   BROADCAST_CHAT_SERVER_PUBLIC,
@@ -23,16 +22,15 @@ import {
   CONNECTIONS_KICK,
   CONNECTIONS_UNBAN_IP,
   PLAYERS_KICK,
+  PLAYERS_UPGRADES_TOGGLE_FEVER,
   POWERUPS_UPDATE_CONFIG,
   RESPONSE_COMMAND_REPLY,
-  RESPONSE_PLAYER_UPGRADE,
 } from '../../events';
 import { Metrics } from '../../logger/metrics';
 import { msToHumanReadable } from '../../support/datetime';
 import { numberToHumanReadable } from '../../support/numbers';
 import { has } from '../../support/objects';
 import { ConnectionId, ConnectionMeta, MainConnectionId, PlayerId } from '../../types';
-import { applyUpgradeFever } from '../maintenance/players/upgrades';
 import { System } from '../system';
 
 export default class ServerCommandHandler extends System {
@@ -769,17 +767,8 @@ export default class ServerCommandHandler extends System {
     if (command.indexOf('upgrades fever') === 0) {
       const verb = this.config.upgrades.fever ? 'ended' : 'started';
 
-      this.config.upgrades.fever = !this.config.upgrades.fever;
+      this.emit(PLAYERS_UPGRADES_TOGGLE_FEVER);
       this.emit(BROADCAST_CHAT_SERVER_PUBLIC, `Upgrades fever ${verb}`);
-
-      this.storage.playerList.forEach(player => {
-        if (!this.helpers.isPlayerConnected(player.id.current)) {
-          return;
-        }
-
-        applyUpgradeFever(player, this.config.upgrades.fever, true);
-        this.emit(RESPONSE_PLAYER_UPGRADE, player.id.current, UPGRADES_ACTION_TYPE.LOST);
-      });
     }
 
     if (command.indexOf('upgrades min') === 0 && command.length > 13) {

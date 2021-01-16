@@ -7,7 +7,6 @@ import {
   PLAYERS_RESPAWN_INACTIVITY_MS,
   PLAYERS_SPAWN_SHIELD_DURATION_MS,
   SHIPS_TYPES,
-  UPGRADES_ACTION_TYPE,
 } from '../../../constants';
 import {
   BROADCAST_PLAYER_RESPAWN,
@@ -21,14 +20,12 @@ import {
   PLAYERS_RESPAWNED,
   PLAYERS_SET_SHIP_TYPE,
   PLAYERS_UPGRADES_RESET,
-  RESPONSE_PLAYER_UPGRADE,
   RESPONSE_SPECTATE_KILL,
   VIEWPORTS_UPDATE_POSITION,
 } from '../../../events';
 import { CHANNEL_RESPAWN_PLAYER } from '../../../events/channels';
 import { PlayerId } from '../../../types';
 import { System } from '../../system';
-import { applyUpgradeFever } from './upgrades';
 
 export default class GamePlayersRespawn extends System {
   constructor({ app }) {
@@ -177,12 +174,6 @@ export default class GamePlayersRespawn extends System {
 
       this.emit(BROADCAST_PLAYER_RESPAWN, player.id.current);
       this.emit(PLAYERS_APPLY_SHIELD, player.id.current, PLAYERS_SPAWN_SHIELD_DURATION_MS);
-
-      /**
-       * Check for upgrades fever and apply.
-       */
-      applyUpgradeFever(player, this.config.upgrades.fever, false);
-      this.emit(RESPONSE_PLAYER_UPGRADE, player.id.current, UPGRADES_ACTION_TYPE.LOST);
 
       /**
        * No spectating anymore.

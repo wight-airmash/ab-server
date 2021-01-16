@@ -92,7 +92,6 @@ import Velocity from '../../components/velocity';
 import Wins from '../../components/wins';
 import Entity from '../../entity';
 import { System } from '../../system';
-import { applyUpgradeFever } from './upgrades';
 
 export default class GamePlayersConnect extends System {
   private framesPassedSinceLogin = 0;
@@ -250,7 +249,7 @@ export default class GamePlayersConnect extends System {
       player.level.current = convertEarningsToLevel(user.lifetimestats.earnings);
     }
 
-    this.log.info('Player fucktarded: %o', {
+    this.log.info('Player connected: %o', {
       playerId,
       name: uniqueName,
       ip: player.ip.current,
@@ -489,14 +488,6 @@ export default class GamePlayersConnect extends System {
         }were recovered after disconnection.`
       );
     }
-
-    applyUpgradeFever(player, this.config.upgrades.fever, false);
-
-    if (this.config.upgrades.fever) {
-      this.emit(BROADCAST_CHAT_SERVER_WHISPER, playerId, `An upgrades fever event is ongoing`);
-    }
-
-    this.delay(RESPONSE_PLAYER_UPGRADE, playerId, UPGRADES_ACTION_TYPE.LOST);
 
     /**
      * Welcome messages.
