@@ -48,6 +48,9 @@ import {
   CHANNEL_UPDATE_HORIZON,
   CHANNEL_UPDATE_PLAYER_FLAG,
 } from '../events/channels';
+import {
+  SERVER_SHUTDOWN_STARTED
+} from '../events/maintenance'
 import Logger from '../logger';
 import metrics, { Metrics } from '../logger/metrics';
 import BTRGameManifest from '../modes/btr/manifest';
@@ -400,6 +403,12 @@ export default class GameServerBootstrap implements GameServerBootstrapInterface
 
     process.on('SIGINT', () => {
       this.log.processfinalHandlers(null, 'SIGINT');
+      this.events.emit(SERVER_SHUTDOWN_STARTED)
+
+      // hack.  need to block on receipt of an event, maybe...
+      let now = new Date().getTime();
+      while (now + 500 >= new Date().getTime()) {}
+
       this.stop();
     });
 

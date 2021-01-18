@@ -1,8 +1,8 @@
 import crypto from 'crypto';
 import { ClockTime } from '@airbattle/protocol';
-import { NS_PER_SEC, SERVER_MAX_MOB_ID, SERVER_MIN_MOB_ID } from '../constants';
+import { NS_PER_SEC, SERVER_MAX_MOB_ID, SERVER_MIN_MOB_ID, PLAYERS_TIME_TO_RESTORE_PLAYER_MS } from '../constants';
 import Logger from '../logger';
-import { AuthToken, AuthTokenData, MobId, PlayerId } from '../types';
+import { AuthToken, AuthTokenData, MobId, Player, PlayerId } from '../types';
 import { GameStorage } from './storage';
 
 /**
@@ -28,6 +28,9 @@ class Helpers {
   constructor({ app }) {
     this.storage = app.storage;
     this.log = app.log;
+
+    this.storePlayerStats = this.storePlayerStats;
+
 
     this.resetClock();
   }
@@ -243,6 +246,91 @@ class Helpers {
 
     return auth.uid;
   }
+
+  storePlayerStats(player: Player): void {
+    this.log.debug('storing player stats. id=%s', player.id.current)
+    this.storage.playerRecoverList.set(player.id.current, {
+      expired: Date.now() + PLAYERS_TIME_TO_RESTORE_PLAYER_MS * 5,
+      ip: player.ip.current,
+      data: {
+        match: this.storage.gameEntity.match.current,
+        matchesTotal: player.stats.matchesTotal,
+        matchesActivePlayed: player.stats.matchesActivePlayed,
+
+        team: player.team.current,
+        type: player.planetype.current,
+        alive: player.alivestatus.current,
+
+        captures: player.captures.current,
+        capturesTime: player.captures.time,
+        recaptures: player.recaptures.current,
+        capSaves: player.captures.saves,
+        capSavesAfterDeath: player.captures.savesAfterDeath,
+        capSavesAfterDrop: player.captures.savesAfterDrop,
+        capAttempts: player.captures.attempts,
+        capAttemptsFromBase: player.captures.attemptsFromBase,
+        capAttemptsFromBaseWithShield: player.captures.attemptsFromBaseWithShield,
+        damage: player.damage.current,
+        damageBots: player.damage.bots,
+        damageHits: player.damage.hits,
+        damageHitsToBots: player.damage.hitsToBots,
+        damageHitsReceived: player.damage.hitsReceived,
+        damageHitsByBots: player.damage.hitsByBots,
+        deaths: player.deaths.current,
+        deathsByBots: player.deaths.byBots,
+        deathsWithFlag: player.deaths.withFlag,
+        deathsWithFlagByBots: player.deaths.withFlagByBots,
+        health: player.health.current,
+        energy: player.energy.current,
+        kills: player.kills.current,
+        killsBots: player.kills.bots,
+        killsWithInferno: player.kills.totalWithInferno,
+        killsBotsWithInferno: player.kills.botsWithInferno,
+        carriersKills: player.kills.carriers,
+        carriersBotsKills: player.kills.carriersBots,
+        score: player.score.current,
+        fires: player.stats.fires,
+        fireProjectiles: player.stats.fireProjectiles,
+
+        pressesTotal: player.keystate.presses.total,
+        pressesFire: player.keystate.presses.FIRE,
+        pressesUp: player.keystate.presses.UP,
+        pressesRight: player.keystate.presses.RIGHT,
+        pressesDown: player.keystate.presses.DOWN,
+        pressesLeft: player.keystate.presses.LEFT,
+        pressesSpecial: player.keystate.presses.SPECIAL,
+
+        x: player.position.x,
+        y: player.position.y,
+        rot: player.rotation.current,
+
+        upgrades: player.upgrades.amount,
+        upgradesCollected: player.upgrades.collected,
+        upgradesUsed: player.upgrades.used,
+
+        speedUpgrades: player.upgrades.speed,
+        defenseUpgrades: player.upgrades.defense,
+        energyUpgrades: player.upgrades.energy,
+        missileUpgrades: player.upgrades.missile,
+
+        shieldsCollected: player.shield.collected,
+        infernosCollected: player.inferno.collected,
+
+        winsTotal: player.wins.current,
+        switches: player.stats.switches,
+
+        joinedAt: player.times.joinedAt,
+        lastSwitch: player.times.lastSwitch,
+        activePlaying: player.times.activePlaying,
+        activePlayingRed: player.times.activePlayingRed,
+        activePlayingBlue: player.times.activePlayingBlue,
+      },
+    });
+  }
+
+
+
+
 }
 
 export default Helpers;
