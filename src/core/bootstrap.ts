@@ -30,6 +30,8 @@ import {
   TIMELINE_LOOP_END,
   TIMELINE_LOOP_START,
   TIMELINE_LOOP_TICK,
+  TIMELINE_RECOVERY_COMPLETE,
+  TIMELINE_SERVER_SHUTDOWN,
   WORKERS_LOG_DEBUG,
   WORKERS_LOG_ERROR,
   WORKERS_LOG_FATAL,
@@ -48,9 +50,6 @@ import {
   CHANNEL_UPDATE_HORIZON,
   CHANNEL_UPDATE_PLAYER_FLAG,
 } from '../events/channels';
-import {
-  SERVER_SHUTDOWN_STARTED
-} from '../events/maintenance'
 import Logger from '../logger';
 import metrics, { Metrics } from '../logger/metrics';
 import BTRGameManifest from '../modes/btr/manifest';
@@ -372,6 +371,10 @@ export default class GameServerBootstrap implements GameServerBootstrapInterface
     this.events.on(WORKERS_LOG_FATAL, this.log.fatal, this.log);
     this.events.on(WORKERS_LOG_INFO, this.log.info, this.log);
     this.events.on(WORKERS_LOG_WARN, this.log.warn, this.log);
+    this.events.on(TIMELINE_RECOVERY_COMPLETE, () => {
+      this.stop()
+    })
+
   }
 
   private async initEndpoints(): Promise<void> {
@@ -387,39 +390,34 @@ export default class GameServerBootstrap implements GameServerBootstrapInterface
   }
 
   private bindExitListeners(): void {
+
     process.on('beforeExit', () => {
       this.log.processfinalHandlers(null, 'beforeExit');
     });
 
     process.on('exit', () => {
       this.log.processfinalHandlers(null, 'exit');
-      this.stop();
+      this.events.emit(TIMELINE_SERVER_SHUTDOWN)
     });
 
     process.on('uncaughtException', (err): void => {
       this.log.processfinalHandlers(err, 'uncaughtException');
-      this.stop();
+      this.events.emit(TIMELINE_SERVER_SHUTDOWN)
     });
 
     process.on('SIGINT', () => {
       this.log.processfinalHandlers(null, 'SIGINT');
-      this.events.emit(SERVER_SHUTDOWN_STARTED)
-
-      // hack.  need to block on receipt of an event, maybe...
-      let now = new Date().getTime();
-      while (now + 500 >= new Date().getTime()) {}
-
-      this.stop();
+      this.events.emit(TIMELINE_SERVER_SHUTDOWN)
     });
 
     process.on('SIGQUIT', () => {
       this.log.processfinalHandlers(null, 'SIGQUIT');
-      this.stop();
+      this.events.emit(TIMELINE_SERVER_SHUTDOWN)
     });
 
     process.on('SIGTERM', () => {
       this.log.processfinalHandlers(null, 'SIGTERM');
-      this.stop();
+      this.events.emit(TIMELINE_SERVER_SHUTDOWN)
     });
   }
 

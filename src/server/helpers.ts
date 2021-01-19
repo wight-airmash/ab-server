@@ -89,11 +89,20 @@ class Helpers {
     return id;
   }
 
+  getMobId(playerName = ''): MobId {
+    if (playerName.length > 0 && this.storage.playerHistoryNameToIdList.has(playerName)) {
+      return this.storage.playerHistoryNameToIdList.get(playerName).id;
+    }
+    return -1
+  }
+
   createMobId(playerName = ''): MobId {
     let mobId = this.storage.nextMobId;
 
     this.storage.nextMobId += 1;
 
+    // TODO: is this correct? 
+    // If the mobID already exists, why aren't we grabbing it and returning?
     if (playerName.length > 0 && this.storage.playerHistoryNameToIdList.has(playerName)) {
       mobId = this.storage.playerHistoryNameToIdList.get(playerName).id;
     }
@@ -250,7 +259,7 @@ class Helpers {
   storePlayerStats(player: Player): void {
     this.log.debug('storing player stats. id=%s', player.id.current)
     this.storage.playerRecoverList.set(player.id.current, {
-      expired: Date.now() + PLAYERS_TIME_TO_RESTORE_PLAYER_MS * 5,
+      expired: Date.now() + PLAYERS_TIME_TO_RESTORE_PLAYER_MS,
       ip: player.ip.current,
       data: {
         match: this.storage.gameEntity.match.current,
