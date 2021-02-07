@@ -140,6 +140,8 @@ export default class GameServerBootstrap implements GameServerBootstrapInterface
 
   private skips: number;
 
+  private shutdownInProgress: boolean;
+
   constructor({ config, log }: { config: GameServerConfigInterface; log: Logger }) {
     this.config = config;
     this.log = log;
@@ -371,6 +373,8 @@ export default class GameServerBootstrap implements GameServerBootstrapInterface
     this.events.on(WORKERS_LOG_FATAL, this.log.fatal, this.log);
     this.events.on(WORKERS_LOG_INFO, this.log.info, this.log);
     this.events.on(WORKERS_LOG_WARN, this.log.warn, this.log);
+
+    // This event is returned 
     this.events.on(TIMELINE_RECOVERY_COMPLETE, () => {
       this.stop()
     })
@@ -389,6 +393,13 @@ export default class GameServerBootstrap implements GameServerBootstrapInterface
     this.geocoder = await maxmind.open<CountryResponse>(this.config.geoBasePath);
   }
 
+  private emitShutdownEvent(): void {
+    if (!this.shutdownInProgress) {
+      this.shutdownInProgress = true
+      this.events.emit(TIMELINE_SERVER_SHUTDOWN)
+    }
+  }
+
   private bindExitListeners(): void {
 
     process.on('beforeExit', () => {
@@ -397,29 +408,31 @@ export default class GameServerBootstrap implements GameServerBootstrapInterface
 
     process.on('exit', () => {
       this.log.processfinalHandlers(null, 'exit');
-      this.events.emit(TIMELINE_SERVER_SHUTDOWN)
+      this.emitShutdownEvent();
     });
 
     process.on('uncaughtException', (err): void => {
       this.log.processfinalHandlers(err, 'uncaughtException');
-      this.events.emit(TIMELINE_SERVER_SHUTDOWN)
+      this.emitShutdownEvent();
     });
 
     process.on('SIGINT', () => {
       this.log.processfinalHandlers(null, 'SIGINT');
-      this.events.emit(TIMELINE_SERVER_SHUTDOWN)
+      this.emitShutdownEvent();
     });
 
     process.on('SIGQUIT', () => {
       this.log.processfinalHandlers(null, 'SIGQUIT');
-      this.events.emit(TIMELINE_SERVER_SHUTDOWN)
+      this.emitShutdownEvent();
     });
 
     process.on('SIGTERM', () => {
       this.log.processfinalHandlers(null, 'SIGTERM');
-      this.events.emit(TIMELINE_SERVER_SHUTDOWN)
+      this.emitShutdownEvent();
     });
+
   }
+
 
   private emitLoopEventsGroup(event: string): void {
     try {

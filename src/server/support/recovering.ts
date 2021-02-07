@@ -1,13 +1,13 @@
 import { TIMELINE_SERVER_SHUTDOWN, TIMELINE_CLOCK_MINUTE, TIMELINE_GAME_START, TIMELINE_RECOVERY_COMPLETE } from '../../events';
 import { System } from '../system';
-import { writeFileSync, readFileSync } from 'fs';
+import { writeFile, writeFileSync, readFileSync } from 'fs';
 import { MobId, PlayerId, PlayerName, PlayerNameHistoryItem, PlayerRecoverItem } from '../../types';
+
+const ASYNC:boolean = true
 
 export default class Recovering extends System {
   constructor({ app }) {
     super({ app });
-
-    shutdown: false;
 
     this.listeners = {
       [TIMELINE_CLOCK_MINUTE]: this.periodic,
@@ -16,24 +16,18 @@ export default class Recovering extends System {
     };
   }
 
-  shutdown: boolean
-
   periodic(): void {
     this.clearExpired();
-    this.persist();
+    this.persist(ASYNC);
   }
 
   saveAll(err: Error, msg: string): void {
-    if (this.shutdown) {
-      return
-    }
-    this.shutdown = true
     this.log.debug("saving all player stats. %s players", this.storage.playerList.size)
 
     for (let [key, player] of this.storage.playerList) {
       this.helpers.storePlayerStats(player)
     }
-    this.persist()
+    this.persist(!ASYNC)
 
     // This event must be emitted or the server will hang
     this.events.emit(TIMELINE_RECOVERY_COMPLETE)
@@ -99,10 +93,10 @@ export default class Recovering extends System {
   }
 
   // Persist takes the existing playerRecoverList and other necessary data and writes it to a file.
-  // TODO:  if storage.cache.clear is set, an empty file is written. storage.cache.clear would be set by a /server command, with the default behavior being for this to be enabled.
-  persist(): void {
+  // the `async` param indicates whether the write call is intended to be blocking or not.
+  persist(async:boolean): void {
     // persist writes the recover data to disk
-    this.log.debug('persisting player stats to %s', this.getCachePath())
+    this.log.debug('persisting player stats. file=%s async=%s', this.getCachePath(), async)
 
     // This cache is all the things that might need to be persistent between server restarts.
     // Serializing typescript objects to JSON is apparently tricky so there's some loops in here
@@ -129,7 +123,15 @@ export default class Recovering extends System {
     cache['nextMobId'] = this.storage.nextMobId
 
     let data = JSON.stringify(cache, null, 1)
-    writeFileSync(this.getCachePath(), data)
+    if (async) {
+      writeFile(this.getCachePath(), data, (err) => {
+        if (err) {
+          this.log.error('unable to commit recovery cache. %s', err)
+        }
+      })
+    } else {
+      writeFileSync(this.getCachePath(), data)
+    }
   }
 
   getCachePath(): string {
