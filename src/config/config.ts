@@ -207,6 +207,12 @@ export interface GameServerConfigInterface {
      * AFK disconnect timeout in minutes.
      */
     afkDisconnectTimeout: number;
+
+    /**
+     * Runner disconnect delay in seconds.
+     * This is the amount of time that a player will stick around after.
+     */
+    runnerDisconnectDelay: number;
   };
 
   accounts: {
@@ -551,6 +557,8 @@ const config: GameServerConfigInterface = {
     autoBan: boolValue(process.env.PACKETS_FLOODING_AUTOBAN, CONNECTIONS_FLOODING_AUTOBAN),
 
     afkDisconnectTimeout: floatValue(process.env.AFK_DISCONNECT_TIMEOUT, undefined),
+
+    runnerDisconnectDelay: floatValue(process.env.RUNNER_DISCONNECT_DELAY, 0.0),
   },
 
   accounts: {

@@ -4,6 +4,7 @@ import {
   CONNECTIONS_LAGGING_DROP_INTERVAL_MS,
   CONNECTIONS_STATUS,
   LIMITS_ANY_WEIGHT,
+  MS_PER_SEC,
   SERVER_MIN_MOB_ID,
 } from '../constants';
 import {
@@ -152,33 +153,59 @@ export default class Connections extends System {
      * Remove all connection data.
      */
     if (connection.isMain) {
-      this.channel(CHANNEL_DISCONNECT_PLAYER).delay(PLAYERS_REMOVE, connection.playerId);
-      secondConnectionId = this.storage.playerBackupConnectionList.get(connection.playerId);
 
-      this.storage.mainConnectionIdList.delete(connectionId);
-      this.storage.humanConnectionIdList.delete(connectionId);
-      this.storage.botConnectionIdList.delete(connectionId);
-      this.storage.playerMainConnectionList.delete(connection.playerId);
+      // Not confident this is a good approach.
+      // Delaying the disconnect event (if runnerDisconnectDelay is set) to keep players in the 
+      // game for a few seconds. This prevents runners from disconnecting / reloading to keep their leaderboard standing.
 
-      if (this.storage.connectionByIPList.has(connection.ip)) {
-        const ipConnections = this.storage.connectionByIPList.get(connection.ip);
-
-        ipConnections.delete(connectionId);
-
-        if (ipConnections.size === 0) {
-          this.storage.connectionByIPList.delete(connection.ip);
-        }
+      // Nuke the player's motion
+      if (this.config.connections.runnerDisconnectDelay > 0) {
+        let player = this.storage.playerList.get(connection.playerId)
+        player.keystate.DOWN = false
+        player.keystate.UP = false
+        player.keystate.LEFT = false
+        player.keystate.RIGHT = false
+        player.keystate.SPECIAL = false
+        player.keystate.FIRE = false
+        player.shield.current = false
+        player.delayed.BROADCAST_PLAYER_UPDATE = true
       }
 
-      if (connection.teamId !== null && this.storage.connectionIdByTeam.has(connection.teamId)) {
-        const teamConnections = this.storage.connectionIdByTeam.get(connection.teamId);
+      let ctx = this;
+      setTimeout(function() {
+        ctx.channel(CHANNEL_DISCONNECT_PLAYER).delay(PLAYERS_REMOVE, connection.playerId);
+        secondConnectionId = ctx.storage.playerBackupConnectionList.get(connection.playerId);
 
-        teamConnections.delete(connectionId);
+        ctx.storage.mainConnectionIdList.delete(connectionId);
+        ctx.storage.humanConnectionIdList.delete(connectionId);
+        ctx.storage.botConnectionIdList.delete(connectionId);
+        ctx.storage.playerMainConnectionList.delete(connection.playerId);
 
-        if (teamConnections.size === 0 && connection.teamId >= SERVER_MIN_MOB_ID) {
-          this.storage.connectionIdByTeam.delete(connection.teamId);
+        if (ctx.storage.connectionByIPList.has(connection.ip)) {
+          const ipConnections = ctx.storage.connectionByIPList.get(connection.ip);
+
+          ipConnections.delete(connectionId);
+
+          if (ipConnections.size === 0) {
+            ctx.storage.connectionByIPList.delete(connection.ip);
+          }
         }
-      }
+
+        if (connection.teamId !== null && ctx.storage.connectionIdByTeam.has(connection.teamId)) {
+          const teamConnections = ctx.storage.connectionIdByTeam.get(connection.teamId);
+
+          teamConnections.delete(connectionId);
+
+          if (teamConnections.size === 0 && connection.teamId >= SERVER_MIN_MOB_ID) {
+            ctx.storage.connectionIdByTeam.delete(connection.teamId);
+          }
+        }
+
+      }, this.config.connections.runnerDisconnectDelay * MS_PER_SEC);
+
+
+
+
     } else if (connection.isBackup) {
       secondConnectionId = this.storage.playerMainConnectionList.get(connection.playerId);
 

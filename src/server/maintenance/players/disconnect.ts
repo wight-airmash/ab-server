@@ -47,14 +47,7 @@ export default class GamePlayersDisconnect extends System {
 
       this.emit(PLAYERS_BEFORE_REMOVE, player);
 
-      /**
-       * Recover stats feature.
-       * CTF only.
-       */
-
-      // if (this.config.server.typeId === GAME_TYPES.CTF) {
       this.helpers.storePlayerStats(player)
-      //}
 
       delete this.storage.connectionIdByNameList[player.name.current];
 
