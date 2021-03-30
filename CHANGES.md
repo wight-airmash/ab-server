@@ -1,5 +1,7 @@
 ## Future version (unversioned)
 
+Dependencies update to fix vulnerabilities.
+
 ## 6.3.1 (January 16, 2021)
 
 Features:
