@@ -1,5 +1,5 @@
 import { CTF_TEAMS } from '@airbattle/protocol';
-import { CTF_PLAYERS_SPAWN_ZONES } from '../../../constants';
+import { CTF_PLAYERS_EXTRA_SPAWN_ZONES, CTF_PLAYERS_SPAWN_ZONES } from '../../../constants';
 import {
   BROADCAST_CHAT_SERVER_PUBLIC,
   BROADCAST_PLAYER_RETEAM,
@@ -65,19 +65,37 @@ export default class GamePlayers extends System {
   }
 
   onAssignPlayerSpawnPosition(player: Player): void {
+    const isBlue = player.team.current === CTF_TEAMS.BLUE;
     let x = 0;
     let y = 0;
     let r = 0;
 
-    if (player.team.current === CTF_TEAMS.BLUE) {
-      [x, y, r] = CTF_PLAYERS_SPAWN_ZONES[CTF_TEAMS.BLUE];
-    } else if (player.team.current === CTF_TEAMS.RED) {
-      [x, y, r] = CTF_PLAYERS_SPAWN_ZONES[CTF_TEAMS.RED];
-    } else {
-      x = 0;
-      y = 0;
-
-      this.log.warn('Unknown player CTF team.');
+    if (
+      player.bot.current ||
+      !player.alivestatus.isLastStateKilled ||
+      !this.config.ctf.extraSpawns
+    ) {
+      if (isBlue) {
+        [x, y, r] = CTF_PLAYERS_SPAWN_ZONES[CTF_TEAMS.BLUE];
+      } else {
+        [x, y, r] = CTF_PLAYERS_SPAWN_ZONES[CTF_TEAMS.RED];
+      }
+    } else if (player.alivestatus.isLastStateKilled) {
+      if (isBlue) {
+        if (player.position.x < 0) {
+          [x, y, r] = CTF_PLAYERS_SPAWN_ZONES[CTF_TEAMS.BLUE];
+        } else if (player.position.y < 0) {
+          [x, y, r] = CTF_PLAYERS_EXTRA_SPAWN_ZONES[CTF_TEAMS.BLUE].SOUTH;
+        } else {
+          [x, y, r] = CTF_PLAYERS_EXTRA_SPAWN_ZONES[CTF_TEAMS.BLUE].NORTH;
+        }
+      } else if (player.position.x > -1024) {
+        [x, y, r] = CTF_PLAYERS_SPAWN_ZONES[CTF_TEAMS.RED];
+      } else if (player.position.y < -512) {
+        [x, y, r] = CTF_PLAYERS_EXTRA_SPAWN_ZONES[CTF_TEAMS.RED].SOUTH;
+      } else {
+        [x, y, r] = CTF_PLAYERS_EXTRA_SPAWN_ZONES[CTF_TEAMS.RED].NORTH;
+      }
     }
 
     player.position.x = x + getRandomInt(-r, r);
