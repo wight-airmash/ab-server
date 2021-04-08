@@ -1,5 +1,9 @@
 ## Future version (unversioned)
 
+Features:
+
+- CTF extra spanws in the middle of the map. Disabled by default. See [`/server extraspawns`](./docs/commands.md#server-extraspawns) command and [CTF_EXTRA_SPAWNS](./docs/env-variables.md#ctf_extra_spawns).
+
 ## 6.3.2 (March 30, 2021)
 
 Dependencies update to fix vulnerabilities.

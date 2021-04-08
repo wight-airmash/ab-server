@@ -90,6 +90,12 @@ Default: `30`
 
 The maximum number of seconds that can be randomly added to the basic interval of the base shield respawning.
 
+### CTF_EXTRA_SPAWNS
+
+Default: `false`
+
+Turn on/off CTF extra spawns in the middle of the map.
+
 ### CTF_QBOTS_FEATURES
 
 Default: `true`

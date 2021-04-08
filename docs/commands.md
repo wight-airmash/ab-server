@@ -272,3 +272,7 @@ Remove all the welcome messages from the list.
 ### /server spawn <zone>
 
 Set an alternative spawn zone for FFA.  Valid zones are `europe`, `canada`, `latam`, and `asia`.
+
+### /server extraspawns
+
+Toggle CTF extra spawns in the middle of the map.
