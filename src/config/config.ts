@@ -490,7 +490,7 @@ const config: GameServerConfigInterface = {
     typeId: 0,
 
     version,
-    edition: strValue(process.env.SERVER_EDITION, 'spawns'),
+    edition: strValue(process.env.SERVER_EDITION, 'main'),
 
     host: strValue(process.env.HOST, SERVER_DEFAULT_HOST),
     port: intValue(process.env.PORT, SERVER_DEFAULT_PORT),
