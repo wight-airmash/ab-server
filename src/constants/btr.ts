@@ -12,7 +12,9 @@ export const BTR_FIREWALL_POSITION = {
 
 export const BTR_FIREWALL_INITIAL_RADIUS = 17000;
 
-export const BTR_FIREWALL_SPEED = -70;
+export const BTR_DEFAULT_FIREWALL_SPEED = 70;
+
+export const BTR_DEFAULT_MATCH_WAIT_TIME = 70;
 
 export const BTR_SHIPS_TYPES_ORDER = [
   SHIPS_TYPES.PREDATOR,

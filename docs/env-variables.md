@@ -56,6 +56,18 @@ Automatically add prefix to bot names, helps to prevent mimicry. Non-bot players
 
 Example: `"[bot] "` (don't forget a space at the end if you want to use it as separator), the bot with a requested name `Lunokhod` will receive an assigned name `[bot] Lunokhod`.
 
+### BTR_FIREWALL_SPEED
+
+Default: 70
+
+Speed of firewall as it burns toward centre of map, in map units per second.
+
+### BTR_MATCH_WAIT_TIME
+
+Default: 70
+
+Number of seconds to wait between matches.
+
 ### CACHE_PATH
 
 Default: `../cache`
