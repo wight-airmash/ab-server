@@ -1,7 +1,10 @@
 ## Future version (unversioned)
 
+## 6.4.0 (May 8, 2021)
+
 Features:
 
+- Configurable firewall speed and match wait time for BTR ([#122](https://github.com/wight-airmash/ab-server/pull/122)). See [BTR_FIREWALL_SPEED](./docs/env-variables.md#btr_firewall_speed) and [BTR_MATCH_WAIT_TIME](./docs/env-variables.md#btr_match_wait_time).
 - CTF extra spanws in the middle of the map. Disabled by default. See [`/server extraspawns`](./docs/commands.md#server-extraspawns) command and [CTF_EXTRA_SPAWNS](./docs/env-variables.md#ctf_extra_spawns).
 
 ## 6.3.2 (March 30, 2021)
