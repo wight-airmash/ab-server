@@ -201,7 +201,9 @@ export default class GameMatches extends System {
           /**
            * Match can only be started if two or more players are still present.
            */
-          const messagePrefix = `${SHIPS_NAMES[this.storage.gameEntity.match.shipType]} round starting`;
+          const messagePrefix = `${
+            SHIPS_NAMES[this.storage.gameEntity.match.shipType]
+          } round starting`;
           const { matchWaitTime } = this.config.btr;
 
           if (this.matchStartTimeout >= matchWaitTime) {
@@ -224,13 +226,22 @@ export default class GameMatches extends System {
               case 3:
               case 4:
               case 5:
-                this.broadcastServerMessageAlert(`${messagePrefix} in ${matchWaitTimeLeft} seconds`, 2);
+                this.broadcastServerMessageAlert(
+                  `${messagePrefix} in ${matchWaitTimeLeft} seconds`,
+                  2
+                );
                 break;
               case 10:
-                this.broadcastServerMessageAlert(`${messagePrefix} in ${matchWaitTimeLeft} seconds`, 3);
+                this.broadcastServerMessageAlert(
+                  `${messagePrefix} in ${matchWaitTimeLeft} seconds`,
+                  3
+                );
                 break;
               case 30:
-                this.broadcastServerMessageAlert(`${messagePrefix} in ${matchWaitTimeLeft} seconds`, 7);
+                this.broadcastServerMessageAlert(
+                  `${messagePrefix} in ${matchWaitTimeLeft} seconds`,
+                  7
+                );
                 break;
               case 60:
                 this.broadcastServerMessageAlert(`${messagePrefix} in 1 minute`, 12);
