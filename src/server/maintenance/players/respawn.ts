@@ -106,6 +106,7 @@ export default class GamePlayersRespawn extends System {
       player.shield.endTime = now + PLAYERS_SPAWN_SHIELD_DURATION_MS;
 
       player.alivestatus.current = PLAYERS_ALIVE_STATUSES.ALIVE;
+      player.alivestatus.isLastStateKilled = false;
 
       player.energy.current = PLAYERS_ENERGY.DEFAULT;
       player.health.current = PLAYERS_HEALTH.DEFAULT;

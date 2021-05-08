@@ -107,6 +107,7 @@ export default class GameSpectating extends System {
         }
       }
 
+      spectator.alivestatus.isLastStateKilled = false;
       spectator.spectate.isActive = true;
       spectator.alivestatus.current = PLAYERS_ALIVE_STATUSES.SPECTATE;
 

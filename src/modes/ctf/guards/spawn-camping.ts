@@ -1,7 +1,8 @@
 import { CTF_TEAMS } from '@airbattle/protocol';
 import {
   CTF_AFK_CHECK_INTERVAL_SEC,
-  CTF_AFK_TIME_TO_AUTO_SPECTATE_MS,
+  CTF_AFK_HARD_LIMIT_TO_AUTO_SPECTATE_MS,
+  CTF_AFK_SOFT_LIMIT_TO_AUTO_SPECTATE_MS,
   CTF_PLAYERS_SPAWN_ZONES,
   PLAYERS_ALIVE_STATUSES,
   PLAYERS_HEALTH,
@@ -98,13 +99,17 @@ export default class SpawnCampingGuard extends System {
   }
 
   checkPlayer(player: Player): void {
+    if (player.bot.current || player.spectate.isActive || player.planestate.flagspeed) {
+      return;
+    }
+
+    const afkMs = this.now - player.times.lastMove;
+
     if (
-      !this.storage.botIdList.has(player.id.current) &&
-      !player.spectate.isActive &&
-      !player.planestate.flagspeed &&
-      this.now - player.times.lastMove > CTF_AFK_TIME_TO_AUTO_SPECTATE_MS &&
-      (this.isAtSpawn(player.position.x, player.position.y, player.team.current) ||
-        player.alivestatus.current === PLAYERS_ALIVE_STATUSES.DEAD)
+      afkMs > CTF_AFK_HARD_LIMIT_TO_AUTO_SPECTATE_MS ||
+      (afkMs > CTF_AFK_SOFT_LIMIT_TO_AUTO_SPECTATE_MS &&
+        (player.alivestatus.current === PLAYERS_ALIVE_STATUSES.DEAD ||
+          this.isAtSpawn(player.position.x, player.position.y, player.team.current)))
     ) {
       if (player.alivestatus.current === PLAYERS_ALIVE_STATUSES.ALIVE) {
         player.health.current = PLAYERS_HEALTH.MAX;
@@ -137,6 +142,7 @@ export default class SpawnCampingGuard extends System {
 
   onPlayerKilled(victimId: PlayerId): void {
     if (this.helpers.isPlayerConnected(victimId)) {
+      this.now = Date.now();
       this.checkPlayer(this.storage.playerList.get(victimId));
     }
   }

@@ -311,6 +311,7 @@ export default class GamePlayersKill extends System {
     /**
      * Tracking victim deaths and score.
      */
+    victim.alivestatus.isLastStateKilled = true;
     victim.deaths.killerId = killerId;
     victim.deaths.current += 1;
 

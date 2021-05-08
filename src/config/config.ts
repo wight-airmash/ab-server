@@ -16,6 +16,7 @@ import {
   CONNECTIONS_INVALID_PROTOCOL_AUTOKICK,
   CONNECTIONS_WEBSOCKETS_COMPRESSION,
   CTF_BASE_SHIELD_RANDOM_INTERVAL_SEC,
+  CTF_EXTRA_SPAWNS,
   CTF_QBOTS_FEATURES,
   FFA_DEFAULT_SPAWN_ZONE,
   FFA_VALID_SPAWN_ZONES,
@@ -323,6 +324,11 @@ export interface GameServerConfigInterface {
      * Randomize periodic base shields.
      */
     randomBaseShieldInterval: number;
+
+    /**
+     * Enable extra middle-map spawns.
+     */
+    extraSpawns: boolean;
   };
 
   ffa: {
@@ -484,7 +490,7 @@ const config: GameServerConfigInterface = {
     typeId: 0,
 
     version,
-    edition: strValue(process.env.SERVER_EDITION, 'main'),
+    edition: strValue(process.env.SERVER_EDITION, 'spawns'),
 
     host: strValue(process.env.HOST, SERVER_DEFAULT_HOST),
     port: intValue(process.env.PORT, SERVER_DEFAULT_PORT),
@@ -635,6 +641,8 @@ const config: GameServerConfigInterface = {
       process.env.CTF_BASE_SHIELD_RANDOM_INTERVAL,
       CTF_BASE_SHIELD_RANDOM_INTERVAL_SEC
     ),
+
+    extraSpawns: boolValue(process.env.CTF_EXTRA_SPAWNS, CTF_EXTRA_SPAWNS),
   },
 
   ffa: {

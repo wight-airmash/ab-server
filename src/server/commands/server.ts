@@ -910,6 +910,22 @@ export default class ServerCommandHandler extends System {
   }
 
   /**
+   * /server extraspawns
+   *
+   * @param playerId
+   * @param command
+   */
+  private handleExtraSpawnsCommand(playerId: PlayerId): void {
+    this.cfg.ctf.extraSpawns = !this.cfg.ctf.extraSpawns;
+
+    this.emit(
+      BROADCAST_CHAT_SERVER_WHISPER,
+      playerId,
+      `Extra spawns turned ${this.cfg.ctf.extraSpawns ? 'on' : 'off'}.`
+    );
+  }
+
+  /**
    * "/server" command handler.
    *
    * @param connectionId
@@ -1080,6 +1096,12 @@ export default class ServerCommandHandler extends System {
 
       if (command.indexOf('spawn') === 0) {
         this.handleSpawnZoneSelection(playerId, command);
+
+        return;
+      }
+
+      if (command.indexOf('extraspawns') === 0) {
+        this.handleExtraSpawnsCommand(playerId);
 
         return;
       }
