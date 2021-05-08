@@ -2,7 +2,6 @@ import { BTR_FIREWALL_STATUS, SERVER_MESSAGE_TYPES } from '@airbattle/protocol';
 import {
   BTR_FIREWALL_INITIAL_RADIUS,
   BTR_FIREWALL_POSITION,
-  BTR_FIREWALL_SPEED,
   BTR_SHIPS_TYPES_ORDER,
   MS_PER_SEC,
   PLAYERS_ALIVE_STATUSES,
@@ -34,7 +33,7 @@ import { has } from '../../../support/objects';
 import { Player, PlayerId } from '../../../types';
 
 export default class GameMatches extends System {
-  private gameStartTimeout = 0;
+  private matchStartTimeout = 0;
 
   private firewallUpdateTimeout = 0;
 
@@ -109,7 +108,7 @@ export default class GameMatches extends System {
       radius: BTR_FIREWALL_INITIAL_RADIUS,
       posX: getRandomNumber(BTR_FIREWALL_POSITION.MIN_X, BTR_FIREWALL_POSITION.MAX_X),
       posY: getRandomNumber(BTR_FIREWALL_POSITION.MIN_Y, BTR_FIREWALL_POSITION.MAX_Y),
-      speed: BTR_FIREWALL_SPEED,
+      speed: -this.config.btr.firewallSpeed,
     };
 
     const { match } = this.storage.gameEntity;
@@ -173,54 +172,7 @@ export default class GameMatches extends System {
   }
 
   onSecondTick(): void {
-    if (!this.storage.gameEntity.match.isActive) {
-      /**
-       * Waiting for game to start
-       */
-      this.gameStartTimeout += 1;
-
-      if (this.gameStartTimeout === 0) {
-        /**
-         * After five second waiting period, new match is prepared regardless of number of players present
-         */
-        this.prepareNewMatch();
-      }
-
-      if (this.gameStartTimeout >= 0 && this.storage.playerList.size < 2) {
-        /**
-         * Matches started from joining a single waiting player start more quickly (within ~5 seconds)
-         */
-        this.gameStartTimeout = 63;
-      } else if (this.storage.playerList.size >= 2) {
-        /**
-         * Post-match countdown to next match if two or more players are still present
-         */
-        if (this.gameStartTimeout === 10) {
-          const shipName = SHIPS_NAMES[this.storage.gameEntity.match.shipType];
-
-          this.broadcastServerMessageAlert(`${shipName} round starting in 1 minute`, 12);
-        } else if (this.gameStartTimeout === 40) {
-          this.broadcastServerMessageAlert('Game starting in 30 seconds', 7);
-        } else if (this.gameStartTimeout === 60) {
-          this.broadcastServerMessageAlert('Game starting in 10 seconds', 7);
-        } else if (this.gameStartTimeout >= 65 && this.gameStartTimeout < 70) {
-          const left = 60 - this.gameStartTimeout;
-          let text = 'Game starting in a second';
-
-          if (left !== 1) {
-            text = `Game starting in ${70 - this.gameStartTimeout} seconds`;
-          }
-
-          this.broadcastServerMessageAlert(text, 2);
-        } else if (this.gameStartTimeout >= 70) {
-          this.startMatch();
-
-          this.broadcastServerMessageAlert('Game starting!', 3);
-
-          this.gameStartTimeout = 0;
-        }
-      }
-    } else {
+    if (this.storage.gameEntity.match.isActive) {
       /**
        * Game in progress
        */
@@ -229,6 +181,70 @@ export default class GameMatches extends System {
       if (this.firewallUpdateTimeout === 5) {
         this.emit(BROADCAST_GAME_FIREWALL);
         this.firewallUpdateTimeout = 0;
+      }
+    } else {
+      /**
+       * Waiting for next match to start.
+       */
+      this.matchStartTimeout += 1;
+
+      if (this.matchStartTimeout === 0) {
+        /**
+         * After the 5 second post-match interlude, a new match is prepared.
+         */
+        this.prepareNewMatch();
+      } else if (this.matchStartTimeout >= 0) {
+        /**
+         * Waiting period between matches.
+         */
+        if (this.storage.playerList.size >= 2) {
+          /**
+           * Match can only be started if two or more players are still present.
+           */
+          const messagePrefix = `${SHIPS_NAMES[this.storage.gameEntity.match.shipType]} round starting`;
+          const { matchWaitTime } = this.config.btr;
+
+          if (this.matchStartTimeout >= matchWaitTime) {
+            /**
+             * Start match if wait time reached.
+             */
+            this.startMatch();
+            this.broadcastServerMessageAlert(`${messagePrefix}!`, 3);
+          } else {
+            /**
+             * Alert players of countdown to next match.
+             */
+            const matchWaitTimeLeft = matchWaitTime - this.matchStartTimeout;
+
+            switch (matchWaitTimeLeft) {
+              case 1:
+                this.broadcastServerMessageAlert(`${messagePrefix} in a second`, 2);
+                break;
+              case 2:
+              case 3:
+              case 4:
+              case 5:
+                this.broadcastServerMessageAlert(`${messagePrefix} in ${matchWaitTimeLeft} seconds`, 2);
+                break;
+              case 10:
+                this.broadcastServerMessageAlert(`${messagePrefix} in ${matchWaitTimeLeft} seconds`, 3);
+                break;
+              case 30:
+                this.broadcastServerMessageAlert(`${messagePrefix} in ${matchWaitTimeLeft} seconds`, 7);
+                break;
+              case 60:
+                this.broadcastServerMessageAlert(`${messagePrefix} in 1 minute`, 12);
+                break;
+              default:
+                break;
+            }
+          }
+        } else {
+          /**
+           * Reset match start time counter if no players or just one player is present.
+           */
+          this.matchStartTimeout = 1;
+        }
       }
     }
   }
@@ -326,7 +342,7 @@ export default class GameMatches extends System {
          * End match, with a short wait before restarting countdown
          */
         match.isActive = false;
-        this.gameStartTimeout = -5;
+        this.matchStartTimeout = -5;
         this.broadcastServerMessageAlert('Game ended!', 5);
 
         this.emit(TIMELINE_GAME_MATCH_END);

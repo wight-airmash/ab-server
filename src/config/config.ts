@@ -9,6 +9,8 @@ import {
   BOTS_IP_LIST_ENABLED,
   BOTS_SERVER_BOT_FLAG,
   BOTS_SERVER_BOT_NAME,
+  BTR_DEFAULT_FIREWALL_SPEED,
+  BTR_DEFAULT_MATCH_WAIT_TIME,
   CONNECTIONS_DEFAULT_MAX_PLAYERS_PER_IP,
   CONNECTIONS_FLOODING_AUTOBAN,
   CONNECTIONS_INVALID_PROTOCOL_AUTOKICK,
@@ -338,6 +340,18 @@ export interface GameServerConfigInterface {
     baseInfernos: boolean;
   };
 
+  btr: {
+    /**
+     * Speed of firewall as it moves toward the centre of the map.
+     */
+    firewallSpeed: number;
+
+    /**
+     * Wait time between matches.
+     */
+    matchWaitTime: number;
+  };
+
   bots: {
     /**
      * Enable or disable allowed IP list.
@@ -626,6 +640,11 @@ const config: GameServerConfigInterface = {
   ffa: {
     spawnZoneName: strValue(process.env.FFA_SPAWN_ZONE_NAME, FFA_DEFAULT_SPAWN_ZONE),
     baseInfernos: boolValue(process.env.FFA_BASE_INFERNOS, false),
+  },
+
+  btr: {
+    firewallSpeed: intValue(process.env.BTR_FIREWALL_SPEED, BTR_DEFAULT_FIREWALL_SPEED),
+    matchWaitTime: intValue(process.env.BTR_MATCH_WAIT_TIME, BTR_DEFAULT_MATCH_WAIT_TIME),
   },
 };
 

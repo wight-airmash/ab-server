@@ -1,5 +1,4 @@
 import { ServerPackets, SERVER_PACKETS } from '@airbattle/protocol';
-import { BTR_FIREWALL_SPEED } from '../../../../constants';
 import { BROADCAST_GAME_FIREWALL, CONNECTIONS_SEND_PACKETS } from '../../../../events';
 import { System } from '../../../../server/system';
 import { PlayerId } from '../../../../types';
@@ -35,7 +34,7 @@ export default class GameFirewallBroadcast extends System {
         posX: firewall.posX,
         posY: firewall.posY,
         radius: firewall.radius,
-        speed: BTR_FIREWALL_SPEED,
+        speed: firewall.speed,
       } as ServerPackets.GameFirewall,
       playerId === null
         ? [...this.storage.mainConnectionIdList]
