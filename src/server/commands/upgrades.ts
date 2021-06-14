@@ -31,9 +31,12 @@ export default class UpgradesCommandHandler extends System {
     }
 
     const player = this.storage.playerList.get(connection.playerId);
-    const isAlive = player.alivestatus.current === PLAYERS_ALIVE_STATUSES.ALIVE;
 
-    if (isAlive && command.indexOf('drop') === 0) {
+    if (player.alivestatus.current !== PLAYERS_ALIVE_STATUSES.ALIVE) {
+      return;
+    }
+
+    if (command.indexOf('drop') === 0) {
       let amount = 1;
 
       if (command.length > 5) {
@@ -95,7 +98,7 @@ export default class UpgradesCommandHandler extends System {
 
       this.emit(RESPONSE_PLAYER_UPGRADE, connection.playerId, UPGRADES_ACTION_TYPE.LOST);
 
-      if (isAlive && player.delayed.BROADCAST_PLAYER_UPDATE) {
+      if (player.delayed.BROADCAST_PLAYER_UPDATE) {
         this.emit(BROADCAST_PLAYER_UPDATE, connection.playerId);
       }
     }

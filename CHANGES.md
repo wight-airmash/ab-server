@@ -1,6 +1,6 @@
 ## Future version (unversioned)
 
-## 6.5.1 (June 14, 2021)
+## 6.5.2 (June 14, 2021)
 
 Bug fixes:
 
