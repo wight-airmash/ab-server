@@ -22,6 +22,7 @@ import {
   CONNECTIONS_KICK,
   CONNECTIONS_UNBAN_IP,
   PLAYERS_KICK,
+  PLAYERS_UPGRADES_AUTO_FEVER,
   PLAYERS_UPGRADES_TOGGLE_FEVER,
   POWERUPS_UPDATE_CONFIG,
   RESPONSE_COMMAND_REPLY,
@@ -760,14 +761,41 @@ export default class ServerCommandHandler extends System {
      * upgrades fever starts an upgrade fever event. The duration is indefinite.
      *
      * When the event begins, each player's current upgrades are tallied and stored,
-     * then their upgrades are all set to 5. Bots get set to 3.
+     * then their upgrades are all set to 5. Bots get set to 3233.
      *
      */
     if (command.indexOf('upgrades fever') === 0) {
-      const verb = this.config.upgrades.fever ? 'ended' : 'started';
+      const bySchedule = command === 'upgrades fever auto';
 
-      this.emit(PLAYERS_UPGRADES_TOGGLE_FEVER);
-      this.emit(BROADCAST_CHAT_SERVER_PUBLIC, `Upgrades fever ${verb}`);
+      if (bySchedule) {
+        if (this.config.upgrades.fever.auto) {
+          this.emit(
+            BROADCAST_CHAT_SERVER_WHISPER,
+            playerId,
+            'Upgrades fever is already in auto mode.'
+          );
+        } else {
+          this.emit(PLAYERS_UPGRADES_AUTO_FEVER);
+
+          this.emit(
+            BROADCAST_CHAT_SERVER_WHISPER,
+            playerId,
+            'Upgrades fever now runs in auto mode.'
+          );
+        }
+      } else {
+        const verb = this.config.upgrades.fever.active ? 'off' : 'on';
+
+        this.emit(PLAYERS_UPGRADES_TOGGLE_FEVER, bySchedule);
+
+        this.emit(
+          BROADCAST_CHAT_SERVER_WHISPER,
+          playerId,
+          `Upgrades fever turned ${verb} permanently.`
+        );
+      }
+
+      return;
     }
 
     if (command.indexOf('upgrades min') === 0 && command.length > 13) {

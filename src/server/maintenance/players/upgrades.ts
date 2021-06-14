@@ -1,17 +1,24 @@
-import { UPGRADES_ACTION_TYPE } from '../../../constants';
+import { SECONDS_PER_DAY, SECONDS_PER_MINUTE, UPGRADES_ACTION_TYPE } from '../../../constants';
 import {
+  BROADCAST_CHAT_SERVER_PUBLIC,
   BROADCAST_CHAT_SERVER_WHISPER,
   PLAYERS_CREATED,
   PLAYERS_RESPAWNED,
+  PLAYERS_UPGRADES_AUTO_FEVER,
   PLAYERS_UPGRADES_RESET,
   PLAYERS_UPGRADES_TOGGLE_FEVER,
   RESPONSE_PLAYER_UPGRADE,
+  TIMELINE_BEFORE_GAME_START,
+  TIMELINE_CLOCK_SECOND,
 } from '../../../events';
 import { CHANNEL_CHAT } from '../../../events/channels';
-import { Player, PlayerId } from '../../../types';
+import { TimeTrigger } from '../../../support/time-trigger';
+import { Player, PlayerId, TimeTriggerScheduleItem } from '../../../types';
 import { System } from '../../system';
 
 export default class GameUpgrades extends System {
+  private feverScheduler: TimeTrigger;
+
   constructor({ app }) {
     super({ app });
 
@@ -19,8 +26,67 @@ export default class GameUpgrades extends System {
       [PLAYERS_CREATED]: this.onPlayerCreated,
       [PLAYERS_RESPAWNED]: this.onPlayerRespawned,
       [PLAYERS_UPGRADES_RESET]: this.onPlayersUpgradesReset,
+      [PLAYERS_UPGRADES_AUTO_FEVER]: this.autoUpgradesFever,
       [PLAYERS_UPGRADES_TOGGLE_FEVER]: this.toggleUpgradesFever,
+      [TIMELINE_BEFORE_GAME_START]: this.initFeverConfig,
+      [TIMELINE_CLOCK_SECOND]: this.onSecond,
     };
+  }
+
+  initFeverConfig(): void {
+    let schedule: TimeTriggerScheduleItem[] = [];
+
+    if (typeof process.env.UPGRADES_FEVER_SCHEDULE !== 'undefined') {
+      schedule = process.env.UPGRADES_FEVER_SCHEDULE.split(',')
+        .map(scheduleItemString => {
+          const [second = -1, minute = -1, hour = -1, weekDay = -1, duration = -1] =
+            scheduleItemString
+              .trim()
+              .split(' ')
+              .map(v => ~~v);
+
+          if (
+            !(
+              second >= 0 &&
+              second < 60 &&
+              minute >= 0 &&
+              minute < 60 &&
+              hour >= 0 &&
+              hour < 24 &&
+              weekDay >= 0 &&
+              weekDay < 7 &&
+              duration > 0 &&
+              duration < SECONDS_PER_DAY * 7
+            )
+          ) {
+            this.log.fatal('Invalid upgrades fever schedule format!');
+
+            process.exit(1);
+          }
+
+          return {
+            weekDay,
+            hour,
+            minute,
+            second,
+            duration: duration * SECONDS_PER_MINUTE,
+          };
+        })
+        .sort((a, b) => a.weekDay - b.weekDay);
+    }
+
+    this.feverScheduler = new TimeTrigger(schedule);
+    this.config.upgrades.fever.auto = true;
+
+    if (schedule.length > 0) {
+      this.log.debug('Upgrades fever schedule items loaded: %d', schedule.length);
+    }
+  }
+
+  onSecond(): void {
+    if (this.config.upgrades.fever.auto) {
+      this.updateFeverStateBySchedule();
+    }
   }
 
   onPlayersUpgradesReset(playerId: PlayerId): void {
@@ -38,7 +104,7 @@ export default class GameUpgrades extends System {
   onPlayerCreated(playerId: PlayerId): void {
     this.applyUpgradesFever(this.storage.playerList.get(playerId));
 
-    if (this.config.upgrades.fever) {
+    if (this.config.upgrades.fever.active) {
       this.channel(CHANNEL_CHAT).delay(
         BROADCAST_CHAT_SERVER_WHISPER,
         playerId,
@@ -51,8 +117,9 @@ export default class GameUpgrades extends System {
     this.applyUpgradesFever(this.storage.playerList.get(playerId));
   }
 
-  toggleUpgradesFever(): void {
-    this.config.upgrades.fever = !this.config.upgrades.fever;
+  toggleUpgradesFever(bySchedule = true): void {
+    this.config.upgrades.fever.auto = bySchedule;
+    this.config.upgrades.fever.active = !this.config.upgrades.fever.active;
 
     this.storage.playerList.forEach(player => {
       if (!this.helpers.isPlayerConnected(player.id.current)) {
@@ -61,12 +128,29 @@ export default class GameUpgrades extends System {
 
       this.applyUpgradesFever(player, true);
     });
+
+    const verb = this.config.upgrades.fever.active ? 'started' : 'ended';
+
+    this.emit(BROADCAST_CHAT_SERVER_PUBLIC, `Upgrades fever ${verb}.`);
+  }
+
+  autoUpgradesFever(): void {
+    this.config.upgrades.fever.auto = true;
+    this.updateFeverStateBySchedule();
+  }
+
+  private updateFeverStateBySchedule(): void {
+    const isActive = this.feverScheduler.state(this.app.ticker.now);
+
+    if (isActive !== this.config.upgrades.fever.active) {
+      this.toggleUpgradesFever();
+    }
   }
 
   private applyUpgradesFever(player: Player, toggle = false): void {
     let changesEvent = true;
 
-    if (this.config.upgrades.fever) {
+    if (this.config.upgrades.fever.active) {
       // if we're toggling this, preserve upgrades.
       if (toggle) {
         // preserve player upgrades

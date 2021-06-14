@@ -32,6 +32,8 @@ export const SECONDS_PER_HOUR = SECONDS_PER_MINUTE * MINUTES_PER_HOUR;
 
 export const SECONDS_PER_DAY = SECONDS_PER_HOUR * HOURS_PER_DAY;
 
+export const MS_PER_WEEK = 7 * SECONDS_PER_DAY * MS_PER_SEC;
+
 export const MAX_UINT16 = (1 << 16) - 1;
 
 export const MAX_UINT32 = 2 ** 32 - 1;

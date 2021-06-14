@@ -540,4 +540,31 @@ export interface SyncStorage {
   hasChanges: boolean;
 }
 
+export interface TimeTriggerScheduleItem {
+  /**
+   * 0-6 (Sunday to Saturday)
+   */
+  weekDay: number;
+
+  /**
+   * 0-23
+   */
+  hour: number;
+
+  /**
+   * 0-59
+   */
+  minute: number;
+
+  /**
+   * 0-59
+   */
+  second: number;
+
+  /**
+   * Seconds.
+   */
+  duration: number;
+}
+
 export * from './entities';
