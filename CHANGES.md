@@ -21,8 +21,8 @@ Dependencies update to fix vulnerabilities.
 
 Features:
 
-- Upgrades fever event ([#116](https://github.com/wight-airmash/ab-server/pull/116)). See [`/server upgrades fever`](./docs/commands.md#server_upgrades_fever) command.
-- FFA alternative spawn zones ([#117](https://github.com/wight-airmash/ab-server/pull/117)). See [FFA_SPAWN_ZONE_NAME](./docs/env-variables.md#ffa_spawn_zone_name) and [`/server spawn <zone>`](./docs/commands.md#server_spawn_zone) command.
+- Upgrades fever event ([#116](https://github.com/wight-airmash/ab-server/pull/116)). See [`/server upgrades fever`](./docs/commands.md#server-upgrades-fever) command.
+- FFA alternative spawn zones ([#117](https://github.com/wight-airmash/ab-server/pull/117)). See [FFA_SPAWN_ZONE_NAME](./docs/env-variables.md#ffa_spawn_zone_name) and [`/server spawn <zone>`](./docs/commands.md#server-spawn-zone) command.
 - Optional periodic CTF-like base infernos in FFA (in addition to the new spawn zones). See [FFA_BASE_INFERNOS](./docs/env-variables.md#ffa_base_infernos).
 
 Improvements:
