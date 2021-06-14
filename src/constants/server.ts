@@ -46,15 +46,7 @@ export const SERVER_DEFAULT_SU_PASSWORD = '';
 export const SERVER_DEFAULT_SCALE_FACTOR = 5500;
 
 export const SERVER_SCALE_FACTOR_VALID_VALUES = [
-  2000,
-  2500,
-  3000,
-  3500,
-  4000,
-  4500,
-  5000,
-  5500,
-  6000,
+  2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000,
 ];
 
 /**

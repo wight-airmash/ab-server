@@ -588,9 +588,8 @@ export default class GamePlayersUpdate extends System {
          * Update hitbox.
          */
         if (isUpdateHitbox) {
-          const hitboxCache = this.storage.shipHitboxesCache[player.planetype.current][
-            player.rotation.low
-          ];
+          const hitboxCache =
+            this.storage.shipHitboxesCache[player.planetype.current][player.rotation.low];
 
           player.hitbox.x = ~~player.position.x + MAP_SIZE.HALF_WIDTH + hitboxCache.x;
           player.hitbox.y = ~~player.position.y + MAP_SIZE.HALF_HEIGHT + hitboxCache.y;
@@ -754,9 +753,10 @@ export default class GamePlayersUpdate extends System {
               /**
                * Hitbox init.
                */
-              const hitboxCache = this.storage.projectileHitboxesCache[PROJECTILE_SPECS.shape][
-                projectile.rotation.low
-              ];
+              const hitboxCache =
+                this.storage.projectileHitboxesCache[PROJECTILE_SPECS.shape][
+                  projectile.rotation.low
+                ];
 
               projectile.hitbox.width = hitboxCache.width;
               projectile.hitbox.height = hitboxCache.height;

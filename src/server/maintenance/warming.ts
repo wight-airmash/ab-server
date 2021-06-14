@@ -36,33 +36,23 @@ const buildinObjects = [
   ],
   [
     // Europe inferno.
-    920,
-    -2800,
-    50,
+    920, -2800, 50,
   ],
   [
     // Blue base inferno.
-    -7440,
-    -1360,
-    50,
+    -7440, -1360, 50,
   ],
   [
     // Red base inferno.
-    6565,
-    -935,
-    50,
+    6565, -935, 50,
   ],
   [
     // Blue base shield.
-    -9300,
-    -1480,
-    50,
+    -9300, -1480, 50,
   ],
   [
     // Red base shield.
-    8350,
-    -935,
-    50,
+    8350, -935, 50,
   ],
 ];
 
@@ -287,9 +277,8 @@ export default class GameWarming extends System {
     this.storage.projectileHitboxesCache = Object.freeze(this.storage.projectileHitboxesCache);
 
     Object.entries(POWERUPS_COLLISIONS).forEach(([powerupType, powerupCollisions]) => {
-      this.storage.powerupHitboxesCache[powerupType] = GameWarming.getHitboxCache(
-        powerupCollisions
-      );
+      this.storage.powerupHitboxesCache[powerupType] =
+        GameWarming.getHitboxCache(powerupCollisions);
     });
 
     this.storage.powerupHitboxesCache = Object.freeze(this.storage.powerupHitboxesCache);

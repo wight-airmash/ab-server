@@ -1,4 +1,9 @@
-import { HOURS_PER_DAY, MINUTES_PER_HOUR, MS_PER_SEC, SECONDS_PER_MINUTE } from '../constants';
+import {
+  HOURS_PER_DAY,
+  MINUTES_PER_HOUR,
+  MS_PER_SEC,
+  SECONDS_PER_MINUTE,
+} from '../constants/units';
 
 export const msToHumanReadable = (ms: number): string => {
   const humanTimeParts = [];

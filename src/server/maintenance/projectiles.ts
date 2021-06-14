@@ -99,9 +99,10 @@ export default class GameProjectiles extends System {
              * Actually rotation never changes, it doesn't need to get hitbox from cache.
              * TODO: cache it.
              */
-            const hitboxCache = this.storage.projectileHitboxesCache[PROJECTILE_PARAMS.shape][
-              projectile.rotation.low
-            ];
+            const hitboxCache =
+              this.storage.projectileHitboxesCache[PROJECTILE_PARAMS.shape][
+                projectile.rotation.low
+              ];
 
             projectile.hitbox.x = ~~projectile.position.x + MAP_SIZE.HALF_WIDTH + hitboxCache.x;
             projectile.hitbox.y = ~~projectile.position.y + MAP_SIZE.HALF_HEIGHT + hitboxCache.y;

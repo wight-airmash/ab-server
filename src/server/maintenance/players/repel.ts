@@ -155,13 +155,15 @@ export default class GamePlayersRepel extends System {
      */
     for (let index = 0; index < projectiles.length; index += 1) {
       const projectile = this.storage.mobList.get(projectiles[index]) as Projectile;
+
       const distanceToRepel = Math.hypot(
         projectile.position.x - player.position.x,
         projectile.position.y - player.position.y
       );
-      const { baseSpeed, repelEnergy, shape, distance } = PROJECTILES_SPECS[
-        projectile.mobtype.current
-      ];
+
+      const { baseSpeed, repelEnergy, shape, distance } =
+        PROJECTILES_SPECS[projectile.mobtype.current];
+
       let repelFactor = 1;
       let doubleDamage = false;
 

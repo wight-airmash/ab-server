@@ -44,8 +44,10 @@ export default class Leaders extends System {
       has(this.storage.connectionIdByNameList, playerName) &&
       this.storage.connectionList.has(this.storage.connectionIdByNameList[playerName])
     ) {
-      const id = this.storage.connectionList.get(this.storage.connectionIdByNameList[playerName])
-        .playerId;
+      const id = this.storage.connectionList.get(
+        this.storage.connectionIdByNameList[playerName]
+      ).playerId;
+
       let playerTeamId: CTF_TEAMS;
 
       if (teamId === null) {

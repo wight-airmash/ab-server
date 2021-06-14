@@ -159,10 +159,8 @@ export class GameStorage {
    * Mob entities (not players and the mobs which have its own storage,
    * like repels and viewports).
    */
-  public mobList: Map<
-    MobId,
-    Player | Repel | Powerup | Flag | FlagZone | Projectile | Mountain
-  > = new Map();
+  public mobList: Map<MobId, Player | Repel | Powerup | Flag | FlagZone | Projectile | Mountain> =
+    new Map();
 
   public users: UsersStorage = {
     list: new Map(),
