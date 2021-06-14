@@ -171,7 +171,11 @@ Set the max value of the upgrades drop chance.
 
 ### /server upgrades fever
 
-Toggle upgrades fever event. If enabled, all the players are constantly full upgraded (5555 pattern) and the bots have 3233 upgrades state pattern.
+Toggle upgrades fever event (permanently). Toggling disables auto mode (by schedule). If enabled, all the players are constantly full upgraded (5555 pattern) and the bots have 3233 upgrades state pattern.
+
+### /server upgrades fever auto
+
+Run upgrades fever event in auto mode by schedule. Permanently turned off if no schedule was passed.
 
 ### /server powerups chance \<value\>
 

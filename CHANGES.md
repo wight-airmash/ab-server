@@ -1,5 +1,11 @@
 ## Future version (unversioned)
 
+## 6.5.0 (June 14, 2021)
+
+Features:
+
+- Upgrades fever event schedule. Disabled by default. See [UPGRADES_FEVER_SCHEDULE](./docs/env-variables.md#upgrades_fever_schedule) and [`/server upgrades fever auto`](./docs/commands.md#server-upgrades-fever-auto) command. Manual toggling with [`/server upgrades fever`](./docs/commands.md#server-upgrades-fever) command disables the automatic mode (scheduled).
+
 ## 6.4.0 (May 8, 2021)
 
 Features:

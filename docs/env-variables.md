@@ -376,6 +376,27 @@ Look at the [code](https://github.com/wight-airmash/ab-server/blob/e3e5b99878919
 
 The default values are empirical (selected during testing). Change the value with care, it may affect the balance of the games.
 
+### UPGRADES_FEVER_SCHEDULE
+
+Default: ``
+
+Set the upgrades fever schedule by pattern: `<schedule item> [, <schedule item>]`. Each schedule item defines the interval at which the event is active, at any other time the event is disabled. The schedule must not contain any intersections (there are no validators!). Timezone is a host (container) timezone.
+
+The schedule is ignored if the event was toggled manually with [`/server upgrades fever`](./commands.md#server-upgrades-fever) commands. Use [`/server upgrades fever auto`](./commands.md#server-upgrades-fever-auto) to revert to schedule mode.
+
+Schedule item params:
+
+```
+┌───────────── second (0-59) of the start
+│ ┌───────────── minute (0-59) of the start
+│ │ ┌───────────── hour (0-23) of the start
+│ │ │ ┌───────────── day of the week (0 - 6) (Sunday to Saturday) of the start
+│ │ │ │
+* * * * <duration in minutes>
+```
+
+Example: the schedule `0 30 16 0 390, 0 0 14 4 720, 0 0 12 6 1440` will run fever event on Sundays from 16:30 to 23:00, Thursdays from 14:00 to 02:00 the next day and Saturdays from 12:00 to 12:00 the next day.
+
 ### USER_ACCOUNTS
 
 Default: `true`

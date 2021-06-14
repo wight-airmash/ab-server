@@ -51,11 +51,11 @@ Available [environment variables](./docs/env-variables.md).
 
 ## User accounts
 
-The current implementation does not support accounts synchronization between server instances.
-
 User accounts data are stored in `./data/user-stats.json` and in memory during the server run. Set `USER_ACCOUNTS` to `false` to turn user accounts off.
 
 Each user session is signed by the [login server](https://github.com/airmash-refugees/airmash-backend) (Ed25519). Validation uses the public key, which is downloaded when the server starts. To change the default key server URL set `AUTH_LOGIN_SERVER_KEY_URL` variable value (only https is supported).
+
+Accounts synchronization (powered by airmash.online sync service) between server instances is disabled by default. See [`STATS_SYNC`](./docs/env-variables.md#stats_sync).
 
 ## Moderation Panel
 
@@ -84,7 +84,7 @@ Set `MODERATION_PANEL` to `false` to turn moderation panel off. To change panel 
 
    `docker run -v /host/logs:/app/logs -v /host/data:/app/data -p 3501:3501 -e SERVER_TYPE=FFA -e SU_PASSWORD=mypass airbattle-server`
 
-   If you want to use TLS also mount `/app/certs` to the host directory with `privkey.pem` and `fullchain.pem`, and set ENDPOINTS_TLS=true.
+   If you want to use TLS also mount `/app/certs` to the host directory with `privkey.pem`, `fullchain.pem` and `dhparam.pem`, and set ENDPOINTS_TLS=true.
 
 Use `development-image` stage to build development image.
 
