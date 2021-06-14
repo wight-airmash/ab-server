@@ -1,5 +1,11 @@
 ## Future version (unversioned)
 
+## 6.5.1 (June 14, 2021)
+
+Bug fixes:
+
+- Prevent upgrades drop by dead/spectating players.
+
 ## 6.5.0 (June 14, 2021)
 
 Features:
