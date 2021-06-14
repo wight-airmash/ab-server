@@ -1,4 +1,4 @@
-import { SECONDS_PER_DAY, SECONDS_PER_MINUTE, UPGRADES_ACTION_TYPE } from '../../../constants';
+import { MINUTES_PER_WEEK, SECONDS_PER_MINUTE, UPGRADES_ACTION_TYPE } from '../../../constants';
 import {
   BROADCAST_CHAT_SERVER_PUBLIC,
   BROADCAST_CHAT_SERVER_WHISPER,
@@ -56,7 +56,7 @@ export default class GameUpgrades extends System {
               weekDay >= 0 &&
               weekDay < 7 &&
               duration > 0 &&
-              duration < SECONDS_PER_DAY * 7
+              duration < MINUTES_PER_WEEK
             )
           ) {
             this.log.fatal('Invalid upgrades fever schedule format!');
