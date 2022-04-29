@@ -10,6 +10,7 @@ import {
   COMMAND_SWITCH,
   CTF_PLAYER_DROP_FLAG,
   CTF_PLAYER_SWITCHED,
+  PLAYERS_RESPAWN,
   PLAYERS_UPDATE_TEAM,
   RESPONSE_COMMAND_REPLY,
 } from '../../../events';
@@ -72,7 +73,11 @@ export default class SwitchCommandHandler extends System {
       this.emit(BROADCAST_PLAYER_RETEAM, [playerId]);
       this.emit(CTF_PLAYER_DROP_FLAG, playerId);
       this.emit(CTF_PLAYER_SWITCHED, playerId);
-      this.emit(BROADCAST_CHAT_SERVER_PUBLIC, `${player.name.current} switched to ${teamText}.`);
+      this.emit(PLAYERS_RESPAWN, playerId);
+
+      if (!this.helpers.isPlayerMuted(playerId)) {
+        this.emit(BROADCAST_CHAT_SERVER_PUBLIC, `${player.name.current} switched to ${teamText}.`);
+      }
     } else {
       this.emit(RESPONSE_COMMAND_REPLY, connectionId, 'Go into spectator mode first.');
     }

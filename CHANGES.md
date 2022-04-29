@@ -1,5 +1,12 @@
 ## Future version (unversioned)
 
+## 6.6.0 (April 29, 2022)
+
+Improvements:
+
+- CTF: prevent exploiting switches chat reports by muted players.
+- CTF: auto respawn after switch.
+
 ## 6.5.2 (June 14, 2021)
 
 Bug fixes:
