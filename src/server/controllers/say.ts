@@ -29,7 +29,7 @@ export default class SayMessageHandler extends System {
     /**
      * Skip spam messages.
      */
-    if (connection.limits.chat > this.config.connections.packetLimits.chat) {
+    if (connection.limits.say > this.config.connections.packetLimits.chat) {
       return;
     }
 
