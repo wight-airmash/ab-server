@@ -928,7 +928,12 @@ export default class GamePlayersUpdate extends System {
           limits.chat < this.config.connections.packetLimits.chatLeak
             ? 0
             : limits.chat - this.config.connections.packetLimits.chatLeak;
-
+        
+        limits.say =
+          limits.say < this.config.connections.packetLimits.chatLeak
+            ? 0
+            : limits.say - this.config.connections.packetLimits.chatLeak;
+        
         limits.respawn =
           limits.respawn < LIMITS_RESPAWN_DECREASE_WEIGHT
             ? 0
