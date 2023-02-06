@@ -208,6 +208,7 @@ export default class WsEndpoint {
       limits: {
         any: 0,
         chat: 0,
+        say: 0,
         key: 0,
         respawn: 0,
         spectate: 0,

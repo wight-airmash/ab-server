@@ -179,6 +179,7 @@ export interface ConnectionMeta extends WorkerConnectionMeta {
   limits: {
     any: number;
     chat: number;
+    say: number;
     key: number;
     respawn: number;
     spectate: number;

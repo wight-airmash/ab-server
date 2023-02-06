@@ -43,6 +43,16 @@ export const LIMITS_CHAT_SPAM_ATTEMPTS_TO_MUTE = 2;
  * Decreasing every second.
  * No punishment, only skip.
  */
+export const LIMITS_SAY = 3;
+
+export const LIMITS_SAY_DECREASE_WEIGHT = 1;
+
+export const LIMITS_SAY_WEIGHT = 1;
+
+/**
+ * Decreasing every second.
+ * No punishment, only skip.
+ */
 export const LIMITS_RESPAWN = 3;
 
 export const LIMITS_RESPAWN_DECREASE_WEIGHT = 5;

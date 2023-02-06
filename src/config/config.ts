@@ -24,6 +24,7 @@ import {
   LIMITS_CHAT,
   LIMITS_CHAT_DECREASE_WEIGHT,
   LIMITS_KEY,
+  LIMITS_SAY,
   METRICS_LOG_INTERVAL_SEC,
   METRICS_LOG_SAMPLES,
   MS_PER_SEC,
@@ -190,6 +191,7 @@ export interface GameServerConfigInterface {
       key: number;
       chat: number;
       chatLeak: number;
+      say: number;
     };
 
     /**
@@ -551,6 +553,7 @@ const config: GameServerConfigInterface = {
       any: intValue(process.env.PACKETS_LIMIT_ANY, LIMITS_ANY),
       key: intValue(process.env.PACKETS_LIMIT_KEY, LIMITS_KEY),
       chat: intValue(process.env.PACKETS_LIMIT_CHAT, LIMITS_CHAT),
+      say: intValue(process.env.PACKETS_LIMITS_SAY, LIMITS_SAY),
       chatLeak: intValue(process.env.PACKETS_LIMIT_CHAT_LEAK, LIMITS_CHAT_DECREASE_WEIGHT),
     },
 

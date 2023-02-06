@@ -10,6 +10,7 @@ import {
   LIMITS_DEBUG_DECREASE_WEIGHT,
   LIMITS_KEY_DECREASE_WEIGHT,
   LIMITS_RESPAWN_DECREASE_WEIGHT,
+  LIMITS_SAY_DECREASE_WEIGHT,
   LIMITS_SPECTATE_DECREASE_WEIGHT,
   LIMITS_SU_DECREASE_WEIGHT,
   MAP_SIZE,
@@ -928,12 +929,10 @@ export default class GamePlayersUpdate extends System {
           limits.chat < this.config.connections.packetLimits.chatLeak
             ? 0
             : limits.chat - this.config.connections.packetLimits.chatLeak;
-        
+
         limits.say =
-          limits.say < this.config.connections.packetLimits.chatLeak
-            ? 0
-            : limits.say - this.config.connections.packetLimits.chatLeak;
-        
+          limits.say < LIMITS_SAY_DECREASE_WEIGHT ? 0 : limits.say - LIMITS_SAY_DECREASE_WEIGHT;
+
         limits.respawn =
           limits.respawn < LIMITS_RESPAWN_DECREASE_WEIGHT
             ? 0
