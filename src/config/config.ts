@@ -553,7 +553,7 @@ const config: GameServerConfigInterface = {
       any: intValue(process.env.PACKETS_LIMIT_ANY, LIMITS_ANY),
       key: intValue(process.env.PACKETS_LIMIT_KEY, LIMITS_KEY),
       chat: intValue(process.env.PACKETS_LIMIT_CHAT, LIMITS_CHAT),
-      say: intValue(process.env.PACKETS_LIMITS_SAY, LIMITS_SAY),
+      say: intValue(process.env.PACKETS_LIMIT_SAY, LIMITS_SAY),
       chatLeak: intValue(process.env.PACKETS_LIMIT_CHAT_LEAK, LIMITS_CHAT_DECREASE_WEIGHT),
     },
 
