@@ -1,5 +1,9 @@
 ## Future version (unversioned)
 
+Bug fixes:
+
+- Prevent chats blocking with `/s` spam ([#129](https://github.com/wight-airmash/ab-server/pull/129)).
+
 ## 6.6.0 (April 29, 2022)
 
 Improvements:

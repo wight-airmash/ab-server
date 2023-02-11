@@ -232,9 +232,9 @@ If the limit is exceeded, the player will be kicked for packets flooding. The pe
 
 ### PACKETS_LIMIT_CHAT
 
-Default: `1`
+Default: `2`
 
-Bucket volume per player for all chat packets (public chat, team, whisper and say). Set the leak volume with [PACKETS_LIMIT_CHAT_LEAK](#packets_limit_chat_leak).
+Bucket volume per player for all chat packets (public chat, team and whisper). Set the leak volume with [PACKETS_LIMIT_CHAT_LEAK](#packets_limit_chat_leak).
 
 If the limit is exceeded, the player will be asked to stop spam. The penalty for repeated violation is mute for 10 minutes.
 
@@ -251,6 +251,14 @@ Default: `100`
 Bucket volume per player for the `KEY` packets (movement/special key presses and releases). Leak volume is 20 per second.
 
 If the limit is exceeded, the player will be kicked for packets flooding. The penalty for repeated violation is regulated with [PACKETS_FLOODING_AUTOBAN](#packets_flooding_autoban).
+
+### PACKETS_LIMIT_SAY
+
+Default: `3`
+
+Bucket volume per player for `say` chat packets. Leak volume is one per second.
+
+If the limit is exceeded, the player will be notified about message skip. No other penalty.
 
 ### PACKETS_FLOODING_AUTOBAN
 
