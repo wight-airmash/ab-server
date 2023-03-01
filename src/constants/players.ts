@@ -46,7 +46,7 @@ export const PLAYERS_SPECTATE_INACTIVITY_MS = 2 * MS_PER_SEC;
 
 export const PLAYERS_DEATH_INACTIVITY_MS = 3 * MS_PER_SEC;
 
-export const PLAYERS_TIME_TO_RESTORE_PLAYER_MS = 60 * MS_PER_SEC;
+export const PLAYERS_TIME_TO_RESTORE_PLAYER_MS = 300 * MS_PER_SEC; 
 
 /**
  * By default the client waits for PLAYER_UPDATE packet

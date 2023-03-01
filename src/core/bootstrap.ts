@@ -30,6 +30,8 @@ import {
   TIMELINE_LOOP_END,
   TIMELINE_LOOP_START,
   TIMELINE_LOOP_TICK,
+  TIMELINE_RECOVERY_COMPLETE,
+  TIMELINE_SERVER_SHUTDOWN,
   WORKERS_LOG_DEBUG,
   WORKERS_LOG_ERROR,
   WORKERS_LOG_FATAL,
@@ -137,6 +139,8 @@ export default class GameServerBootstrap implements GameServerBootstrapInterface
   private time: number;
 
   private skips: number;
+
+  private shutdownInProgress: boolean;
 
   constructor({ config, log }: { config: GameServerConfigInterface; log: Logger }) {
     this.config = config;
@@ -369,6 +373,12 @@ export default class GameServerBootstrap implements GameServerBootstrapInterface
     this.events.on(WORKERS_LOG_FATAL, this.log.fatal, this.log);
     this.events.on(WORKERS_LOG_INFO, this.log.info, this.log);
     this.events.on(WORKERS_LOG_WARN, this.log.warn, this.log);
+
+    // This event is returned 
+    this.events.on(TIMELINE_RECOVERY_COMPLETE, () => {
+      this.stop()
+    })
+
   }
 
   private async initEndpoints(): Promise<void> {
@@ -383,36 +393,46 @@ export default class GameServerBootstrap implements GameServerBootstrapInterface
     this.geocoder = await maxmind.open<CountryResponse>(this.config.geoBasePath);
   }
 
+  private emitShutdownEvent(): void {
+    if (!this.shutdownInProgress) {
+      this.shutdownInProgress = true
+      this.events.emit(TIMELINE_SERVER_SHUTDOWN)
+    }
+  }
+
   private bindExitListeners(): void {
+
     process.on('beforeExit', () => {
       this.log.processfinalHandlers(null, 'beforeExit');
     });
 
     process.on('exit', () => {
       this.log.processfinalHandlers(null, 'exit');
-      this.stop();
+      this.emitShutdownEvent();
     });
 
     process.on('uncaughtException', (err): void => {
       this.log.processfinalHandlers(err, 'uncaughtException');
-      this.stop();
+      this.emitShutdownEvent();
     });
 
     process.on('SIGINT', () => {
       this.log.processfinalHandlers(null, 'SIGINT');
-      this.stop();
+      this.emitShutdownEvent();
     });
 
     process.on('SIGQUIT', () => {
       this.log.processfinalHandlers(null, 'SIGQUIT');
-      this.stop();
+      this.emitShutdownEvent();
     });
 
     process.on('SIGTERM', () => {
       this.log.processfinalHandlers(null, 'SIGTERM');
-      this.stop();
+      this.emitShutdownEvent();
     });
+
   }
+
 
   private emitLoopEventsGroup(event: string): void {
     try {

@@ -166,6 +166,7 @@ export default class GamePlayersConnect extends System {
       uniqueName = `${name}#${getRandomInt(101, 999)}`;
     }
 
+    const oldPlayerId = this.helpers.getMobId(uniqueName);
     const playerId = this.helpers.createMobId(uniqueName);
 
     /**
@@ -258,16 +259,16 @@ export default class GamePlayersConnect extends System {
 
     /**
      * Player stats recovering after disconnection.
-     * CTF only.
+     * CTF player stats 
      */
     let isAssignTeamNeeded = true;
     let isRecovered = false;
 
+    let lookupId = (this.config.server.typeId === GAME_TYPES.CTF) ? playerId : oldPlayerId;
     if (
-      this.storage.playerRecoverList.has(playerId) &&
-      this.config.server.typeId === GAME_TYPES.CTF
+      this.storage.playerRecoverList.has(lookupId)
     ) {
-      const recover = this.storage.playerRecoverList.get(playerId);
+      const recover = this.storage.playerRecoverList.get(lookupId);
 
       if (recover.ip === player.ip.current && recover.expired >= Date.now()) {
         isRecovered = true;
@@ -339,7 +340,7 @@ export default class GamePlayersConnect extends System {
         player.inferno.collected = recover.data.infernosCollected;
       }
 
-      this.storage.playerRecoverList.delete(playerId);
+      this.storage.playerRecoverList.delete(lookupId);
     }
 
     if (isAssignTeamNeeded) {
