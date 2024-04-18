@@ -463,7 +463,27 @@ export default class WsEndpoint {
       maxBackpressure: CONNECTIONS_MAX_BACKPRESSURE,
       idleTimeout: CONNECTIONS_IDLE_TIMEOUT_SEC,
 
-      open: (connection: PlayerConnection, req) => {
+      upgrade: (res, req, context) => {
+        let myData = {ip: '', headers: {}, method: req.getMethod()};
+
+        if (req.getHeader('x-forwarded-for') !== '') {
+          myData.ip = req.getHeader('x-forwarded-for');
+        } else if (req.getHeader('x-real-ip') !== '') {
+          myData.ip = req.getHeader('x-real-ip');
+        }
+        req.forEach((title, value) => {
+          myData.headers[title] = value;
+        });
+
+        // https://github.com/uNetworking/uWebSockets.js/blob/master/examples/Upgrade.js
+        res.upgrade({ myData },
+          req.getHeader('sec-websocket-key'),
+          req.getHeader('sec-websocket-protocol'),
+          req.getHeader('sec-websocket-extensions'),
+          context);
+      },
+
+      open: (connection: PlayerConnection<any>) => {
         const connectionId = this.createConnectionId();
         const now = Date.now();
         const meta: WorkerConnectionMeta = {
@@ -473,31 +493,28 @@ export default class WsEndpoint {
           createdAt: now,
         };
 
-        if (req.getHeader('x-forwarded-for') !== '') {
-          meta.ip = req.getHeader('x-forwarded-for');
-        } else if (req.getHeader('x-real-ip') !== '') {
-          meta.ip = req.getHeader('x-real-ip');
-        }
+        const myData = connection.getUserData();
+
+        if (myData.ip)
+          meta.ip = myData.ip;
 
         connection.meta = meta;
 
         this.wsStorage.connectionList.set(connectionId, connection);
 
-        req.forEach((title, value) => {
-          meta.headers[title] = value;
-        });
+        meta.headers = myData.headers;
 
         this.log.debug('Connection opened: %o', {
           connectionId,
           ip: meta.ip,
-          method: req.getMethod(),
+          method: myData.method,
           headers: meta.headers,
         });
 
         this.connectionOpened(meta);
       },
 
-      message: (connection: PlayerConnection, message, isBinary) => {
+      message: (connection: PlayerConnection<any>, message, isBinary) => {
         if (isBinary === true) {
           try {
             this.events.emit(CONNECTIONS_PACKET_RECEIVED, message, connection.meta.id);
@@ -516,7 +533,7 @@ export default class WsEndpoint {
         }
       },
 
-      close: (connection: PlayerConnection, code) => {
+      close: (connection: PlayerConnection<any>, code) => {
         const { id } = connection.meta;
 
         try {

@@ -199,7 +199,7 @@ export interface ConnectionMeta extends WorkerConnectionMeta {
   };
 }
 
-export interface PlayerConnection extends WebSocket {
+export interface PlayerConnection<UserData> extends WebSocket<UserData> {
   meta?: WorkerConnectionMeta;
 }
 

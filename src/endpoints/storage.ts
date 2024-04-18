@@ -4,7 +4,7 @@ class ConnectionsStorage {
   /**
    * All connections (main and backup).
    */
-  public connectionList: Map<ConnectionId, PlayerConnection> = new Map();
+  public connectionList: Map<ConnectionId, PlayerConnection<any>> = new Map();
 
   /**
    * Online counter.

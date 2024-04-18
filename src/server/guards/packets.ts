@@ -12,7 +12,7 @@ import {
   CONNECTIONS_SEND_PACKETS,
   ERRORS_PACKET_FLOODING_DETECTED,
 } from '../../events';
-import { ConnectionId, PlayerConnection } from '../../types';
+import { ConnectionId, ConnectionMeta, PlayerConnection } from '../../types';
 import { System } from '../system';
 
 export default class PacketsGuard extends System {
@@ -25,7 +25,7 @@ export default class PacketsGuard extends System {
     };
   }
 
-  onCheckLimits(connection: PlayerConnection): void {
+  onCheckLimits(connection: ConnectionMeta): void {
     if (
       (connection.limits.any > this.config.connections.packetLimits.any ||
         connection.limits.key > this.config.connections.packetLimits.key) &&

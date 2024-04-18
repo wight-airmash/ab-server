@@ -1,7 +1,50 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import pino from 'pino';
+import {pino, symbols} from 'pino';
 import config from '../config';
 import { LOGS_FLUSH_INTERVAL_MS } from '../constants';
+
+// https://github.com/pinojs/pino/blob/v6.x/lib/tools.js
+(pino as any).final = function(logger, handler) {
+  if (typeof logger === 'undefined' || typeof logger.child !== 'function') {
+    throw Error('expected a pino logger instance')
+  }
+  const hasHandler = (typeof handler !== 'undefined')
+  if (hasHandler && typeof handler !== 'function') {
+    throw Error('if supplied, the handler parameter should be a function')
+  }
+  const stream = logger[symbols.streamSym]
+  if (typeof stream.flushSync !== 'function') {
+    throw Error('final requires a stream that has a flushSync method, such as pino.destination')
+  }
+
+  const finalLogger = new Proxy(logger, {
+    get: (logger, key) => {
+      if (key in logger.levels.values) {
+        return (...args) => {
+          logger[key](...args)
+          stream.flushSync()
+        }
+      }
+      return logger[key]
+    }
+  })
+
+  if (!hasHandler) {
+    return finalLogger
+  }
+
+  return (err = null, ...args) => {
+    try {
+      stream.flushSync()
+    } catch (e) {
+      // it's too late to wait for the stream to be ready
+      // because this is a final tick scenario.
+      // in practice there shouldn't be a situation where it isn't
+      // however, swallow the error just in case (and for easier testing)
+    }
+    return handler(err, finalLogger, ...args)
+  }
+}
 
 type LogLevelMethod = (msgOrObj: any, ...args: any[]) => void;
 
@@ -37,9 +80,9 @@ class Logger {
       },
     };
 
-    if (!isDev) {
+    //if (!isDev) {
       delete loggerConfig.prettyPrint;
-    }
+    //}
 
     const finalHandler = (err: Error | null, finalLogger: pino.Logger, evt: string): void => {
       finalLogger.info(`${evt} caught`);
@@ -58,7 +101,7 @@ class Logger {
         loggerConfig,
         isDev ? pino.destination(path) : pino.destination({ dest: path, sync: false })
       );
-      this.finalHandlers.push(pino.final(this.fileLogger, finalHandler));
+      this.finalHandlers.push((pino as any).final(this.fileLogger, finalHandler));
     }
 
     if (chat.length > 0) {
@@ -75,7 +118,7 @@ class Logger {
         },
         isDev ? pino.destination(chat) : pino.destination({ dest: chat, sync: false })
       );
-      this.finalHandlers.push(pino.final(this.chatFileLogger, finalHandler));
+      this.finalHandlers.push((pino as any).final(this.chatFileLogger, finalHandler));
     }
 
     if (isStdout) {
@@ -87,7 +130,7 @@ class Logger {
         loggerConfig,
         isDev ? pino.destination() : pino.destination({ sync: false })
       );
-      this.finalHandlers.push(pino.final(this.consoleLogger, finalHandler));
+      this.finalHandlers.push((pino as any).final(this.consoleLogger, finalHandler));
     }
 
     let logHandler: LogLevelMethod = null;

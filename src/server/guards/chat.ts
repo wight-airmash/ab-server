@@ -5,7 +5,7 @@ import {
   RESPONSE_COMMAND_REPLY,
   RESPONSE_VOTEMUTED,
 } from '../../events';
-import { PlayerConnection } from '../../types';
+import { ConnectionMeta, PlayerConnection } from '../../types';
 import { System } from '../system';
 
 export default class ChatGuard extends System {
@@ -17,7 +17,7 @@ export default class ChatGuard extends System {
     };
   }
 
-  onCheckLimits(connection: PlayerConnection): void {
+  onCheckLimits(connection: ConnectionMeta): void {
     const isMuted = this.helpers.isPlayerMuted(connection.playerId);
 
     connection.limits.chat += LIMITS_CHAT_WEIGHT;
