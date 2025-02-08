@@ -55,7 +55,7 @@ User accounts data are stored in `./data/user-stats.json` and in memory during t
 
 Each user session is signed by the [login server](https://github.com/airmash-refugees/airmash-backend) (Ed25519). Validation uses the public key, which is downloaded when the server starts. To change the default key server URL set `AUTH_LOGIN_SERVER_KEY_URL` variable value (only https is supported).
 
-Accounts synchronization (powered by airmash.online sync service) between server instances is disabled by default. See [`STATS_SYNC`](./docs/env-variables.md#stats_sync).
+Accounts synchronization (powered by airmash.rocks sync service) between server instances is disabled by default. See [`STATS_SYNC`](./docs/env-variables.md#stats_sync).
 
 ## Moderation Panel
 

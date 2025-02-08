@@ -16,11 +16,11 @@ It sends a `SYNC_START` message to indicate that this connection is from the syn
 
 When the sync service connects to the websocket endpoint of a game server, authentication of that server is implied by a successful TLS connection.
 
-For example, if the sync service connects to https://eu.airmash.online/ffa without error, it accepts that it is communicating with game server **eu-ffa1**.
+For example, if the sync service connects to https://eu.airmash.rocks/ffa without error, it accepts that it is communicating with game server **eu-ffa1**.
 
 ### Sync service to game server
 
-A game server first needs to obtain the login service key from https://login.airmash.online/key for authentication to proceed.
+A game server first needs to obtain the login service key from https://login.airmash.rocks/key for authentication to proceed.
 
 Upon receiving a sync connection from sync service (via `SYNC_START`), the game server sends a [nonce](https://en.wikipedia.org/wiki/Cryptographic_nonce) in a `SYNC_AUTH` message. The sync service sends back its own `SYNC_AUTH` message, with a signed token containing this nonce.
 
@@ -56,7 +56,7 @@ Example:
 \# | From         | To           | Message type | Data
 ---|--------------|--------------|--------------|------
 1  | Game server  | Sync service | `SYNC_INIT`  | <table><tr><td>`sequence`</td><td>`1`</td></tr><tr><td>`timestamp`</td><td>`1598733150123`</td></tr></table>
-2  | Sync service | Game server  | `SYNC_INIT`  | <table><tr><td>`sequence`</td><td>`1234`</td></tr><tr><td>`timestamp`</td><td>`1598733151234`</td></tr><tr><td>`serverId`</td><td>`eu-ffa1`</td></tr><tr><td>`wsEndpoint`</td><td>`eu.airmash.online/ffa`</td></tr></table>
+2  | Sync service | Game server  | `SYNC_INIT`  | <table><tr><td>`sequence`</td><td>`1234`</td></tr><tr><td>`timestamp`</td><td>`1598733151234`</td></tr><tr><td>`serverId`</td><td>`eu-ffa1`</td></tr><tr><td>`wsEndpoint`</td><td>`eu.airmash.rocks/ffa`</td></tr></table>
 
 ## Data update from sync service to game server
 

@@ -28,7 +28,7 @@ Enable or disable filter for usernames. [Some unicode chars in the usernames cau
 
 ### AUTH_LOGIN_SERVER_KEY_URL
 
-Default: `https://login.airmash.online/key`
+Default: `https://login.airmash.rocks/key`
 
 Public key server url. Required by [user accounts](../README.md#user-account). Only https is supported.
 
@@ -346,7 +346,7 @@ Default: `../data/user-stats.json`
 
 Default: `false`
 
-Allows cross-server synchronization of user stats, via the airmash.online sync service.
+Allows cross-server synchronization of user stats, via the airmash.rocks sync service.
 
 Public servers in the games list should set this to true. Development or private servers should leave this as false.
 

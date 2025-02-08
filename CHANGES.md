@@ -1,5 +1,11 @@
 ## Future version (unversioned)
 
+## 6.7.0 (Feb 8, 2025)
+
+Features:
+
+- Updated game domain.
+
 ## 6.6.1 (Feb 11, 2023)
 
 Bug fixes:
